@@ -17,10 +17,6 @@
 #define CAPS_LOCK_PRESSED    0x3A
 #define NUM_LOCK_PRESSED     0x45
 
-#define F1_PRESSED 0x3B
-#define F2_PRESSED 0x3C
-#define F3_PRESSED 0x3D
-
 // Flags that indicate if a modifier key is pressed.
 uint8_t caps  = 0;
 uint8_t ctrl  = 0;
