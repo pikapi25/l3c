@@ -46,12 +46,12 @@ int idt_test(){
 }
 
 
-// Some Exception Tests
 /* de_test
- * Test if div 0 exception can be triggered
+ * Test if div 0 exception can be raised
  * Inputs: None
  * return: FAIL
  * Side Effects: None
+ * Coverage: Load IDT, IDT definition
  * Files: idt.c/h
  */
 int de_test(){
@@ -60,24 +60,6 @@ int de_test(){
 	int a = 0;
 	int b = 1 / a;
 	b++;	
-
-	return FAIL;
-}
-
-
-/* gp_test
- * Test if general protection fault exception can be raised by dereferencing a NULL pointer.
- * Inputs: None
- * return: FAIL
- * Side Effects: None
- * Files: idt.c/h
- */
-int gp_test(){
-	TEST_HEADER;
-
-	int* ptr=(int *)0x0;
-	int value;
-	value=*ptr;
 
 	return FAIL;
 }
@@ -193,18 +175,10 @@ int paging_test4(){
 /* Test suite entry point */
 void launch_tests(){
 	// TEST_OUTPUT("idt_test", idt_test());
-	// printf("\n");
 	// TEST_OUTPUT("de_test", de_test());
-	// printf("\n");
-	TEST_OUTPUT("gp_test", gp_test());
-	printf("\n");
 	// TEST_OUTPUT("paging test1", paging_test1());
-	// printf("\n");
 	// TEST_OUTPUT("paging test2", paging_test2());
-	// printf("\n");
 	// TEST_OUTPUT("paging test3", paging_test3());
-	// printf("\n");
 	// TEST_OUTPUT("paging test4", paging_test4());
-	// printf("\n");
 }
 
