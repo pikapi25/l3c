@@ -64,7 +64,23 @@
 ***
 ### Initialize the keyboard
 ***
-### Initialize the RTC
+### Initialize the RTC  
+The 2 I/O ports used for the RTC and CMOS are 0x70 and 0x71.  
+>   - Port 0x70 is used to specify an index or "register number", and to disable NMI. 
+>   - Port 0x71 is used to read or write from/to that byte of CMOS configuration space. 
+>   - Only three bytes of CMOS RAM are used to control the RTC periodic interrupt function. 
+>   - They are called RTC Status Register A, B, and C. They are at offset 0xA, 0xB, and 0xC in the CMOS RAM.  
+
+``rtc_init``: This is used to initialize the RTC and enable it on PIC.  
+>   1. Turn on IRQ 8
+>   2. Set the interrupt rate
+>   3. Initialize all variables
+>   4. Enable IRQ 8 on PIC  
+
+``rtc_handler``: This is used to handle the interrupt handler, and disable irq 8.
+>   1. Set interrupt flag to 0, indicating the interrupt happend.
+>   2. Read Register C so that the interrupt can happen again.  
+
 ***
 ### Initialize Paging
 ***
