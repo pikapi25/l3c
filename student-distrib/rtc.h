@@ -36,8 +36,8 @@
 /* Externally-visible functions */
 
 /* Initialize RTC */
-void rtc_init(void);
+extern void rtc_init(void);
 /* handle RTC interrupts */
-void rtc_handler(void);
+extern void rtc_handler(void);
 
 #endif /* _RTC_H */

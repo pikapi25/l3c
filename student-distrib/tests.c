@@ -20,6 +20,65 @@ static inline void assertion_failure(){
 
 /* Checkpoint 1 tests */
 
+/* IDT Test - Example
+ * 
+ * Asserts that first 10 IDT entries are not NULL
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: Load IDT, IDT definition
+ * Files: x86_desc.h/S
+ */
+int idt_test(){
+	TEST_HEADER;
+
+	int i;
+	int result = PASS;
+	for (i = 0; i < 10; ++i){
+		if ((idt[i].offset_15_00 == NULL) && 
+			(idt[i].offset_31_16 == NULL)){
+			assertion_failure();
+			result = FAIL;
+		}
+	}
+
+	return result;
+}
+
+// Some Exception Tests
+/* de_test
+ * Test if div 0 exception can be triggered
+ * Inputs: None
+ * return: FAIL
+ * Side Effects: None
+ * Files: idt.c/h
+ */
+int de_test(){
+	TEST_HEADER;
+
+	int a = 0;
+	int b = 1 / a;
+	b++;	
+
+	return FAIL;
+}
+
+/* ss_test
+ * Test if stack-segmentf fault exception can be triggered
+ * Inputs: None
+ * return: FAIL
+ * Side Effects: None
+ * Files: idt.c/h
+ */
+int ss_test(){
+	TEST_HEADER;
+
+	int a[1];
+	a[3]++;
+
+	return FAIL;
+}
+
 /* Paging Test
  * 
  * Dereferencing different address ranges with paging turned on
@@ -125,6 +184,9 @@ int paging_test4(){
 
 /* Test suite entry point */
 void launch_tests(){
+	TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("de_test", de_test());
+	TEST_OUTPUT("ss_test", ss_test());
 	TEST_OUTPUT("paging test1", paging_test1());
 	TEST_OUTPUT("paging test2", paging_test2());
 	TEST_OUTPUT("paging test3", paging_test3());
