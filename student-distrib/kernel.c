@@ -9,6 +9,10 @@
 #include "debug.h"
 #include "tests.h"
 #include "paging.h"
+#include "rtc.h"
+#include "keyboard.h"
+#include "idt.h"
+
 #define RUN_TESTS
 
 /* Macros. */
@@ -147,6 +151,9 @@ void entry(unsigned long magic, unsigned long addr) {
 
     //init the RTC
     rtc_init();
+
+    //init the keyboard
+    keyboard_init();
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
