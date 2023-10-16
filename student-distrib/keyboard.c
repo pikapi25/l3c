@@ -5,32 +5,33 @@
 //flags of modifier keys
 uint8_t caps  = 0;
 uint8_t ctrl  = 0;
-uint8_t shrf = 0;
+uint8_t shift = 0;
 uint8_t numl  = 0;
 
 //scan code table1
 //If there is no correspoding ascii code in the scan code set, output '\0'
+//the row of the table match with the row of US QWERTY keyboard
 char scan_code_table[SCAN_CODE_PRESS] = {
-	'\0', '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-	'-', '=', '\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 
-	'o', 'p', '[', ']', '\n', '\0', 'a', 's', 'd', 'f', 'g', 'h', 
-	'j', 'k', 'l' , ';', '\'', '`', '\0', '\\', 'z', 'x', 'c', 'v', 
-	'b', 'n', 'm', ',', '.', '/', '\0', '\0', '\0', ' ', '\0',
+	'\0', '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 
+	'\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n', '\0', 
+	'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l' , 
+	';', '\'', '`', '\0', '\\', 
+	'z', 'x', 'c', 'v', 'b', 'n', 'm', 
+	',', '.', '/', '\0', '\0', '\0', ' ', '\0',
 };
 
-/* The table to translate scan code to ASCII code when caps is pressed */
-char scan_code_table_caps[SCAN_CODE_PRESS] = {
-	'\0', '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=',
-	'\b', '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
-	'[', ']', '\n', '\0',
+//the table used when caps is pressed
+char caps_table[SCAN_CODE_PRESS] = {
+	'\0', '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b', 
+	'\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\n', '\0',
 	'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L' ,
 	';', '\'', '`', '\0', '\\',
 	'Z', 'X', 'C', 'V', 'B', 'N', 'M',
 	',', '.', '/', '\0', '\0', '\0', ' ', '\0',
 };
 
-/* The table to translate scan code to ASCII code when shift is pressed */
-char scan_code_table_shift[SCAN_CODE_PRESS] = {
+//the table used when shift is pressed
+char shift_table[SCAN_CODE_PRESS] = {
 	'\0', '\0', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+',
 	'\b', '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
 	'{', '}', '\n', '\0',
@@ -40,8 +41,8 @@ char scan_code_table_shift[SCAN_CODE_PRESS] = {
 	'<', '>', '?', '\0', '\0', '\0', ' ', '\0',
 };
 
-/* The table to translate scan code to ASCII code when shift and caps are pressed */
-char scan_code_table_shift_caps[SCAN_CODE_PRESS] = {
+//the table used when both shift and caps are pressed
+char shift_and_caps_table[SCAN_CODE_PRESS] = {
 	'\0', '\0', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+',
 	'\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
 	'{', '}', '\n', '\0',
@@ -87,10 +88,10 @@ void key_handler(void) {
 	switch (scan_code) {
 		case LEFT_CTRL_PRESSED:		ctrl = 1;		break;
 		case LEFT_CTRL_RELEASED:	ctrl = 0;		break;
-		case LEFT_SHIFT_PRESSED:	shrf = 1;		break;
-		case LEFT_SHIFT_RELEASED:	shrf = 0;		break;
-		case RIGHT_SHIFT_PRESSED:	shrf = 1;		break;
-		case RIGHT_SHIFT_RELEASED:	shrf = 0;		break;
+		case LEFT_SHIFT_PRESSED:	shift = 1;		break;
+		case LEFT_SHIFT_RELEASED:	shift = 0;		break;
+		case RIGHT_SHIFT_PRESSED:	shift = 1;		break;
+		case RIGHT_SHIFT_RELEASED:	shift = 0;		break;
 		case CAPS_LOCK_PRESSED:		caps = !caps;	break;
 		case NUM_LOCK_PRESSED:		numl = !numl;	break;
 
@@ -100,7 +101,7 @@ void key_handler(void) {
 			//temp handler in checkpoint1
 			if (scan_code >= SCAN_CODE_PRESS && !numl) break;
 			//if shift and caps are pressed
-			if (shrf && caps) {
+			if (shift && caps) {
 				ascii = scan_code_table_shift_caps[scan_code];
 			}  
 			//only caps is pressed
@@ -108,7 +109,7 @@ void key_handler(void) {
 				ascii = scan_code_table_caps[scan_code];
 			}
 			//only srf is pressed
-			else if (shrf) {
+			else if (shift) {
 				ascii = scan_code_table_shift[scan_code];
 			} 
 			//Number lock is unlocked
