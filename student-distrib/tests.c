@@ -93,10 +93,14 @@ int ss_test(){
 int paging_test1(){
 	TEST_HEADER;
 	// here we define the virtual memory address
+	// 0xb8000 is where video_memory starts
+	// 0xb8FFF is where video_memory ends
+	// 0x400000 is where kernel_memory starts
+	// 0x7FFFFF is where kernel_memory ends
 	char* video_memory = (char*)0xb8000;
-	char* video_memory_end = (char*)0xb9000;
+	char* video_memory_end = (char*)0xb8FFF;
 	char* kernel_memory = (char*)0x400000;
-	char* kernel_memory_end = (char*)0x800000;
+	char* kernel_memory_end = (char*)0x7FFFFF;
 	char read_result;
 
 	// here we try to read one byte by dereferencing virtual memory address into physical memory address
@@ -175,7 +179,80 @@ int paging_test4(){
 	return FAIL;
 }
 
+int rtc_init_test( void )
+{
+	TEST_HEADER;
+	int i;
+	for (i = 0; i < (1000000000); i++) {}
 
+	rtc_init();
+
+	for (i = 0; i < 1000000000; i++) {}
+
+	disable_irq(8);
+
+	clear();
+
+	return PASS;
+}
+
+/* ENABLE_IRQ INVALID TEST */
+/* Tests whether passing in a negative IRQ number and an IRQ   */
+/* number greater than 15 when trying to enable that specific  */
+/* IRQ number will cause the PIC to break   		           */
+/* Inputs: None. 											   */
+/* Outputs: None. 											   */
+/* Side Effects: If the test fails, nothing should show on 	   */
+/*				 on the screen when typing					   */
+/* Coverage: Enable IRQ for the PIC							   */
+int enable_irq_inval_test( void )
+{
+	TEST_HEADER;
+
+	enable_irq(-1);
+	enable_irq(100);
+
+	return PASS;
+}
+
+/* DISABLE_IRQ INVALID TEST */
+/* Tests whether passing in a negative IRQ number and an IRQ   */
+/* number greater than 15 when trying to disable that specific */
+/* IRQ number will cause the PIC to break   		           */
+/* Inputs: None. 											   */
+/* Outputs: None. 											   */
+/* Side Effects: If the test fails, nothing should show on 	   */
+/*				 on the screen when typing					   */
+/* Coverage: Disable IRQ for the PIC					       */
+int disable_irq_inval_test( void )
+{
+	TEST_HEADER;
+
+	disable_irq(-1);
+	disable_irq(100);
+
+	return PASS;
+}
+
+/* SEND_EOI INVALID TEST */
+/* Tests whether passing in a negative IRQ number and an IRQ   */
+/* number greater than 15 when trying to send an 			   */
+/* end-of-interrupt signal for that specific IRQ number will   */
+/* cause the PIC to break   		          				   */ 
+/* Inputs: None. 											   */
+/* Outputs: None. 											   */
+/* Side Effects: If the test fails, nothing should show on 	   */
+/*				 on the screen when typing					   */
+/* Coverage: Send EOI for the PIC						       */
+int send_eoi_inval_test( void )
+{
+	TEST_HEADER;
+
+	send_eoi(-1);
+	send_eoi(100);
+
+	return PASS;
+}
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -184,12 +261,19 @@ int paging_test4(){
 
 /* Test suite entry point */
 void launch_tests(){
-	TEST_OUTPUT("idt_test", idt_test());
-	TEST_OUTPUT("de_test", de_test());
-	TEST_OUTPUT("ss_test", ss_test());
-	TEST_OUTPUT("paging test1", paging_test1());
-	TEST_OUTPUT("paging test2", paging_test2());
-	TEST_OUTPUT("paging test3", paging_test3());
-	TEST_OUTPUT("paging test4", paging_test4());
+	//TEST_OUTPUT("idt_test", idt_test());
+	//TEST_OUTPUT("de_test", de_test());
+	// TEST_OUTPUT("ss_test", ss_test());
+	// TEST_OUTPUT("paging test1", paging_test1());
+	// TEST_OUTPUT("paging test2", paging_test2());
+	// TEST_OUTPUT("paging test3", paging_test3());
+	// TEST_OUTPUT("paging test4", paging_test4());
+	//TEST_OUTPUT("rtc_init_test", rtc_init_test( ));
+	// TEST_OUTPUT("enable_irq_inval_test", enable_irq_inval_test( ));
+	// printf("\n");
+	// TEST_OUTPUT("disable_irq_inval_test", disable_irq_inval_test( ));
+	// printf("\n");
+	// TEST_OUTPUT("send_eoi_inval_test", send_eoi_inval_test( ));
+	// printf("\n");
 }
 

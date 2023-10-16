@@ -7,9 +7,6 @@
 // PT and PD are required to be aligned.
 // since there are 1024 entries for each array and each entry is 4 Byte long
 // we use 4*1024 to make every entry aligned by 4 bytes
-#define PAGE_TABLE_COUNT    1024
-#define PAGE_DIC_COUNT  1024
-#define KERNEL_PHYSICAL_ADDRESS 0x400000
 
 // PDE has following structure
 // |31 ... 12|11 ... 8| 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
@@ -26,9 +23,8 @@
 // (31 ... 12) Address : For PDE, it's the address of PT
 //                       For PTE, it's physical address of 4kb memory space (memory frame)
 //  PDE and PTE has small difference in PAT (bit 7)
-uint32_t page_table[PAGE_TABLE_COUNT] __attribute__((aligned (4 * PAGE_TABLE_COUNT)));        // page_table for 0~4 MB
-uint32_t page_table_extra[PAGE_TABLE_COUNT] __attribute__((aligned (4 * PAGE_TABLE_COUNT)));        // page_table for extra use
-uint32_t page_dic[PAGE_DIC_COUNT] __attribute__((aligned (4 * PAGE_DIC_COUNT))); 
 extern void Page_Initialize();           
 
 #endif
+
+
