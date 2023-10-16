@@ -20,18 +20,21 @@
 
 //scan code of modifier keys
 #define LEFT_CTRL_PRESSED    0x1D
-#define LEFT_CTRL_RELEASED   0x9D
 #define LEFT_SHIFT_PRESSED   0x2A
-#define LEFT_SHIFT_RELEASED  0xAA
 #define RIGHT_SHIFT_PRESSED  0x36
-#define RIGHT_SHIFT_RELEASED 0xB6
 #define CAPS_LOCK_PRESSED    0x3A
 #define NUM_LOCK_PRESSED     0x45
+#define RELEASED_OFFSET      0x80
+#define LEFT_CTRL_RELEASED   LEFT_CTRL_PRESSED + RELEASED_OFFSET 
+#define LEFT_SHIFT_RELEASED  LEFT_SHIFT_PRESSED + RELEASED_OFFSET
+#define RIGHT_SHIFT_RELEASED RIGHT_SHIFT_PRESSED + RELEASED_OFFSET
+
 
 //Initialize keyboard
 extern void key_init(void);
 
 //keyboard handler function
 extern void key_handler(void);
+
 
 #endif /* _KEYBOARD_H */
