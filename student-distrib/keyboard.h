@@ -1,5 +1,3 @@
-/* keyboard.h - Defines used in interactions with keyboard
- */
 
 #ifndef _KEYBOARD_H
 #define _KEYBOARD_H
@@ -7,19 +5,33 @@
 #include "types.h"
 
 
-/* Ports that KEYBOARD sits on */
+//keyboard buffer register is connected to port 0x60
 #define KEY_BUF_PORT    0x60
 
-/* keyboard use irq 1 on MASTER_PIC */
+//PS\2 keyboard use irq 1 of the master PIC
 #define KEY_IRQ_NUM 1
 
+//the number of valid scan code in checkpoint1 
+#define SCAN_CODE_PRESS 58
+//13 keys of keypad are used in checkpoint1
+#define KEYPAD_NUM 13
+//keypad mask used to get ascii code
+#define KEYPAD_MASK 0x47
 
-/* About scan code */
-#define SCAN_CODE_PRESS 59
+//scan code of modifier keys
+#define LEFT_CTRL_PRESSED    0x1D
+#define LEFT_CTRL_RELEASED   0x9D
+#define LEFT_SHIFT_PRESSED   0x2A
+#define LEFT_SHIFT_RELEASED  0xAA
+#define RIGHT_SHIFT_PRESSED  0x36
+#define RIGHT_SHIFT_RELEASED 0xB6
+#define CAPS_LOCK_PRESSED    0x3A
+#define NUM_LOCK_PRESSED     0x45
 
-/* Initialize keyboard */
+//Initialize keyboard
 extern void key_init(void);
-/* keyboard handler */
+
+//keyboard handler function
 extern void key_handler(void);
 
 #endif /* _KEYBOARD_H */
