@@ -15,15 +15,15 @@
 #define SCAN_CODE_PRESS 59
 //13 keys of keypad are used in checkpoint1
 #define KEYPAD_NUM 13
-//keypad mask used to get ascii code
-#define KEYPAD_MASK 0x47
+// //keypad mask used to get ascii code
+// #define KEYPAD_MASK 0x47
 
 //scan code of modifier keys
 #define LEFT_CTRL_PRESSED    0x1D
 #define LEFT_SHIFT_PRESSED   0x2A
 #define RIGHT_SHIFT_PRESSED  0x36
 #define CAPS_LOCK_PRESSED    0x3A
-#define NUM_LOCK_PRESSED     0x45
+// #define NUM_LOCK_PRESSED     0x45
 #define RELEASED_OFFSET      0x80
 #define LEFT_CTRL_RELEASED   LEFT_CTRL_PRESSED + RELEASED_OFFSET 
 #define LEFT_SHIFT_RELEASED  LEFT_SHIFT_PRESSED + RELEASED_OFFSET

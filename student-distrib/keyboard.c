@@ -6,7 +6,7 @@
 uint8_t caps  = 0;
 uint8_t ctrl  = 0;
 uint8_t shift = 0;
-uint8_t numl  = 0;
+// uint8_t numl  = 0;
 
 //scan code table1
 //If there is no correspoding ascii code in the scan code set, output '\0'
@@ -41,20 +41,20 @@ char shift_table[SCAN_CODE_PRESS] = {
 	'<', '>', '?', '\0', '\0', '\0', ' ', '\0',
 };
 
-//the table used when both shift and caps are pressed
-char shift_and_caps_table[SCAN_CODE_PRESS] = {
-	'\0', '\0', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+',
-	'\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
-	'{', '}', '\n', '\0',
-	'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l' ,
-	':', '\"', '~', '\0', '|',
-	'z', 'x', 'c', 'v', 'b', 'n', 'm',
-	'<', '>', '?', '\0', '\0', '\0', ' ', '\0',
-};
+// //the table used when both shift and caps are pressed
+// char shift_and_caps_table[SCAN_CODE_PRESS] = {
+// 	'\0', '\0', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+',
+// 	'\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+// 	'{', '}', '\n', '\0',
+// 	'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l' ,
+// 	':', '\"', '~', '\0', '|',
+// 	'z', 'x', 'c', 'v', 'b', 'n', 'm',
+// 	'<', '>', '?', '\0', '\0', '\0', ' ', '\0',
+// };
 
-char keypad_table[KEYPAD_NUM]={
-	'7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'
-};
+// char keypad_table[KEYPAD_NUM]={
+// 	'7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'
+// };
 
 /*
 *   key_init
@@ -107,19 +107,19 @@ void keyboard_handler(void) {
 		case CAPS_LOCK_PRESSED:		
 			caps = !caps;	
 			break;
-		case NUM_LOCK_PRESSED:		
-			numl = !numl;	
-			break;
+		// case NUM_LOCK_PRESSED:		
+		// 	numl = !numl;	
+		// 	break;
 
 		default:
             //get corresponding ascii for letters and numbers
             //invalid scan code, break
 			//temp handler in checkpoint1
-			if (scan_code >= SCAN_CODE_PRESS && !numl) break;
-			//if shift and caps are pressed
-			if (shift && caps) {
-				ascii = shift_and_caps_table[scan_code];
-			}  
+			if (scan_code >= SCAN_CODE_PRESS) break;
+			// //if shift and caps are pressed
+			// if (shift && caps) {
+			// 	ascii = shift_and_caps_table[scan_code];
+			// }  
 			//only caps is pressed
             else if (caps) {
 				ascii = caps_table[scan_code];
@@ -128,10 +128,10 @@ void keyboard_handler(void) {
 			else if (shift) {
 				ascii = shift_table[scan_code];
 			} 
-			//Number lock is unlocked
-			else if (numl) {
-				ascii = keypad_table[scan_code-KEYPAD_MASK];
-			}
+			// //Number lock is unlocked
+			// else if (numl) {
+			// 	ascii = keypad_table[scan_code-KEYPAD_MASK];
+			// }
 			//no special keys are pressed
             else {
 				ascii = scan_code_table[scan_code];
