@@ -1,6 +1,7 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "keyboard.h"
 
 #define PASS 1
 #define FAIL 0
@@ -45,7 +46,40 @@ int idt_test(){
 	return result;
 }
 
-// add more tests here
+// Some Exception Tests
+/* de_test
+ * Test if div 0 exception can be triggered
+ * Inputs: None
+ * return: FAIL
+ * Side Effects: None
+ * Files: idt.c/h
+ */
+int de_test(){
+	TEST_HEADER;
+
+	int a = 0;
+	int b = 1 / a;
+	b++;	
+
+	return FAIL;
+}
+
+/* ss_test
+ * Test if stack-segmentf fault exception can be triggered
+ * Inputs: None
+ * return: FAIL
+ * Side Effects: None
+ * Files: idt.c/h
+ */
+int ss_test(){
+	TEST_HEADER;
+
+	int a[1];
+	a[3]++;
+
+	return FAIL;
+}
+
 
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
@@ -56,5 +90,7 @@ int idt_test(){
 /* Test suite entry point */
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("de_test", de_test());
+	TEST_OUTPUT("ss_test", ss_test());
 	// launch your tests here
 }
