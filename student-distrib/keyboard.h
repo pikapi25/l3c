@@ -31,10 +31,10 @@
 
 
 //Initialize keyboard
-extern void key_init(void);
+extern void keyboard_init(void);
 
 //keyboard handler function
-extern void key_handler(void);
+extern void keyboard_handler(void);
 
 
 #endif /* _KEYBOARD_H */

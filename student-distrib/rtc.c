@@ -3,7 +3,6 @@
 #include "i8259.h"
 #include "lib.h"
 #include "rtc.h"
-#include "lib.c"
 
 volatile uint8_t rtc_int_flag = 0; // indicate if an interrupt occurred. 0 for not occurred.
 // volatile uint32_t rtc_ticks = 0; // the number of ticks. every interrupt increment one tick.
