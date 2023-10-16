@@ -136,11 +136,17 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
+    //init the IDT
+    idt_init();
+
     /* Init the PIC */
     i8259_init();
 
     // Init the paging
     Page_Initialize();
+
+    //init the RTC
+    rtc_init();
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
