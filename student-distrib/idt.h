@@ -1,8 +1,8 @@
 #ifndef _IDT_H
 #define _IDT_H
+
 #include "x86_desc.h"
 #include "lib.h"
-
 #include "interrupt_linkage.h"
 
 //vectors for system call

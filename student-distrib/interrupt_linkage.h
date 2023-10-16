@@ -1,6 +1,9 @@
 #ifndef INTERRUPT_LINKAGE_H
 #define INTERRUPT_LINKAGE_H
 
+#include "keyboard.h"
+#include "rtc.h"
+
 // link the keyboard interrupt handler
 extern void keyboard_handler_linkage();
 
