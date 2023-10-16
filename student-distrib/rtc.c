@@ -47,7 +47,8 @@ void rtc_handler(void){
     // rtc_ticks ++;
     outb(RTC_REG_C, RTC_REG_PORT); // select register C
     inb(RTC_CMOS_RW_PORT); // just throw away contents
+    sti();
     test_interrupts(); // for testing
     send_eoi(RTC_IRQ_NUM); // send end-of-interrupt to pic
-    sti(); 
+     
 }

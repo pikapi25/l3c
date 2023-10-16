@@ -50,8 +50,8 @@ Page_Initialize(){
     page_dic[1] = KERNEL_PHYSICAL_ADDRESS|0x83; 
 
     // 1. load page_directory into cr3
-    // 2. set CR0 PG bit to 1 (enable paging)
-    // 3. set CR4 to map PDE into 4 MB page.
+    // 2. set CR0 PG bit to 1 (enable paging) (or 0x80000001)
+    // 3. set CR4 to map PDE into 4 MB (or 0x00000010) page.
     asm volatile(
         "movl %0, %%eax; \
         movl %%eax, %%cr3; \

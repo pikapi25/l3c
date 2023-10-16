@@ -11,5 +11,8 @@
         popal                  ;\
         iret 
 
-INTR_LINK(keyboard_handler_linkage, keyboard_handler);  
+#create the assemply linkage for keyboard interrupt
+INTR_LINK(keyboard_handler_linkage, keyboard_handler);   
+
+#create the assemply linkage for RTC interrupt
 INTR_LINK(rtc_handler_linkage, rtc_handler);         

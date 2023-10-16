@@ -5,10 +5,10 @@
 // #include "keyboard.h"
 // #include "rtc.h"
 
-// link the keyboard interrupt handler
+//the assemply linkage for keyboard interrupt
 extern void keyboard_handler_linkage();
 
-// link the RTC interrupt handler
+//the assemply linkage for RTC interrupt
 extern void rtc_handler_linkage();
 
 #endif
