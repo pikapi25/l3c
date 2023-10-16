@@ -13,6 +13,7 @@
 #define NUM_EXCP            20
 
 //local functions
+extern void idt_init();
 void exception_handler_de();
 void exception_handler_db();
 void exception_handler_nmi();
