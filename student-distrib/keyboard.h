@@ -12,7 +12,7 @@
 #define KEY_IRQ_NUM 1
 
 //the number of valid scan code in checkpoint1 
-#define SCAN_CODE_PRESS 58
+#define SCAN_CODE_PRESS 59
 //13 keys of keypad are used in checkpoint1
 #define KEYPAD_NUM 13
 //keypad mask used to get ascii code
