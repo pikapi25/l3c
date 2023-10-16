@@ -26,6 +26,12 @@ ldt_desc:
     .word KERNEL_LDT
     .long ldt
 
+# GDT for loading
+	.word 0
+gdt_desc:
+	.word gdt_bottom - gdt - 1	   
+	.long gdt					 
+
     .align 4
 tss:
 _tss:
