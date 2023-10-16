@@ -60,6 +60,7 @@
 >   2. Send EOI to PIC.
 >   - If it's an interrupt on slave, both slave and master should receive EOI
 >   - If it's an interrupt on master, only master should receive EOI 
+>   - Don't forget to OR EOI with correct IRQ line before sending!  
 ***
 ### Initialize the keyboard
 ***
