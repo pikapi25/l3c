@@ -52,7 +52,7 @@ char shift_and_caps_table[SCAN_CODE_PRESS] = {
 	'<', '>', '?', '\0', '\0', '\0', ' ', '\0',
 };
 
-char scan_code_table_keypad[KEYPAD_NUM]={
+char keypad_table[KEYPAD_NUM]={
 	'7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'
 };
 
@@ -102,19 +102,19 @@ void key_handler(void) {
 			if (scan_code >= SCAN_CODE_PRESS && !numl) break;
 			//if shift and caps are pressed
 			if (shift && caps) {
-				ascii = scan_code_table_shift_caps[scan_code];
+				ascii = shift_and_caps_table[scan_code];
 			}  
 			//only caps is pressed
             else if (caps) {
-				ascii = scan_code_table_caps[scan_code];
+				ascii = caps_table[scan_code];
 			}
 			//only srf is pressed
 			else if (shift) {
-				ascii = scan_code_table_shift[scan_code];
+				ascii = shift_table[scan_code];
 			} 
 			//Number lock is unlocked
 			else if (numl) {
-				ascii = scan_code_table_keypad[scan_code-KEYPAD_MASK];
+				ascii = keypad_table[scan_code-KEYPAD_MASK];
 			}
 			//no special keys are pressed
             else {
