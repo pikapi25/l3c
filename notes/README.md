@@ -8,7 +8,7 @@
 | Initialize the IDT   | dsc  |
 | Initialize the PIC   | lkn  |
 | Initialize the keyboard  | lyz  |
-| Initialize the RTC   | not assigned  |
+| Initialize the RTC   | lkn  |
 | Initialize Paging   | ljy  |
 
 
@@ -82,7 +82,7 @@ The 2 I/O ports used for the RTC and CMOS are 0x70 and 0x71.
 >   2. Read Register C so that the interrupt can happen again.  
 
 ***
-### Initialize Paging
+### Initialize Paging @ljy
 ***
 Reference web link1: https://wiki.osdev.org/CPU_Registers_x86#CR0
 Reference web link1: https://wiki.osdev.org/Paging
@@ -104,7 +104,9 @@ PDE (Page Directory Entry) structure
 >- (31 ... 12) Address : For PDE, it's the address of PT;For PTE, it's physical address of 4kb memory space (memory frame)
 >- PDE and PTE has small difference in PAT (bit 7)
 
-``Page_Initialize``: Initialize page table(PT) and page directory(PD) when kernel is loaded. (being used in kernel.c)
+``Page_Initialize``: Initialize page table(PT) and page directory(PD) when kernel is loaded. (called in kernel.c)
 >1. create global array for PT and PD;
->2. load kernel memory
->3. load video memory
+>2. Initialize and set flags for PTE and PDE.
+>3. load kernel memory (start at 4MB and end at 8MB)and set flag 
+>4. load video memory (start at 0xb8000 and end at 0xb9000 )and set flag
+>5. change cr(s) registers (flush tlb and open paging mode and protection mode)
