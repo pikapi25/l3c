@@ -90,5 +90,7 @@ int ss_test(){
 /* Test suite entry point */
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("de_test", de_test());
+	TEST_OUTPUT("ss_test", ss_test());
 	// launch your tests here
 }
