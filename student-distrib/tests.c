@@ -45,6 +45,7 @@ int idt_test(){
 	return result;
 }
 
+
 // Some Exception Tests
 /* de_test
  * Test if div 0 exception can be triggered
@@ -63,21 +64,24 @@ int de_test(){
 	return FAIL;
 }
 
-/* ss_test
- * Test if stack-segmentf fault exception can be triggered
+
+/* gp_test
+ * Test if general protection fault exception can be raised by dereferencing a NULL pointer.
  * Inputs: None
  * return: FAIL
  * Side Effects: None
  * Files: idt.c/h
  */
-int ss_test(){
+int gp_test(){
 	TEST_HEADER;
 
-	int a[1];
-	a[3]++;
+	int* ptr=(int *)0x0;
+	int value;
+	value=*ptr;
 
 	return FAIL;
 }
+
 
 /* Paging Test
  * 
@@ -179,80 +183,7 @@ int paging_test4(){
 	return FAIL;
 }
 
-int rtc_init_test( void )
-{
-	TEST_HEADER;
-	int i;
-	for (i = 0; i < (1000000000); i++) {}
 
-	rtc_init();
-
-	for (i = 0; i < 1000000000; i++) {}
-
-	disable_irq(8);
-
-	clear();
-
-	return PASS;
-}
-
-/* ENABLE_IRQ INVALID TEST */
-/* Tests whether passing in a negative IRQ number and an IRQ   */
-/* number greater than 15 when trying to enable that specific  */
-/* IRQ number will cause the PIC to break   		           */
-/* Inputs: None. 											   */
-/* Outputs: None. 											   */
-/* Side Effects: If the test fails, nothing should show on 	   */
-/*				 on the screen when typing					   */
-/* Coverage: Enable IRQ for the PIC							   */
-int enable_irq_inval_test( void )
-{
-	TEST_HEADER;
-
-	enable_irq(-1);
-	enable_irq(100);
-
-	return PASS;
-}
-
-/* DISABLE_IRQ INVALID TEST */
-/* Tests whether passing in a negative IRQ number and an IRQ   */
-/* number greater than 15 when trying to disable that specific */
-/* IRQ number will cause the PIC to break   		           */
-/* Inputs: None. 											   */
-/* Outputs: None. 											   */
-/* Side Effects: If the test fails, nothing should show on 	   */
-/*				 on the screen when typing					   */
-/* Coverage: Disable IRQ for the PIC					       */
-int disable_irq_inval_test( void )
-{
-	TEST_HEADER;
-
-	disable_irq(-1);
-	disable_irq(100);
-
-	return PASS;
-}
-
-/* SEND_EOI INVALID TEST */
-/* Tests whether passing in a negative IRQ number and an IRQ   */
-/* number greater than 15 when trying to send an 			   */
-/* end-of-interrupt signal for that specific IRQ number will   */
-/* cause the PIC to break   		          				   */ 
-/* Inputs: None. 											   */
-/* Outputs: None. 											   */
-/* Side Effects: If the test fails, nothing should show on 	   */
-/*				 on the screen when typing					   */
-/* Coverage: Send EOI for the PIC						       */
-int send_eoi_inval_test( void )
-{
-	TEST_HEADER;
-
-	send_eoi(-1);
-	send_eoi(100);
-
-	return PASS;
-}
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -261,19 +192,19 @@ int send_eoi_inval_test( void )
 
 /* Test suite entry point */
 void launch_tests(){
-	//TEST_OUTPUT("idt_test", idt_test());
-	//TEST_OUTPUT("de_test", de_test());
-	// TEST_OUTPUT("ss_test", ss_test());
+	// TEST_OUTPUT("idt_test", idt_test());
+	// printf("\n");
+	// TEST_OUTPUT("de_test", de_test());
+	// printf("\n");
+	TEST_OUTPUT("gp_test", gp_test());
+	printf("\n");
 	// TEST_OUTPUT("paging test1", paging_test1());
+	// printf("\n");
 	// TEST_OUTPUT("paging test2", paging_test2());
+	// printf("\n");
 	// TEST_OUTPUT("paging test3", paging_test3());
+	// printf("\n");
 	// TEST_OUTPUT("paging test4", paging_test4());
-	//TEST_OUTPUT("rtc_init_test", rtc_init_test( ));
-	// TEST_OUTPUT("enable_irq_inval_test", enable_irq_inval_test( ));
-	// printf("\n");
-	// TEST_OUTPUT("disable_irq_inval_test", disable_irq_inval_test( ));
-	// printf("\n");
-	// TEST_OUTPUT("send_eoi_inval_test", send_eoi_inval_test( ));
 	// printf("\n");
 }
 

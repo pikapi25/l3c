@@ -44,7 +44,6 @@ void rtc_init(void){
  * EFFECT: handle the interrupt handler, and disable irq 8
 */
 void rtc_handler(void){
-    char temp;
     cli();
     rtc_int_flag = 1;
     // rtc_ticks ++;

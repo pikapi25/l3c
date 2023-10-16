@@ -88,7 +88,7 @@ void idt_init()
 
 
 /* FUNCTION HEADER FOR ALL EXCEPTION HANDLERS 
-/* exception handler functions
+ * exception handler functions
  * Description: print a prompt when an exception is raised and freeze by using a while loop
  * Inputs: none
  * Outputs: the exception message
