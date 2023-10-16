@@ -16,6 +16,7 @@ volatile uint8_t rtc_int_flag = 0; // indicate if an interrupt occurred. 0 for n
 void rtc_init(void){
 
     /* Turning on IRQ 8*/
+    cli();
     char prev;
     outb(RTC_REG_B|RTC_DIS_NMI, RTC_REG_PORT); // select register B and disable NMI
     prev = inb(RTC_CMOS_RW_PORT); // read the current value of register B
@@ -33,6 +34,7 @@ void rtc_init(void){
     // rtc_ticks = 0; // ticks is set to 0. 
 
     /* enable irq line */
+    sti();
     enable_irq(RTC_IRQ_NUM); // the IRQ number of RTC is 8. we need to turn on it.
 }
 
@@ -42,12 +44,14 @@ void rtc_init(void){
  * EFFECT: handle the interrupt handler, and disable irq 8
 */
 void rtc_handler(void){
+    char temp;
     cli();
     rtc_int_flag = 1;
     // rtc_ticks ++;
     outb(RTC_REG_C, RTC_REG_PORT); // select register C
-    inb(RTC_CMOS_RW_PORT); // just throw away contents
+    temp = inb(RTC_CMOS_RW_PORT); // just throw away contents 
     test_interrupts(); // for testing
+    sti();
     send_eoi(RTC_IRQ_NUM); // send end-of-interrupt to pic
-    sti(); 
+
 }

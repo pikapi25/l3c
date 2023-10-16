@@ -93,11 +93,11 @@ void send_eoi(uint32_t irq_num) {
      /* if irq_num is between 0-7, it should be on master */
      if (irq_num >= 0 && irq_num <=7){
         /* send EOI to master */
-        outb(EOI | irq_num, MASTER_8259_DATA); // tell the master which line 
+        outb(EOI | irq_num, MASTER_8259_PORT); // tell the master which line 
     }else if (irq_num >= 8 && irq_num <=15){
         /* if irq_num is between 8-15, it should be on slave */
         /* and we should send EOI to both master and slave */
-        outb(EOI | 2, MASTER_8259_DATA); // tell the master the slave is sending EOI (from irq line 2)
-        outb(EOI | (irq_num - 8), SLAVE_8259_DATA); // tell the slave which line 
+        outb(EOI | 2, MASTER_8259_PORT); // tell the master the slave is sending EOI (from irq line 2)
+        outb(EOI | (irq_num - 8), SLAVE_8259_PORT); // tell the slave which line 
     }
 }
