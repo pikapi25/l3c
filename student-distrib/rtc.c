@@ -6,7 +6,7 @@
 
 volatile uint8_t rtc_int_flag = 0; // indicate if an interrupt occurred. 0 for not occurred.
 volatile uint32_t rtc_ticks = 0; // the number of ticks. every **actual** interrupt increment one tick.
-uint32_t rtc_virtual_rate = 2; /* the virtual interrupt rate */
+uint32_t rtc_virtual_rate = 1024; /* the virtual interrupt rate */
 
 /* rtc_init
  * INPUT: none
@@ -31,11 +31,13 @@ void rtc_init(void){
 
     /* Initialize the variables */
     rtc_int_flag = 0; // no interrupt occurred
+    rtc_virtual_rate = 1024;
+    rtc_ticks = 0;
     // rtc_ticks = 0; // ticks is set to 0. 
 
     /* enable irq line */
-    sti();
     enable_irq(RTC_IRQ_NUM); // the IRQ number of RTC is 8. we need to turn on it.
+    sti();
 }
 
 /* rtc_handler
@@ -51,15 +53,16 @@ void rtc_handler(void){
     */
     cli();
     rtc_ticks ++;
-    if (rtc_ticks % (RTC_DEFAULT_RATE / rtc_virtual_rate) == 0){
+    if (rtc_ticks  == rtc_virtual_rate){
         rtc_int_flag = 1;
+        rtc_ticks = 0;
     }
     outb(RTC_REG_C, RTC_REG_PORT); // select register C
     inb(RTC_CMOS_RW_PORT); // just throw away contents
     //test_interrupts(); // for testing
-    sti();
+
     send_eoi(RTC_IRQ_NUM); // send end-of-interrupt to pic
-     
+    sti();
 }
 
 /* rtc_open
@@ -68,7 +71,8 @@ void rtc_handler(void){
  * EFFECT: set the interrupt rate to 2
 */
 int32_t rtc_open(const uint8_t* filename){
-    rtc_virtual_rate = 2;
+    rtc_int_flag = 0;
+    rtc_virtual_rate = 1024 / 2;
     return 0;
 }
 
@@ -114,7 +118,7 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
      * If we AND the original number with (num - 1), it should result in 0. */
 
     if (rtc_set_freq > 0 && rtc_set_freq <= 1024 && ((rtc_set_freq & (rtc_set_freq - 1)) == 0 )){
-        rtc_virtual_rate = rtc_set_freq;
+        rtc_virtual_rate = 1024 / rtc_set_freq;
     }else{
         return -1;
     }

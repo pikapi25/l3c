@@ -178,12 +178,13 @@ int paging_test4(){
 */
 int rtc_write_test(){
 	TEST_HEADER;
-	int freq, rate, count;
+	int freq, rate, count, test;
 	for (freq = 2, rate = 0; freq <= 1024; freq <<= 1, rate++) {
+		printf("%d ", freq);
 		rtc_write(0, &freq, 4);
 		for (count = 0; count < freq; count++) {
 			rtc_read(0, NULL, 0);
-			printf("%d", rate);
+			printf("*");
 		}
 		printf("\n");
 	}
