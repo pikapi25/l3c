@@ -505,7 +505,7 @@ void scroll() {
 	//update the cursor
     terminal.cursor_y--;
 	if (terminal.cursor_y == 255) {
-		++terminal.cursor_y;
+		terminal.cursor_y++;
 	}
 }
 
@@ -563,6 +563,7 @@ void handle_backspace() {
 	}
 	terminal.cursor_x--;
     //backspace on the new line should go back to the previous line
+    //(uint8_t)0-1=255
 	if (terminal.cursor_x == 255) {
 		terminal.cursor_y--;
 		terminal.cursor_x = NUM_COLS - 1;
@@ -579,22 +580,24 @@ void handle_backspace() {
  * Inputs: uint8_t cursor_start, uint8_t cursor_end
  * Return Value: none
  */
-void enable_cursor(uint8_t cursor_start, uint8_t cursor_end) {
-	outb(0x0A, 0x3D4);						
-	outb((inb(0x3D5) & 0xC0) | cursor_start, 0x3D5);	
-	outb(0x0B, 0x3D4);						
-	outb((inb(0x3D5) & 0xE0) | cursor_end, 0x3D5);		
+void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
+{
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
+ 
+	outb(0x3D4, 0x0B);
+	outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
 }
 
-/* void disable_cursor()
- * disabling the cursor
- * Inputs: none
- * Return Value: none
- */
-void disable_cursor() {
-	outb(0x0A, 0x3D4);						
-	outb(0x20, 0x3D5);						
-}
+// /* void disable_cursor()
+//  * disabling the cursor
+//  * Inputs: none
+//  * Return Value: none
+//  */
+// void disable_cursor() {
+// 	outb(0x3D4, 0x0A);						
+// 	outb(0x3D5, 0x20);						
+// }
 
 /* void update_cursor(int x, int y)
  * update the position of the cursor and draw it in vga

@@ -122,9 +122,9 @@ void keyboard_handler(void) {
 		default:
             //get corresponding ascii for letters and numbers
             //invalid scan code, break
-			//temp handler in checkpoint1
+			//temp handler in checkpoint1 and checkpoint2
 			if (scan_code >= SCAN_CODE_PRESS) break;
-			//if shift and caps are pressed
+			//if shift and caps are both pressed
 			else if (shift && caps) {
 				ascii = shift_and_caps_table[scan_code];
 			}  
@@ -148,30 +148,40 @@ void keyboard_handler(void) {
             // putc(ascii);
 			// break;
 			//--------------------checkpoint2-----------------------
+			//ctrl+l/L: clean the screen 
 			if (ctrl && (ascii == 'l' || ascii == 'L')) {
-				clear_redraw();						/* Ctrl + L cleans the screen */
+				clear_redraw();						
 				break;
-			} else if (ascii == '\n') {
+			} 
+			else if (ascii == '\n') {
 				userkey_putc(ascii);
-				terminal->kbd_buf[terminal->kbd_buf_count++] = '\n';
+				terminal->kbd_buf[terminal->kbd_buf_count] = '\n';
+				terminal->kbd_buf_count++;
 				terminal->readkey = 1;							/* Set the "endline" flag */
-			} else if (ascii == '\b') {
+			} 
+			else if (ascii == '\b') {
 				if (terminal->kbd_buf_count > 0) {
 					userkey_putc(ascii);
-					terminal->kbd_buf[--terminal->kbd_buf_count] = '\0';
+					terminal->kbd_buf_count--;
+					terminal->kbd_buf[terminal->kbd_buf_count] = '\0';
 				}
-			} else if (ascii == '\t') {
+			} 
+			else if (ascii == '\t') {
 				for (i = 0; i < 2; i++) {
 					if (terminal->kbd_buf_count < MAX_CHA_BUF - 1) {
 						userkey_putc(' ');
-						terminal->kbd_buf[terminal->kbd_buf_count++] = ' ';
+						terminal->kbd_buf[terminal->kbd_buf_count] = ' ';
+						terminal->kbd_buf_count++;
 					}
 				}
-			} else if (ascii != '\0') {
+			} 
+			else if (ascii != '\0') {
 				if (terminal->kbd_buf_count < MAX_CHA_BUF - 1) {
 					userkey_putc(ascii);
-					terminal->kbd_buf[terminal->kbd_buf_count++] = ascii;
+					terminal->kbd_buf[terminal->kbd_buf_count] = ascii;
+					terminal->kbd_buf_count++;
 				}
+				//stop displaying when buffer is full
 			}
 	}
 
