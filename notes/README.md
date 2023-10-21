@@ -110,3 +110,40 @@ PDE (Page Directory Entry) structure
 >3. load kernel memory (start at 4MB and end at 8MB)and set flag 
 >4. load video memory (start at 0xb8000 and end at 0xb9000 )and set flag
 >5. change cr(s) registers (flush tlb and open paging mode and protection mode)
+
+
+
+## CHECKPOINT 2
+
+| Task     | Assignee  |
+| -------- | --------- |
+| Create a Terminal Driver   | lyz & lkn  |
+| Parse the Read-only File System   | dsc & ljy  |
+| The Real-Time Clock Driver   | lkn  |
+
+### The Real-Time Clock Driver  
+**virtualizing the RTC**:
+>   - "By virtualizing the RTC you basically give the illusion to the process  
+that the RTC is set to their frequency when in reality the RTC isn’t.   
+Instead you set the RTC to the highest possible frequency and wait until   
+you receive x interrupts to return back to the process such that those x interrupts   
+at the highest frequency is equivalent to 1 interrupt at the frequency the process wants."
+***  
+``rtc_open``: Reset the frequency to 2Hz.  
+>   - "set up any data necessary to handle RTC"
+
+``rtc_read``:  
+>   - "You might want to use some sort of flag here (you will not need spinlocks. Why?)"  
+>   - "should always return 0."  
+>   - "but only after an interrupt has occurred (set a flag and wait until the interrupt handler clears it, then return 0)"
+
+``rtc_write``: This function is used to set the interrupt rate.  
+>   - "should always accept only a 4-byte integer specifying the interrupt rate in Hz."  
+>   - "and should set the rate of periodic interrupts accordingly."
+>   - "The RTC device itself can only generate interrupts at a rate that is a power of 2 (do a parameter check)"
+>   - "writing to the RTC should block interrupts to interact with the device."  
+>   - "must get its input parameter through a buffer and not read the value directly." 
+>   - "The call returns the number of bytes written, or -1 on failure." 
+
+``rtc_close``: successful closes should return 0.
+

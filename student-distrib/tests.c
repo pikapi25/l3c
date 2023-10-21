@@ -1,7 +1,7 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
-
+#include "rtc.h"
 #define PASS 1
 #define FAIL 0
 
@@ -167,6 +167,29 @@ int paging_test4(){
 
 
 /* Checkpoint 2 tests */
+
+/* RTC Test
+ * 
+ * Test and visualize if the rtc_write can correctly set the frequency
+ * Inputs: None
+ * Outputs: PASS
+ * Side Effects: Print the visualization of rtc frequency
+ * Files: rtc.c/.h
+*/
+int rtc_write_test(){
+	TEST_HEADER;
+	int freq, rate, count;
+	for (freq = 2, rate = 0; freq <= 1024; freq <<= 1, rate++) {
+		rtc_write(0, &freq, 4);
+		for (count = 0; count < freq; count++) {
+			rtc_read(0, NULL, 0);
+			printf("%d", rate);
+		}
+		printf("\n");
+	}
+
+	return PASS;
+}
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -180,5 +203,6 @@ void launch_tests(){
 	// TEST_OUTPUT("paging test2", paging_test2());
 	// TEST_OUTPUT("paging test3", paging_test3());
 	// TEST_OUTPUT("paging test4", paging_test4());
+	TEST_OUTPUT("rtc_driver_test", rtc_write_test());
 }
 
