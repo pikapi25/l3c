@@ -9,6 +9,12 @@
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
+//print users' key checkpoint2
+void scroll();
+void userkey_putc(uint8_t c);
+void handle_newline();
+void handle_backspace();
+
 int32_t puts(int8_t *s);
 int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);
 int8_t *strrev(int8_t* s);
@@ -28,6 +34,11 @@ void test_interrupts(void);
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);
 int32_t safe_strncpy(int8_t* dest, const int8_t* src, int32_t n);
+
+//cursor checkpoint2
+void enable_cursor(uint8_t cursor_start, uint8_t cursor_end);
+void disable_cursor();
+void update_cursor(int x, int y);
 
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit

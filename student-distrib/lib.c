@@ -2,6 +2,8 @@
  * vim:ts=4 noexpandtab */
 
 #include "lib.h"
+#include "terminal.h"
+#include "keyboard.h"
 
 #define VIDEO       0xB8000
 #define NUM_COLS    80
@@ -12,10 +14,12 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
-/* void clear(void);
- * Inputs: void
+//checkpoint2
+/* void clear(void)
+ * Clear video memory
+ * Inputs: none
  * Return Value: none
- * Function: Clears video memory */
+ */
 void clear(void) {
     int32_t i;
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
@@ -473,4 +477,142 @@ void test_interrupts(void) {
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
         video_mem[i << 1]++;
     }
+}
+
+//---------------------checkpoint2--------------------------
+/* void scroll()
+ * scroll the screen by adding another line to the bottom
+ * of the screen and erasing the top line of the screen.   
+ * Side effect: the cursor is moved
+ */
+void scroll() {
+	int i;
+
+    //Starting on the second line, move the content up one line
+	for (i = 0; i < NUM_ROWS - 1; i++) {
+		memcpy((uint8_t *)(video_mem + (i * NUM_COLS * 2)),
+			   (uint8_t *)(video_mem + ((i + 1) * NUM_COLS * 2)),
+			   NUM_COLS * 2);
+	}
+
+	//Clear the last line
+	for (i = 0; i < NUM_COLS; i++) {
+		*(uint8_t *)(video_mem + ((NUM_ROWS - 1) * NUM_COLS * 2) + (i << 1)) = ' ';
+		*(uint8_t *)(video_mem + ((NUM_ROWS - 1) * NUM_COLS * 2) + (i << 1) + 1)
+			= ATTRIB;
+	}
+
+	//update the cursor
+    terminal.cursor_y--;
+	if (terminal.cursor_y == 255) {
+		++terminal.cursor_y;
+	}
+}
+
+/* void userkey_putc(uint8_t c)
+ * handle keys pressed by users
+ * Inputs: ascii code of the pressed key                                           
+ * Outputs: none
+ * Side effect: print keys on the screen                                           
+ */
+void userkey_putc(uint8_t c) {
+	int flags;
+	cli_and_save(flags);
+
+	switch (c) {
+		case '\0': break;   //print nothing
+		case '\n': case '\r': handle_newline(); break;     //start a new line if get line break or enter is pressed
+		case '\b': handle_backspace(); break;   //handle backspace
+		default:
+            //start a new line if cursor is already at the end of the current line
+			if (terminal.cursor_x >= NUM_COLS) {
+				handle_newline();
+			}
+			*(uint8_t *)(video_mem + ((NUM_COLS * terminal.cursor_y + terminal.cursor_x) << 1)) = c;
+			*(uint8_t *)(video_mem + ((NUM_COLS * terminal.cursor_y + terminal.cursor_x) << 1) + 1) = ATTRIB;
+			terminal.cursor_x++;
+	}
+
+	update_cursor(terminal.cursor_x, terminal.cursor_y);
+	restore_flags(flags);
+}
+
+/* void handle_newline
+ * add a new line
+ * Side effect: cursor moves to the start of the new line                                          
+ */
+void handle_newline() {
+	terminal.cursor_x = 0;
+	terminal.cursor_y++;
+    //after adding a newline, we run out of the rows
+    //then, do scrolling
+	if (terminal.cursor_y >= NUM_ROWS) {
+		scroll();
+	}
+	//update_cursor(terminal.cursor_x, terminal.cursor_y);
+}
+
+/* void handle_backspace
+ * realize backspace operation
+ * Side effect: the position of the cursor changes and the last character is deleted                                  
+ */
+void handle_backspace() {
+    //if the cursor is at the start of the screen, return
+	if (terminal.cursor_x == 0 && terminal.cursor_y == 0) {
+		return;
+	}
+	terminal.cursor_x--;
+    //backspace on the new line should go back to the previous line
+	if (terminal.cursor_x == 255) {
+		terminal.cursor_y--;
+		terminal.cursor_x = NUM_COLS - 1;
+	}
+    //delete the character
+	*(uint8_t *)(video_mem + ((NUM_COLS * terminal.cursor_y + terminal.cursor_x) << 1)) = ' ';
+}
+
+
+//----------functions to handle the curse-----------
+//reference: https://wiki.osdev.org/Text_Mode_Cursor
+/* void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
+ * enabling the cursor
+ * Inputs: uint8_t cursor_start, uint8_t cursor_end
+ * Return Value: none
+ */
+void enable_cursor(uint8_t cursor_start, uint8_t cursor_end) {
+	outb(0x0A, 0x3D4);						
+	outb((inb(0x3D5) & 0xC0) | cursor_start, 0x3D5);	
+	outb(0x0B, 0x3D4);						
+	outb((inb(0x3D5) & 0xE0) | cursor_end, 0x3D5);		
+}
+
+/* void disable_cursor()
+ * disabling the cursor
+ * Inputs: none
+ * Return Value: none
+ */
+void disable_cursor() {
+	outb(0x0A, 0x3D4);						
+	outb(0x20, 0x3D5);						
+}
+
+/* void update_cursor(int x, int y)
+ * update the position of the cursor and draw it in vga
+ * Inputs: current postion: int x, int y
+ * Return Value: none
+ */
+void update_cursor(int x, int y)
+{
+	uint16_t pos = y * NUM_COLS + x;
+ 
+    // //outb(data, port)
+	// outb(0x3D4, 0x0F);
+	// outb(0x3D5, (uint8_t) (pos & 0xFF));
+	// outb(0x3D4, 0x0E);
+	// outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+    uint16_t pos = y * NUM_COLS + x;		
+	outb(0x0F, 0x3D4);						
+	outb((uint8_t) (pos & 0xFF), 0x3D5);
+	outb(0x0E, 0x3D4);						 
+	outb((uint8_t) ((pos >> 8) & 0xFF), 0x3D5);
 }

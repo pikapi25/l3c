@@ -1,11 +1,13 @@
 #include "keyboard.h"
 #include "lib.h"
 #include "i8259.h"
+#include "terminal.h"
 
 //flags of modifier keys
 uint8_t caps  = 0;
 uint8_t ctrl  = 0;
 uint8_t shift = 0;
+uint8_t alt = 0;	//added in cp2 but not used
 // uint8_t numl  = 0;
 
 //scan code table1
@@ -41,16 +43,16 @@ char shift_table[SCAN_CODE_PRESS] = {
 	'<', '>', '?', '\0', '\0', '\0', ' ', '\0',
 };
 
-// //the table used when both shift and caps are pressed
-// char shift_and_caps_table[SCAN_CODE_PRESS] = {
-// 	'\0', '\0', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+',
-// 	'\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
-// 	'{', '}', '\n', '\0',
-// 	'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l' ,
-// 	':', '\"', '~', '\0', '|',
-// 	'z', 'x', 'c', 'v', 'b', 'n', 'm',
-// 	'<', '>', '?', '\0', '\0', '\0', ' ', '\0',
-// };
+//the table used when both shift and caps are pressed
+char shift_and_caps_table[SCAN_CODE_PRESS] = {
+	'\0', '\0', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+',
+	'\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+	'{', '}', '\n', '\0',
+	'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l' ,
+	':', '\"', '~', '\0', '|',
+	'z', 'x', 'c', 'v', 'b', 'n', 'm',
+	'<', '>', '?', '\0', '\0', '\0', ' ', '\0',
+};
 
 // char keypad_table[KEYPAD_NUM]={
 // 	'7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'
@@ -79,7 +81,8 @@ void keyboard_init(void) {
 void keyboard_handler(void) {
 	cli();
 	uint8_t scan_code, ascii;
-
+	int i;
+	terminal_t* terminal = get_terminal();
 	//get scan code from port
     //the size of scan code is one byte
 	scan_code = inb(KEY_BUF_PORT);
@@ -104,6 +107,11 @@ void keyboard_handler(void) {
 		case RIGHT_SHIFT_RELEASED:	
 			shift = 0;		
 			break;
+		case LEFT_ALT_PRESSED:
+			alt = 1;
+		case LEFT_ALT_RELEASED:
+			alt = 0;
+
 		case CAPS_LOCK_PRESSED:		
 			caps = !caps;	
 			break;
@@ -116,10 +124,10 @@ void keyboard_handler(void) {
             //invalid scan code, break
 			//temp handler in checkpoint1
 			if (scan_code >= SCAN_CODE_PRESS) break;
-			// //if shift and caps are pressed
-			// if (shift && caps) {
-			// 	ascii = shift_and_caps_table[scan_code];
-			// }  
+			//if shift and caps are pressed
+			else if (shift && caps) {
+				ascii = shift_and_caps_table[scan_code];
+			}  
 			//only caps is pressed
             else if (caps) {
 				ascii = caps_table[scan_code];
@@ -136,9 +144,35 @@ void keyboard_handler(void) {
             else {
 				ascii = scan_code_table[scan_code];
 			}
-			//output
-            putc(ascii);
-			break;
+			//output in cp1
+            // putc(ascii);
+			// break;
+			//--------------------checkpoint2-----------------------
+			if (ctrl && (ascii == 'l' || ascii == 'L')) {
+				clear_redraw();						/* Ctrl + L cleans the screen */
+				break;
+			} else if (ascii == '\n') {
+				userkey_putc(ascii);
+				terminal->kbd_buf[terminal->kbd_buf_count++] = '\n';
+				terminal->readkey = 1;							/* Set the "endline" flag */
+			} else if (ascii == '\b') {
+				if (terminal->kbd_buf_count > 0) {
+					userkey_putc(ascii);
+					terminal->kbd_buf[--terminal->kbd_buf_count] = '\0';
+				}
+			} else if (ascii == '\t') {
+				for (i = 0; i < 2; i++) {
+					if (terminal->kbd_buf_count < MAX_CHA_BUF - 1) {
+						userkey_putc(' ');
+						terminal->kbd_buf[terminal->kbd_buf_count++] = ' ';
+					}
+				}
+			} else if (ascii != '\0') {
+				if (terminal->kbd_buf_count < MAX_CHA_BUF - 1) {
+					userkey_putc(ascii);
+					terminal->kbd_buf[terminal->kbd_buf_count++] = ascii;
+				}
+			}
 	}
 
     //end of interrupt
