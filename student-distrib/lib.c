@@ -609,8 +609,7 @@ void update_cursor(int x, int y)
 	// outb(0x3D4, 0x0F);
 	// outb(0x3D5, (uint8_t) (pos & 0xFF));
 	// outb(0x3D4, 0x0E);
-	// outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
-    uint16_t pos = y * NUM_COLS + x;		
+	// outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));	
 	outb(0x0F, 0x3D4);						
 	outb((uint8_t) (pos & 0xFF), 0x3D5);
 	outb(0x0E, 0x3D4);						 
