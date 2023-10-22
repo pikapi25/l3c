@@ -47,8 +47,8 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes) {
 	if (NULL == buf || nbytes <= 0) { return 0; }
 
 	reset_kbd_buf();
-    terminal.readkey = 0;
-	while (!terminal.readkey);					/* Wait on the flag */
+    terminal.readkey = 1;
+	while (terminal.readkey);					/* Wait on the flag */
 	/* Read from the keyboard buffer */
 	/* User can only type up to 127 (MAX_CHA_BUF - 1) characters */
 
@@ -59,7 +59,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes) {
 	for (i = 0; i < nbytes && i < MAX_CHA_BUF && terminal.kbd_buf[i] != '\0'; i++) {
 		((char*)buf)[i] = terminal.kbd_buf[i];
 	}
-
+    reset_kbd_buf();
 	return i;
 }
 
