@@ -3,6 +3,7 @@
 #include "lib.h"
 #include "rtc.h"
 #include "terminal.h"
+#include "filesys.h"
 #define PASS 1
 #define FAIL 0
 
@@ -212,6 +213,115 @@ int terminal_test(){
 	t_read = terminal_read(0, buf, read_nbytes);
 	t_write = terminal_write(0, buf, write_nbytes);
 	return PASS;
+}
+
+/* File System Test -- Open
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_Open(){
+	TEST_HEADER;
+
+	uint8_t* file_Nonexistent = "lalala";	
+	if (open_file(file_Nonexistent) == -1 && open_dir(file_Nonexistent) == 0)return PASS;
+	return FAIL;
+}
+
+/* File System Test -- close
+*  try to close fd and return PASS if fd != 0 or 1 
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_close(){
+	TEST_HEADER;
+
+	int32_t fd_default = 0;
+	int32_t fd_normal = 3;
+	if (close_file(fd_default) == -1 && close_file(fd_normal) == 0 && close_file(fd_normal) == -1 && close_dir(fd_normal) == 0)return PASS;
+	return FAIL;
+}
+
+/* File System Test -- write
+*  try to write into file or directory and return PASS if write_file is denied
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_Write(){
+	TEST_HEADER;
+
+	int32_t buf[20] = {1};
+	if (write_file(0,buf,32) == -1 && write_dir(0,buf,32) == -1)return PASS;
+	return FAIL;
+}
+
+/* File System Test -- read of directory
+*  If read of directory is succeeded, it will display file_name on the screen
+*  Inputs: None
+*  Outputs: Showing directory name list
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_Dir_Read(){
+	TEST_HEADER;
+	int i;
+	uint8_t* buf[FILENAME_LEN];
+
+	for(i =0 ; i< FILES_NUM_MAX; i++){
+		if (read_dir_index(0,buf,i) == -1)break;
+		printf(buf);
+		printf("\n");
+	}
+}
+
+/* File System Test -- read of file
+*  
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_File_Read_Small(){
+	TEST_HEADER;
+
+	
+}
+
+/* File System Test -- read of file
+*  
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_File_Read_Exe(){
+	TEST_HEADER;
+
+	
+}
+
+/* File System Test -- read of file
+*  
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_File_Read_Large(){
+	TEST_HEADER;
+
+	int32_t result;
+	uint8_t buf[BLOCK_SIZE];
+	uint8_t* filename = "verylargetextwithverylongname.tx";
+	result = open_file(filename);
+	if (result == -1){printf("file open failed");}
+
+	result = read_file(0,buf,)
 }
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */

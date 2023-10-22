@@ -5,6 +5,10 @@ boot_block_t* boot_block;
 inode_t* inode_head;
 data_block_t* data_block_head;
 
+// here we record the pointer for available pcb entry -1 using global pointer pcb_pointer
+fdt pcb[8];
+int32_t pcb_pointer = 1;
+int dir_loc = 0;
 
 /*
 *   filesys_init
@@ -143,4 +147,121 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length
     }
 
     return num_bytes;
+}
+
+// open_file
+// find the directory entry corresponding to the named file, allocate an unused file descriptor,
+// and set up any data necessary to handle the given type of file (directory,
+// RTC device, or regular file). If the named file does not exist or no descriptors are free, the call returns -1.
+// input: filename
+// output: return 0 on success and -1 on failure
+// side effect: none
+int32_t open_file(const uint8_t* filename){
+    // here we call read_dentry_by_name to test whether the filename is valid and set up any data necessary
+    dentry_t* d;
+    if (read_dentry_by_name(filename,d) == 0){return 0;}
+    return -1;
+}
+
+// close_file
+// close a file by closing its fd
+// input: fd (file descriptor)
+// output: return 0 on success and -1 on failure (trying to close default fd == 0 or 1)
+// side effect: close a fd
+int32_t close_file(int32_t fd){
+    if (fd == 0 || fd == 1)return -1;
+    return 0;
+}
+
+// **read file
+// read nbytes data from the buffer and update file_pos once succeed
+// input: fd --- file descriptor
+//        buf --- buffer offered to read data from
+//        nbytes --- read data byte limit
+// output: return  on success
+// side effect: update file_pos after read is succeeded
+int32_t read_file(int32_t fd, void* buf, int32_t nbytes){
+    // we use cur_fdt to store current file descriptor entry
+    fdt cur_fdt = pcb[fd];
+    uint32_t inode = cur_fdt.inode;
+    uint32_t offset = cur_fdt.file_pos;
+    int32_t result = read_data(inode, offset, buf, nbytes);
+    // since read_data return the bytes copied on success
+    if (result != -1){
+        // we update the file_pos if read call is succeeded
+        pcb[fd].file_pos += result; 
+        return 0;
+    }
+    return -1;
+}
+
+// write file
+// Writes to regular files should always return -1 to indicate failure since the file system is read-only
+// input: fd
+//        buf
+//        nbytes
+// output: -1
+// side effect: none
+int32_t write_file(int32_t fd, const void* buf, int32_t nbytes){
+    return -1;
+}
+
+// open_dir
+// open a directory if the dirname is vaild
+// input: filename -- name of directory going to be opened
+// output: return 0 on success and -1 on failure
+// side effect: none
+int32_t open_dir(const uint8_t* filename){
+    return 0;
+}
+
+// close_dir
+// input: fd
+// output: 0 on success and -1 on failure
+// side effect: fd is closed
+int32_t close_dir(int32_t fd){
+    if (fd == 0 || fd == -1)return -1;
+    return 0;
+}
+
+// // **read_dir
+// // provide current filename
+// // if the initial location is at or beyond the end of the file then return 0
+// // input:   fd
+// //          buf
+// //          nbytes
+// // output: number of bytes read
+// // side effect
+// int32_t read_dir(int32_t fd, void* buf, int32_t nbytes){
+// }
+
+// **read_dir
+// provide filename with index #? 
+// if the initial location is at or beyond the end of the file then return 0
+// input:   fd
+//          buf
+//          nbytes
+// output: number of bytes read
+// side effect
+int32_t read_dir_index(int32_t fd, void* buf, int32_t index){
+    // if beyond the file number range
+    if (index >= boot_block->dir_count){return -1;}
+
+    dentry_t dentry = boot_block->direntries[index];
+    
+    memcpy(buf, &dentry.filename, FILES_NUM_MAX);
+    return strlen((int8_t*)dentry.filename);
+}
+
+// write_dir
+// Writes to regular files should always return -1 to indicate failure since the file system is read-only
+// input: fd
+//        buf
+//        nbytes
+// output: -1
+// input:
+// output:
+// side effect
+int32_t write_dir(int32_t fd, const void* buf, int32_t nbytes){
+    return -1;
 }
