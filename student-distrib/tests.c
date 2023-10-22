@@ -1,7 +1,8 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
-
+#include "rtc.h"
+#include "terminal.h"
 #define PASS 1
 #define FAIL 0
 
@@ -167,6 +168,51 @@ int paging_test4(){
 
 
 /* Checkpoint 2 tests */
+
+/* RTC Test
+ * 
+ * Test and visualize if the rtc_write can correctly set the frequency
+ * Inputs: None
+ * Outputs: PASS
+ * Side Effects: Print the visualization of rtc frequency
+ * Files: rtc.c/.h
+*/
+int rtc_write_test(){
+	TEST_HEADER;
+	int freq, rate, count, test;
+	for (freq = 2, rate = 0; freq <= 1024; freq <<= 1, rate++) {
+		printf("%d ", freq);
+		rtc_write(0, &freq, 4);
+		for (count = 0; count < freq; count++) {
+			rtc_read(0, NULL, 0);
+			printf("*");
+		}
+		printf("\n");
+	}
+
+	return PASS;
+}
+
+/* Terminal Test
+ * 
+ * Try to repeatedly read from and write to terminal
+ * Inputs: none
+ * Output: PASS
+ * Side Effects: None
+ * Files: terminal.c/h, keyboard.c/h
+*/
+int terminal_test(){
+	TEST_HEADER;
+
+	int32_t t_read, t_write;
+	int32_t read_nbytes, write_nbytes;
+	uint8_t buf[128];
+	read_nbytes = 128;
+	write_nbytes = 128;
+	t_read = terminal_read(0, buf, read_nbytes);
+	t_write = terminal_write(0, buf, write_nbytes);
+	return PASS;
+}
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -180,5 +226,8 @@ void launch_tests(){
 	// TEST_OUTPUT("paging test2", paging_test2());
 	// TEST_OUTPUT("paging test3", paging_test3());
 	// TEST_OUTPUT("paging test4", paging_test4());
+	// TEST_OUTPUT("rtc_driver_test", rtc_write_test());
+	clear_redraw();
+	TEST_OUTPUT("terminal_test", terminal_test());
 }
 

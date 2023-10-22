@@ -155,9 +155,14 @@ void keyboard_handler(void) {
 			} 
 			else if (ascii == '\n') {
 				userkey_putc(ascii);
-				terminal->kbd_buf[terminal->kbd_buf_count] = '\n';
-				terminal->kbd_buf_count++;
-				terminal->readkey = 1;							/* Set the "endline" flag */
+				if (terminal->readkey){
+					terminal->kbd_buf[terminal->kbd_buf_count] = '\n';
+					terminal->kbd_buf_count++;
+					terminal->readkey = 0;							/* Set the "endline" flag */
+				}else{
+					reset_kbd_buf();
+				}
+				
 			} 
 			else if (ascii == '\b') {
 				if (terminal->kbd_buf_count > 0) {
