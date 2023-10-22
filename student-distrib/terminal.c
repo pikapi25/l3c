@@ -17,8 +17,7 @@ void terminal_init() {
     memset(terminal.kbd_buf, 0, MAX_CHA_BUF);   //not sure
     terminal.cursor_x = 0;  //the location of the cursor at the beginning
     terminal.cursor_y = 0;
-    enable_cursor(0, 0);					
-    //printf("init terminal");					
+    // enable_cursor(0, 0);							
     update_cursor(terminal.cursor_x, terminal.cursor_y);	//draw the initial cursor position
 }
 
@@ -42,21 +41,13 @@ terminal_t* get_terminal(){
 }
 
 /* terminal_read
- * Read from terminal
- * INPUT: fd     -- file descriptor, ignored
- *        buf    -- buffer to read into
- *        nbytes -- number of bytes to read
- * RETURN VALUE: number of bytes read
- * OUTPUT: change the contents of given buffer
- * SIDE EFFECT: change the contents of given buffer
  */
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes) {
 	int32_t i = 0;
 	if (NULL == buf || nbytes <= 0) { return 0; }
 
-	memset(terminal.kbd_buf, 0, MAX_CHA_BUF);	/* Clear the buffer */
-	terminal.kbd_buf_count = 0;					/* Reset the buffer count */
-	terminal.readkey = 0;						/* Reset the "endline" flag */
+	reset_kbd_buf();
+    terminal.readkey = 0;
 	while (!terminal.readkey);					/* Wait on the flag */
 	/* Read from the keyboard buffer */
 	/* User can only type up to 127 (MAX_CHA_BUF - 1) characters */
@@ -73,18 +64,11 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes) {
 }
 
 /* terminal_write
- * Write bytes in the given buffer to screen
- * INPUT: fd     -- file descriptor, ignored
- *        buf    -- buffer to write from
- *        nbytes -- number of bytes to put on the screen
- * RETURN VALUE: number of bytes to put on the screen
- * OUTPUT: change the contents on the screen
- * SIDE EFFECT: change the contents on the screen
  */
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes) {
 	int i = 0;
 
-	if (NULL == buf || nbytes == 0) { return 0; }
+	if (NULL == buf || nbytes == 0) { return -1; }
 
 	// /* Write to the screen */
 	// /* See above for loop-breaking conditions */
@@ -111,10 +95,9 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes) {
  * Side effect: Clear the screen
  */
 void clear_redraw() {
-    int32_t i;
+    int i;
     //clear video memory by setting all to ' ' and ATTRIB
-    for( i = 0; i < NUM_ROWS*NUM_COLS; i++ )
-    {
+    for( i = 0; i < NUM_ROWS*NUM_COLS; i++ ){
         *(uint8_t *)(VIDEO_MEM_LOC + (i << 1)) = ' ';
         *(uint8_t *)(VIDEO_MEM_LOC + (i << 1) + 1) = ATTRIB;
     }
