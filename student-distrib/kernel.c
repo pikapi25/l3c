@@ -140,6 +140,10 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
+    module_t* module_addr = (module_t*) mbi->mods_addr;
+    uint32_t* file_system_start_addr = (uint32_t*) (module_addr->mod_start);
+    filesys_init(file_system_start_addr);
+
     //init the IDT
     idt_init();
 
