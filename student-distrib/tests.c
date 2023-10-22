@@ -279,50 +279,92 @@ int File_System_Test_Dir_Read(){
 	}
 }
 
-/* File System Test -- read of file
+/* File System Test -- read small file
 *  
 *  Inputs: None
 *  Outputs: PASS on success and FAIL on Failure
 *  Side Effects: None
 *  Files: filesystem_module.c 
 */
-int File_System_Test_File_Read_Small(){
+int File_System_Test_Read_Small(){
 	TEST_HEADER;
-
-	
-}
-
-/* File System Test -- read of file
-*  
-*  Inputs: None
-*  Outputs: PASS on success and FAIL on Failure
-*  Side Effects: None
-*  Files: filesystem_module.c 
-*/
-int File_System_Test_File_Read_Exe(){
-	TEST_HEADER;
-
-	
-}
-
-/* File System Test -- read of file
-*  
-*  Inputs: None
-*  Outputs: PASS on success and FAIL on Failure
-*  Side Effects: None
-*  Files: filesystem_module.c 
-*/
-int File_System_Test_File_Read_Large(){
-	TEST_HEADER;
-
+	dentry_t test;
 	int32_t result;
-	uint8_t buf[BLOCK_SIZE];
-	uint8_t* filename = "verylargetextwithverylongname.tx";
-	result = open_file(filename);
-	if (result == -1){printf("file open failed");}
+	char file_name[] = "frame0.txt";
+	result = read_dentry_by_name((const uint8_t*) file_name, &test);
 
-	result = read_file(0,buf,)
+	if (result == -1) {
+		return FAIL;
+	} else {
+		return PASS;
+	}
+	
 }
+
+/* File System Test -- read executable file
+*  
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_Read_Exe(){
+	TEST_HEADER;
+	dentry_t test;
+	int32_t result;
+	char file_name[] = "grep";
+	result = read_dentry_by_name((const uint8_t*) file_name, &test);
+
+	if (result == -1) {
+		return FAIL;
+	} else {
+		return PASS;
+	}
+
+	
+}
+
+/* File System Test -- read large file
+*  
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_Read_Large(){
+	TEST_HEADER;
+	dentry_t test;
+	int32_t result;
+	char file_name[] = "frame0.txt";
+	result = read_dentry_by_name((const uint8_t*) file_name, &test);
+
+	if (result == -1) {
+		return FAIL;
+	} else {
+		return PASS;
+	}
+}
+
+/* File System Test -- read file data
+*  
+*  Inputs: uint8_t* filename -- the file to be read
+*  Outputs: None
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+void File_System_Test_Read_Data(uint8_t* filename){
+	TEST_HEADER;
+	dentry_t test;
+	char buf[40000] = {'\0'};
+	int i;
+	int32_t bytes_read;
+	read_dentry_by_name(filename,&test);
+	bytes_read = read_data(test.inode_num,0,(uint8_t*)buf,100000);
+	for(i=0; i <bytes_read; i++)
+		putc(buf[i]);
+	return;
+}
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */

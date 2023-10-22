@@ -17,9 +17,9 @@ int dir_loc = 0;
 *   Outputs: none
 *   Side effects: none
 */
-void filesys_init(uint32_t* fs_start)
+void filesys_init(uint32_t* fs_addr)
 {
-    boot_block=(boot_block_t*)fs_start;
+    boot_block=(boot_block_t*)fs_addr;
     inode_head=(inode_t*)(boot_block+1);
     data_block_head=(data_block_t*)(boot_block + boot_block->inode_count);
 }

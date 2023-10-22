@@ -50,7 +50,7 @@ typedef struct fdt{
     uint32_t flag;
 }fdt;
 
-extern void filesys_init(uint32_t* fs_start);
+extern void filesys_init(uint32_t* fs_addr);
 
 int32_t read_dentry_by_name(const uint8_t* fname, dentry_t* dentry);
 int32_t read_dentry_by_index(uint32_t index, dentry_t* dentry);
