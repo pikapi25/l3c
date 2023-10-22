@@ -12,6 +12,7 @@
 #include "rtc.h"
 #include "keyboard.h"
 #include "idt.h"
+#include "filesys.h"
 
 #define RUN_TESTS
 

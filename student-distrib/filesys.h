@@ -3,10 +3,10 @@
 
 #include "types.h"
 
-#define FILENAME_LEN 32;        //name is up to 32 characters
-#define FILES_NUM_MAX 63;       //the file system can hold up to 63 files
-#define DATA_BLOCK_COUNT_MAX 1023;        //(4096-4)/4=1023   4096->4kB per block
-#define BLOCK_SIZE 4096;
+#define FILENAME_LEN 32        //name is up to 32 characters
+#define FILES_NUM_MAX 63       //the file system can hold up to 63 files
+#define DATA_BLOCK_COUNT_MAX 1023        //(4096-4)/4=1023   4096->4kB per block
+#define BLOCK_SIZE 4096
 
 //data structures for the file system
 typedef struct dentry
@@ -54,7 +54,7 @@ extern void filesys_init(uint32_t* fs_addr);
 
 int32_t read_dentry_by_name(const uint8_t* fname, dentry_t* dentry);
 int32_t read_dentry_by_index(uint32_t index, dentry_t* dentry);
-int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
+int32_t read_data(uint32_t inode_index, uint32_t offset, uint8_t* buf, uint32_t length);
 
 // define open, close, read and write functions for file and directory
 int32_t open_file(const uint8_t* filename);

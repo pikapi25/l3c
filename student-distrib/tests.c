@@ -168,7 +168,7 @@ int paging_test4(){
 }
 
 
-/* Checkpoint 2 tests */
+/* ------------------------ Checkpoint 2 tests --------------------------------*/
 
 /* RTC Test
  * 
@@ -180,7 +180,7 @@ int paging_test4(){
 */
 int rtc_write_test(){
 	TEST_HEADER;
-	int freq, rate, count, test;
+	int freq, rate, count;
 	for (freq = 2, rate = 0; freq <= 1024; freq <<= 1, rate++) {
 		printf("%d ", freq);
 		rtc_write(0, &freq, 4);
@@ -225,15 +225,21 @@ int terminal_test(){
 int File_System_Test_Read_Small(){
 	TEST_HEADER;
 	dentry_t test;
-	int32_t result;
-	char file_name[] = "frame0.txt";
-	result = read_dentry_by_name((const uint8_t*) file_name, &test);
-
-	if (result == -1) {
+	char filename[] = "frame0.txt";
+	printf("READ SMALL FILE TEST");
+	printf(" \n");
+	if(read_dentry_by_name((uint8_t*)filename,&test) == -1){
+		printf("A non-existent file!");
 		return FAIL;
-	} else {
-		return PASS;
+	}else{
+		printf("The file name is %s.\n",test.filename);
 	}
+
+	if(strncmp((int8_t*)test.filename,(int8_t*)filename,FILENAME_LEN)!=0){
+		return FAIL;
+	}
+	
+	return PASS;
 	
 }
 
@@ -247,17 +253,21 @@ int File_System_Test_Read_Small(){
 int File_System_Test_Read_Exe(){
 	TEST_HEADER;
 	dentry_t test;
-	int32_t result;
-	char file_name[] = "grep";
-	result = read_dentry_by_name((const uint8_t*) file_name, &test);
-
-	if (result == -1) {
+	char filename[] = "grep";
+	printf("READ EXECUTABLE FILE TEST");
+	printf(" \n");
+	if(read_dentry_by_name((uint8_t*)filename,&test) == -1){
+		printf("A non-existent file!");
 		return FAIL;
-	} else {
-		return PASS;
+	}else{
+		printf("The file name is %s.\n",test.filename);
 	}
 
+	if(strncmp((int8_t*)test.filename,(int8_t*)filename,FILENAME_LEN)!=0){
+		return FAIL;
+	}
 	
+	return PASS;
 }
 
 /* File System Test -- read large file
@@ -270,15 +280,21 @@ int File_System_Test_Read_Exe(){
 int File_System_Test_Read_Large(){
 	TEST_HEADER;
 	dentry_t test;
-	int32_t result;
-	char file_name[] = "frame0.txt";
-	result = read_dentry_by_name((const uint8_t*) file_name, &test);
-
-	if (result == -1) {
+	char filename[] = "verylargetextwithverylongname.txt";
+	printf("READ LARGE FILE TEST");
+	printf(" \n");
+	if(read_dentry_by_name((uint8_t*)filename,&test) == -1){
+		printf("A non-existent file!");
 		return FAIL;
-	} else {
-		return PASS;
+	}else{
+		printf("The file name is %s.\n",test.filename);
 	}
+
+	if(strncmp((int8_t*)test.filename,(int8_t*)filename,FILENAME_LEN)!=0){
+		return FAIL;
+	}
+	
+	return PASS;
 }
 
 /* File System Test -- read file data
@@ -291,12 +307,15 @@ int File_System_Test_Read_Large(){
 int File_System_Test_Read_Data(uint8_t* filename){
 	TEST_HEADER;
 	dentry_t test;
-	char buf[40000] = {'\0'};
+	uint8_t buf[1000];
 	int i;
 	int32_t bytes_read;
 	read_dentry_by_name(filename,&test);
-	bytes_read = read_data(test.inode_num,0,(uint8_t*)buf,100000);
-	for(i=0; i <bytes_read; i++)
+	printf(test.filename);
+	printf("\n");
+	bytes_read = read_data(test.inode_num,0,buf,1000);
+	printf("bytes_read:%d\n",bytes_read);
+	for(i=0; i<bytes_read; i++)
 		putc(buf[i]);
 	return PASS;
 }
@@ -311,8 +330,8 @@ int File_System_Test_Read_Data(uint8_t* filename){
 int File_System_Test_Open(){
 	TEST_HEADER;
 
-	uint8_t* file_Nonexistent = "lalala";	
-	if (open_file(file_Nonexistent) == -1 && open_dir(file_Nonexistent) == 0)return PASS;
+	char file_Nonexistent[] = "lalala";	
+	if (open_file((const uint8_t*)file_Nonexistent) == -1 && open_dir((const uint8_t*)file_Nonexistent) == 0)return PASS;
 	return FAIL;
 }
 
@@ -361,9 +380,10 @@ int File_System_Test_Dir_Read(){
 
 	for(i =0 ; i< FILES_NUM_MAX; i++){
 		if (read_dir_index(0,buf,i) == -1)break;
-		printf(buf);
+		printf((int8_t*)buf);
 		printf("\n");
 	}
+	return PASS;
 }
 
 
@@ -371,6 +391,12 @@ int File_System_Test_Dir_Read(){
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
+void sleep(uint32_t ticks) {
+	int32_t i;
+	for (i = 0; i < ticks; i++) {
+		rtc_read(0, NULL, 0);
+	}
+}
 
 /* Test suite entry point */
 void launch_tests(){
@@ -386,13 +412,16 @@ void launch_tests(){
 	/*CHECKPOINT2 TESTS*/
 	// clear_redraw();
 	// TEST_OUTPUT("terminal_test", terminal_test());
-	TEST_OUTPUT("File_System_Test_Read_Small", File_System_Test_Read_Small());
+	//clear_redraw();
+	// TEST_OUTPUT("File_System_Test_Read_Small", File_System_Test_Read_Small());
+	// sleep(5);
+	// clear_redraw();
+	// TEST_OUTPUT("File_System_Test_Read_Large", File_System_Test_Read_Large());
+	// sleep(5);
+	// clear_redraw();
+	// TEST_OUTPUT("File_System_Test_Read_Exe", File_System_Test_Read_Exe());
+	// sleep(5);
 	clear_redraw();
-	TEST_OUTPUT("File_System_Test_Read_Large", File_System_Test_Read_Large());
-	clear_redraw();
-	TEST_OUTPUT("File_System_Test_Read_Exe", File_System_Test_Read_Exe());
-	clear_redraw();
-	TEST_OUTPUT("File_System_Test_Read_Data", File_System_Test_Read_Data("frame0.txt"));
-	clear_redraw();
+	TEST_OUTPUT("File_System_Test_Read_Data", File_System_Test_Read_Data((uint8_t*)"frame0.txt"));
 }
 
