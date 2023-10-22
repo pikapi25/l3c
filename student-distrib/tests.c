@@ -215,70 +215,6 @@ int terminal_test(){
 	return PASS;
 }
 
-/* File System Test -- Open
-*  Inputs: None
-*  Outputs: PASS on success and FAIL on Failure
-*  Side Effects: None
-*  Files: filesystem_module.c 
-*/
-int File_System_Test_Open(){
-	TEST_HEADER;
-
-	uint8_t* file_Nonexistent = "lalala";	
-	if (open_file(file_Nonexistent) == -1 && open_dir(file_Nonexistent) == 0)return PASS;
-	return FAIL;
-}
-
-/* File System Test -- close
-*  try to close fd and return PASS if fd != 0 or 1 
-*  Inputs: None
-*  Outputs: PASS on success and FAIL on Failure
-*  Side Effects: None
-*  Files: filesystem_module.c 
-*/
-int File_System_Test_close(){
-	TEST_HEADER;
-
-	int32_t fd_default = 0;
-	int32_t fd_normal = 3;
-	if (close_file(fd_default) == -1 && close_file(fd_normal) == 0 && close_file(fd_normal) == -1 && close_dir(fd_normal) == 0)return PASS;
-	return FAIL;
-}
-
-/* File System Test -- write
-*  try to write into file or directory and return PASS if write_file is denied
-*  Inputs: None
-*  Outputs: PASS on success and FAIL on Failure
-*  Side Effects: None
-*  Files: filesystem_module.c 
-*/
-int File_System_Test_Write(){
-	TEST_HEADER;
-
-	int32_t buf[20] = {1};
-	if (write_file(0,buf,32) == -1 && write_dir(0,buf,32) == -1)return PASS;
-	return FAIL;
-}
-
-/* File System Test -- read of directory
-*  If read of directory is succeeded, it will display file_name on the screen
-*  Inputs: None
-*  Outputs: Showing directory name list
-*  Side Effects: None
-*  Files: filesystem_module.c 
-*/
-int File_System_Test_Dir_Read(){
-	TEST_HEADER;
-	int i;
-	uint8_t* buf[FILENAME_LEN];
-
-	for(i =0 ; i< FILES_NUM_MAX; i++){
-		if (read_dir_index(0,buf,i) == -1)break;
-		printf(buf);
-		printf("\n");
-	}
-}
-
 /* File System Test -- read small file
 *  
 *  Inputs: None
@@ -352,7 +288,7 @@ int File_System_Test_Read_Large(){
 *  Side Effects: None
 *  Files: filesystem_module.c 
 */
-void File_System_Test_Read_Data(uint8_t* filename){
+int File_System_Test_Read_Data(uint8_t* filename){
 	TEST_HEADER;
 	dentry_t test;
 	char buf[40000] = {'\0'};
@@ -362,8 +298,74 @@ void File_System_Test_Read_Data(uint8_t* filename){
 	bytes_read = read_data(test.inode_num,0,(uint8_t*)buf,100000);
 	for(i=0; i <bytes_read; i++)
 		putc(buf[i]);
-	return;
+	return PASS;
 }
+
+
+/* File System Test -- Open
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_Open(){
+	TEST_HEADER;
+
+	uint8_t* file_Nonexistent = "lalala";	
+	if (open_file(file_Nonexistent) == -1 && open_dir(file_Nonexistent) == 0)return PASS;
+	return FAIL;
+}
+
+/* File System Test -- close
+*  try to close fd and return PASS if fd != 0 or 1 
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_close(){
+	TEST_HEADER;
+
+	int32_t fd_default = 0;
+	int32_t fd_normal = 3;
+	if (close_file(fd_default) == -1 && close_file(fd_normal) == 0 && close_file(fd_normal) == -1 && close_dir(fd_normal) == 0)return PASS;
+	return FAIL;
+}
+
+/* File System Test -- write
+*  try to write into file or directory and return PASS if write_file is denied
+*  Inputs: None
+*  Outputs: PASS on success and FAIL on Failure
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_Write(){
+	TEST_HEADER;
+
+	int32_t buf[20] = {1};
+	if (write_file(0,buf,32) == -1 && write_dir(0,buf,32) == -1)return PASS;
+	return FAIL;
+}
+
+/* File System Test -- read of directory
+*  If read of directory is succeeded, it will display file_name on the screen
+*  Inputs: None
+*  Outputs: Showing directory name list
+*  Side Effects: None
+*  Files: filesystem_module.c 
+*/
+int File_System_Test_Dir_Read(){
+	TEST_HEADER;
+	int i;
+	uint8_t* buf[FILENAME_LEN];
+
+	for(i =0 ; i< FILES_NUM_MAX; i++){
+		if (read_dir_index(0,buf,i) == -1)break;
+		printf(buf);
+		printf("\n");
+	}
+}
+
 
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -372,6 +374,7 @@ void File_System_Test_Read_Data(uint8_t* filename){
 
 /* Test suite entry point */
 void launch_tests(){
+	/*CHECKPOINT1 TESTS*/
 	// TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("de_test", de_test());
 	// TEST_OUTPUT("paging test1", paging_test1());
@@ -379,7 +382,17 @@ void launch_tests(){
 	// TEST_OUTPUT("paging test3", paging_test3());
 	// TEST_OUTPUT("paging test4", paging_test4());
 	// TEST_OUTPUT("rtc_driver_test", rtc_write_test());
+
+	/*CHECKPOINT2 TESTS*/
+	// clear_redraw();
+	// TEST_OUTPUT("terminal_test", terminal_test());
+	TEST_OUTPUT("File_System_Test_Read_Small", File_System_Test_Read_Small());
 	clear_redraw();
-	TEST_OUTPUT("terminal_test", terminal_test());
+	TEST_OUTPUT("File_System_Test_Read_Large", File_System_Test_Read_Large());
+	clear_redraw();
+	TEST_OUTPUT("File_System_Test_Read_Exe", File_System_Test_Read_Exe());
+	clear_redraw();
+	TEST_OUTPUT("File_System_Test_Read_Data", File_System_Test_Read_Data("frame0.txt"));
+	clear_redraw();
 }
 
