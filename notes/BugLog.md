@@ -28,3 +28,9 @@ Solution:
 is affected by other interrupts, so we add a critical section in ``rtc_init``. And now it work!
 
 Time to fix: one and a half hours
+
+## CHECKPOINT 2
+
+--- problem 1 ---
+
+Problem Description:
