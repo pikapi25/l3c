@@ -65,7 +65,7 @@ int32_t write_file(int32_t fd, const void* buf, int32_t nbytes);
 int32_t open_dir(const uint8_t* filename);
 int32_t close_dir(int32_t fd);
 // not used in ck2 ** being updated in following cks
-// int32_t read_dir(int32_t fd, void* buf, int32_t nbytes);
-int32_t read_dir_index(int32_t fd, void* buf, int32_t index);
+int32_t read_dir(int32_t fd, void* buf, int32_t nbytes);
+// int32_t read_dir_index(int32_t fd, void* buf, void* buf2, int32_t index);
 int32_t write_dir(int32_t fd, const void* buf, int32_t nbytes);
 #endif

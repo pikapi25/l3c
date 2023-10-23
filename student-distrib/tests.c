@@ -229,29 +229,56 @@ int terminal_test(){
 	return PASS;
 }
 
+
+/* File System Test -- helper function for printing data of the file
+*  
+*  Inputs: uint8_t* filename -- the file to be read
+*		   uint32_t offset -- The starting offset within the file to begin reading
+*		   uint32_t length -- The number of bytes to read from the file
+*  Outputs: None
+*  Side Effects: None
+*  Files: filesys.c 
+*/
+void Filesys_Test_Read_Data(uint8_t* filename, uint32_t offset, uint32_t length){
+	dentry_t test;
+	uint8_t buf[10000];
+	int i;
+	int32_t bytes_read;
+	read_dentry_by_name(filename,&test);
+	//printf(" \n");
+	bytes_read = read_data(test.inode_num,offset,buf,length);
+	printf(" Bytes read:%d\n",bytes_read);
+	for(i=0; i<bytes_read; i++)
+		putc(buf[i]);
+	return;
+}
+
+
 /* File System Test -- read small file
 *  
 *  Inputs: None
 *  Outputs: PASS on success and FAIL on Failure
 *  Side Effects: None
-*  Files: filesystem_module.c 
+*  Files: filesys.c 
 */
-int File_System_Test_Read_Small(){
+int Filesys_Test_Read_Small(){
 	TEST_HEADER;
 	dentry_t test;
 	char filename[] = "frame0.txt";
-	printf("READ SMALL FILE TEST");
-	printf(" \n");
+	printf("READ SMALL FILE TEST\n");
 	if(read_dentry_by_name((uint8_t*)filename,&test) == -1){
-		printf("A non-existent file!");
+		printf("A non-existent file!\n");
 		return FAIL;
 	}else{
-		printf("The file name is %s.\n",test.filename);
+		printf("Reading file: %s\n",test.filename);
 	}
 
 	if(strncmp((int8_t*)test.filename,(int8_t*)filename,FILENAME_LEN)!=0){
 		return FAIL;
 	}
+
+	Filesys_Test_Read_Data((uint8_t*)filename,0,1000);
+	printf(" \n");
 	
 	return PASS;
 	
@@ -262,24 +289,26 @@ int File_System_Test_Read_Small(){
 *  Inputs: None
 *  Outputs: PASS on success and FAIL on Failure
 *  Side Effects: None
-*  Files: filesystem_module.c 
+*  Files: filesys.c 
 */
-int File_System_Test_Read_Exe(){
+int Filesys_Test_Read_Exe(){
 	TEST_HEADER;
 	dentry_t test;
 	char filename[] = "grep";
-	printf("READ EXECUTABLE FILE TEST");
-	printf(" \n");
+	printf("READ EXECUTABLE FILE TEST\n");
 	if(read_dentry_by_name((uint8_t*)filename,&test) == -1){
-		printf("A non-existent file!");
+		printf("A non-existent file!\n");
 		return FAIL;
 	}else{
-		printf("The file name is %s.\n",test.filename);
+		printf("Reading file: %s\n",test.filename);
 	}
 
 	if(strncmp((int8_t*)test.filename,(int8_t*)filename,FILENAME_LEN)!=0){
 		return FAIL;
 	}
+
+	Filesys_Test_Read_Data((uint8_t*)filename,0,10000);
+	printf(" \n");
 	
 	return PASS;
 }
@@ -289,48 +318,32 @@ int File_System_Test_Read_Exe(){
 *  Inputs: None
 *  Outputs: PASS on success and FAIL on Failure
 *  Side Effects: None
-*  Files: filesystem_module.c 
+*  Files: filesys.c 
 */
-int File_System_Test_Read_Large(){
+int Filesys_Test_Read_Large(){
 	TEST_HEADER;
 	dentry_t test;
-	char filename[] = "verylargetextwithverylongname.txt";
-	printf("READ LARGE FILE TEST");
-	printf(" \n");
+	char filename[] = "verylargetextwithverylongname.tx";
+	printf("READ LARGE FILE TEST\n");
 	if(read_dentry_by_name((uint8_t*)filename,&test) == -1){
-		printf("A non-existent file!");
+		printf("A non-existent file!\n");
 		return FAIL;
 	}else{
-		printf("The file name is %s.\n",test.filename);
+		printf("Reading file: %s\n",test.filename);
 	}
 
 	if(strncmp((int8_t*)test.filename,(int8_t*)filename,FILENAME_LEN)!=0){
 		return FAIL;
 	}
-	
-	return PASS;
-}
 
-/* File System Test -- read file data
-*  
-*  Inputs: uint8_t* filename -- the file to be read
-*  Outputs: None
-*  Side Effects: None
-*  Files: filesystem_module.c 
-*/
-int File_System_Test_Read_Data(uint8_t* filename){
-	TEST_HEADER;
-	dentry_t test;
-	uint8_t buf[1000];
-	int i;
-	int32_t bytes_read;
-	read_dentry_by_name(filename,&test);
-	printf(test.filename);
-	printf("\n");
-	bytes_read = read_data(test.inode_num,0,buf,1000);
-	printf("bytes_read:%d\n",bytes_read);
-	for(i=0; i<bytes_read; i++)
-		putc(buf[i]);
+	/*read some parts of the file*/
+	Filesys_Test_Read_Data((uint8_t*)filename,0,1500);
+
+	/*read the whole file, but the screen doesn't look good*/
+	// Filesys_Test_Read_Data((uint8_t*)filename,0,15000);
+
+	printf(" \n");
+	
 	return PASS;
 }
 
@@ -339,11 +352,12 @@ int File_System_Test_Read_Data(uint8_t* filename){
 *  Inputs: None
 *  Outputs: PASS on success and FAIL on Failure
 *  Side Effects: None
-*  Files: filesystem_module.c 
+*  Files: filesys.c 
 */
 int File_System_Test_Open(){
 	TEST_HEADER;
 
+	printf("try to open nonexistent file/directory lalala\n");
 	char file_Nonexistent[] = "lalala";	
 	if (open_file((const uint8_t*)file_Nonexistent) == -1 && open_dir((const uint8_t*)file_Nonexistent) == 0)return PASS;
 	return FAIL;
@@ -354,14 +368,14 @@ int File_System_Test_Open(){
 *  Inputs: None
 *  Outputs: PASS on success and FAIL on Failure
 *  Side Effects: None
-*  Files: filesystem_module.c 
+*  Files: filesys.c 
 */
 int File_System_Test_close(){
 	TEST_HEADER;
 
 	int32_t fd_default = 0;
 	int32_t fd_normal = 3;
-	if (close_file(fd_default) == -1 && close_file(fd_normal) == 0 && close_file(fd_normal) == -1 && close_dir(fd_normal) == 0)return PASS;
+	if (close_file(fd_default) == -1 && close_file(fd_normal) == 0 && close_dir(fd_default) == -1 && close_dir(fd_normal) == 0)return PASS;
 	return FAIL;
 }
 
@@ -370,12 +384,13 @@ int File_System_Test_close(){
 *  Inputs: None
 *  Outputs: PASS on success and FAIL on Failure
 *  Side Effects: None
-*  Files: filesystem_module.c 
+*  Files: filesys.c 
 */
 int File_System_Test_Write(){
 	TEST_HEADER;
 
 	int32_t buf[20] = {1};
+	// since it's read-only, both write functions shall return -1
 	if (write_file(0,buf,32) == -1 && write_dir(0,buf,32) == -1)return PASS;
 	return FAIL;
 }
@@ -385,20 +400,20 @@ int File_System_Test_Write(){
 *  Inputs: None
 *  Outputs: Showing directory name list
 *  Side Effects: None
-*  Files: filesystem_module.c 
+*  Files: filesys.c 
 */
 int File_System_Test_Dir_Read(){
 	TEST_HEADER;
+	dentry_t dentry;
 	int i;
-	uint8_t* buf[FILENAME_LEN];
 
-	for(i =0 ; i< FILES_NUM_MAX; i++){
-		if (read_dir_index(0,buf,i) == -1)break;
-		printf((int8_t*)buf);
-		printf("\n");
+	for (i=0;i<FILES_NUM_MAX;i++){
+		if (read_dentry_by_index(i,&dentry)==-1){break;}
+		printf("filename:%s  \n",dentry.filename);
 	}
 	return PASS;
 }
+
 
 void ckpt2_print_message(){
 	clear_redraw();
@@ -455,18 +470,22 @@ void launch_tests(){
 	/*CHECKPOINT2 TESTS*/
 	// clear_redraw();
 	// TEST_OUTPUT("terminal_test", terminal_test());
-	//clear_redraw();
-	// TEST_OUTPUT("File_System_Test_Read_Small", File_System_Test_Read_Small());
+	// TEST_OUTPUT("File_System_Test_Open",File_System_Test_Open());
+	// TEST_OUTPUT("File_System_Test_Write",File_System_Test_Write());
+	// TEST_OUTPUT("File_System_Test_close",File_System_Test_close());
+	// clear_redraw();
+	// TEST_OUTPUT("File_System_Test_Dir_Read",File_System_Test_Dir_Read());
+	// clear_redraw();
+	// TEST_OUTPUT("Filesys_Test_Read_Small", Filesys_Test_Read_Small());
+	// sleep(5);
+	clear_redraw();
+	TEST_OUTPUT("Filesys_Test_Read_Large", Filesys_Test_Read_Large());
 	// sleep(5);
 	// clear_redraw();
-	// TEST_OUTPUT("File_System_Test_Read_Large", File_System_Test_Read_Large());
+	// TEST_OUTPUT("Filesys_Test_Read_Exe", Filesys_Test_Read_Exe());
 	// sleep(5);
 	// clear_redraw();
-	// TEST_OUTPUT("File_System_Test_Read_Exe", File_System_Test_Read_Exe());
-	// sleep(5);
-	// clear_redraw();
-	// TEST_OUTPUT("File_System_Test_Read_Data", File_System_Test_Read_Data((uint8_t*)"frame0.txt"));
-	ckpt2_test();
+	// ckpt2_test();
 	//rtc_write_test();
-	printt("Checkpoint 2 Test Finished! Well Done! \n");
+	// printt("Checkpoint 2 Test Finished! Well Done! \n");
 }

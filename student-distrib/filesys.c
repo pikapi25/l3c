@@ -47,6 +47,7 @@ int32_t read_dentry_by_index(uint32_t index, dentry_t* dentry)
 
     /*fill in the dentry block*/
     strncpy((int8_t*)dentry->filename, (int8_t*)from_dentry->filename, FILENAME_LEN);
+    // strcpy((int8_t*)dentry->filename, (int8_t*)from_dentry->filename);
     dentry->filetype = from_dentry->filetype;
     dentry->inode_num = from_dentry->inode_num;
 
@@ -313,9 +314,9 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length
 // side effect: none
 int32_t open_file(const uint8_t* filename){
     // here we call read_dentry_by_name to test whether the filename is valid and set up any data necessary
-    dentry_t* d;
-    if (read_dentry_by_name(filename,d) == 0){return 0;}
-    return -1;
+    dentry_t d;
+    if (read_dentry_by_name(filename,&d) == -1){return -1;}
+    return 0;
 }
 
 // close_file
@@ -379,34 +380,28 @@ int32_t close_dir(int32_t fd){
     return 0;
 }
 
-// // **read_dir
-// // provide current filename
-// // if the initial location is at or beyond the end of the file then return 0
-// // input:   fd
-// //          buf
-// //          nbytes
-// // output: number of bytes read
-// // side effect
-// int32_t read_dir(int32_t fd, void* buf, int32_t nbytes){
-// }
-
-// **read_dir
-// provide filename with index #? 
+// --------------please do not use, under construction-----------
+// read_dir
+// provide current filename
 // if the initial location is at or beyond the end of the file then return 0
 // input:   fd
 //          buf
 //          nbytes
 // output: number of bytes read
 // side effect
-int32_t read_dir_index(int32_t fd, void* buf, int32_t index){
-    // if beyond the file number range
-    if (index >= boot_block->dir_count){return -1;}
+int32_t read_dir(int32_t fd, void* buf, int32_t nbytes){
+    // dentry_t dentry;
+	// int i;
 
-    dentry_t dentry = boot_block->direntries[index];
-    
-    memcpy(buf, &dentry.filename, FILES_NUM_MAX);
-    return strlen((int8_t*)dentry.filename);
+	// for (i=0;i<FILES_NUM_MAX;i++){
+	// 	if (read_dentry_by_index(i,&dentry)==-1){return 0;}
+	// 	memcpy(&dentry.filename,buf,FILENAME_LEN);
+	// }
+    // return strlen((const int8_t)buf);
+    return 0;
 }
+
+
 
 // write_dir
 // Writes to regular files should always return -1 to indicate failure since the file system is read-only
