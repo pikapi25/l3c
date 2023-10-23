@@ -33,4 +33,8 @@ Time to fix: one and a half hours
 
 --- problem 1 ---
 
-Problem Description:
+Problem Description: When keyboard reads more than 128 characters(buffer overflow), must enter 3 'ENTER's to continue typing.
+
+Solution:  
+>   - It turns out to be, the buffer is only cleaned in terminal_read, so when no body is reading, the buffer can't be cleaned automatically.  
+>   - Therefore, we add an ``if`` in keyboard dealing with '\n'. If no one is reading, clean the buffer when read '\n'; If terminal is reading, just put '\n' into buffer and wait for terminal to clean the buffer.

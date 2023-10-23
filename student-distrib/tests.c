@@ -19,7 +19,20 @@ static inline void assertion_failure(){
 	asm volatile("int $15");
 }
 
+void sleep(uint32_t ticks) {
+	int32_t i;
+	for (i = 0; i < ticks; i++) {
+		rtc_read(0, NULL, 0);
+	}
+}
 
+void my_test_output(int func){
+	if(func){
+		printt("\n[TEST] Result = PASS\n");
+	}else{
+		printt("\n[TEST] Result = FAIL\n");
+	}
+}
 /* Checkpoint 1 tests */
 
 /* IDT Test - Example
@@ -189,7 +202,7 @@ void wait_for_b(){
 */
 int rtc_write_test(){
 	int freq, rate, count;
-	//printt("rtc test start!\n");
+	printt("[TEST: RTC_WRITE_TEST]\n");
 	for (freq = 2, rate = 0; freq <= 1024; freq <<= 1, rate++) {
 		rtc_write(0, &freq, 4);
 		for (count = 0; count < freq; count++) {
@@ -448,7 +461,10 @@ void ckpt2_print_message(){
 	clear_redraw();
 	printt("CHECKPOINT 2 TEST!!!\n");
 	printt("please select one test:\n");
-	printt("0: rtc_driver_test\n");
+	printt("0: RTC Write Test\n");
+	printt("1: Filesys Test Read Small\n");
+	printt("2: Filesys Test Read Large\n");
+	printt("3: Filesys Test Read Exe\n");
 	printt("q: quit\n");
 }
 
@@ -458,18 +474,31 @@ void ckpt2_test(){
 	// printt("Press enter to start testing.");
 	// readt(str);	
 	ckpt2_print_message();
+	printt("Test: ");
 	readt(str);	
 	while (strncmp(str, "q", 1)!=0){
 		if (strncmp(str, "0", 1)==0){
 			printt("\n");
 			clear_redraw();
 			test_result = rtc_write_test();
+			//my_test_output(test_result);
 			wait_for_b();
 			//test_result = terminal_test();
-		}else{
-			printt("no such command!\n");
+		}else if(strncmp(str, "1", 1)==0){
+			clear_redraw();
+			my_test_output(Filesys_Test_Read_Small());
+			wait_for_b();
+		}else if(strncmp(str, "2", 1)==0){
+			clear_redraw();
+			my_test_output(Filesys_Test_Read_Large());
+			wait_for_b();
+		}else if(strncmp(str, "3", 1)==0){
+			clear_redraw();
+			my_test_output(Filesys_Test_Read_Exe());
+			wait_for_b();
 		}
 		ckpt2_print_message();
+		printt("Test: ");
 		readt(str);	
 	}
 	
@@ -478,20 +507,7 @@ void ckpt2_test(){
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
-void sleep(uint32_t ticks) {
-	int32_t i;
-	for (i = 0; i < ticks; i++) {
-		rtc_read(0, NULL, 0);
-	}
-}
 
-void my_test_output(int func){
-	if(func){
-		printt("\n[TEST] Result = PASS\n");
-	}else{
-		printt("\n[TEST] Result = FAIL\n");
-	}
-}
 
 /* Test suite entry point */
 void launch_tests(){
@@ -512,17 +528,16 @@ void launch_tests(){
 	// TEST_OUTPUT("File_System_Test_close",File_System_Test_close());
 	// clear_redraw();
 	// TEST_OUTPUT("File_System_Test_Dir_Read",File_System_Test_Dir_Read());
-	clear_redraw();
-	my_test_output(Filesys_Test_Read_Small());
-	sleep(6);
-	clear_redraw();
-	my_test_output(Filesys_Test_Read_Large());
-	sleep(6);
-	clear_redraw();
-	my_test_output(Filesys_Test_Read_Exe());
+	// clear_redraw();
+	// my_test_output(Filesys_Test_Read_Small());
 	// sleep(6);
 	// clear_redraw();
-	// ckpt2_test();
-	//rtc_write_test();
-	// printt("Checkpoint 2 Test Finished! Well Done! \n");
+	// my_test_output(Filesys_Test_Read_Large());
+	// sleep(6);
+	// clear_redraw();
+	// my_test_output(Filesys_Test_Read_Exe());
+	// sleep(6);
+	// clear_redraw();
+	ckpt2_test();
+	printt("Checkpoint 2 Test Finished! Well Done! \n");
 }
