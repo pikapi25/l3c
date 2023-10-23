@@ -45,12 +45,12 @@ Problem Description: Always print a smile emoji when trying to print very long f
 Cause: 
 >   - The null character is not in the right place. Seems like the buffer holding the string has a size of 33, but position 32 is not set to null.
 Solution: 
->   - Using ``putc`` to print out buffer content instead of ``printf``
+>   - Using ``putc`` to print out buffer content instead of ``printf``  
 Time: 1 h
 
 --- problem 3 ---
 Problem Description: 
 >   - Cursor appears below the characters.
 Solution: 
->   - The arguments in ``enable_cursor`` are wrong.
+>   - The arguments in ``enable_cursor`` are wrong.  
 Time: 1h 20min.
