@@ -19,6 +19,14 @@ static inline void assertion_failure(){
 	asm volatile("int $15");
 }
 
+/**
+ * sleep
+ * 
+ * Description: Helper function for tests. Keep the screen unchanged for some time.
+ * Inputs:  ticks -- the time of screen being unchanged
+ * Return value: none
+ * Side effects: none
+ */
 void sleep(uint32_t ticks) {
 	int32_t i;
 	for (i = 0; i < ticks; i++) {
@@ -26,6 +34,14 @@ void sleep(uint32_t ticks) {
 	}
 }
 
+/**
+ * my_test_output
+ * 
+ * Description: Helper function for tests. Print the results of tests.
+ * Inputs: func -- the test function
+ * Return value: none
+ * Side effects: none
+ */
 void my_test_output(int func){
 	if(func){
 		printt("\n[TEST] Result = PASS\n");
@@ -33,6 +49,9 @@ void my_test_output(int func){
 		printt("\n[TEST] Result = FAIL\n");
 	}
 }
+
+
+
 /* Checkpoint 1 tests */
 
 /* IDT Test - Example
@@ -285,7 +304,7 @@ int Filesys_Test_Read_Small(){
 		return FAIL;
 	}
 
-	/*print file name*/
+	/*print and test file name*/
 	printt("[TEST] Reading file: ");
 	for(i=0; i<FILENAME_LEN; i++){
 		userkey_putc((uint8_t)test.filename[i]);
@@ -323,7 +342,7 @@ int Filesys_Test_Read_Exe(){
 		return FAIL;
 	}
 
-	/*print file name*/
+	/*print and test file name*/
 	printt("[TEST] Reading file: ");
 	for(i=0; i<FILENAME_LEN; i++){
 		userkey_putc((uint8_t)test.filename[i]);
@@ -366,7 +385,7 @@ int Filesys_Test_Read_Large(){
 		return FAIL;
 	}
 
-	/*print file name*/
+	/*print and test file name*/
 	printt("[TEST] Reading file: ");
 	for(i=0; i<FILENAME_LEN; i++){
 		userkey_putc((uint8_t)test.filename[i]);
@@ -606,16 +625,16 @@ void launch_tests(){
 	// TEST_OUTPUT("File_System_Test_close",File_System_Test_close());
 	// clear_redraw();
 	// TEST_OUTPUT("File_System_Test_Dir_Read",File_System_Test_Dir_Read());
-	// clear_redraw();
-	// my_test_output(Filesys_Test_Read_Small());
+	clear_redraw();
+	my_test_output(Filesys_Test_Read_Small());
+	sleep(6);
+	clear_redraw();
+	my_test_output(Filesys_Test_Read_Large());
+	sleep(6);
+	clear_redraw();
+	my_test_output(Filesys_Test_Read_Exe());
 	// sleep(6);
 	// clear_redraw();
-	// my_test_output(Filesys_Test_Read_Large());
-	// sleep(6);
-	// clear_redraw();
-	// my_test_output(Filesys_Test_Read_Exe());
-	// sleep(6);
-	// clear_redraw();
-	ckpt2_test();
-	printt("Checkpoint 2 Test Finished! Well Done! \n");
+	// ckpt2_test();
+	// printt("Checkpoint 2 Test Finished! Well Done! \n");
 }
