@@ -58,3 +58,21 @@ Solution:
 >   - The arguments in ``enable_cursor`` are wrong.    
 
 Time: 1h 20min.  
+
+--- problem 4 ---  
+Problem Description:   
+>   - Test for reading name of "verylargetextwithverylongname.txt" returned FAIL. 
+
+Solution:   
+>   - Changing the sanity check for read_dentry_by_name.   
+
+Time: 30 min.  
+
+--- problem 5 ---  
+Problem Description:   
+>   - Tried to print the data in the files by calling read_data, but nothing was printed.
+
+Solution:   
+>   - filesys_init didn't find the correct address for data blocks. Corrected that.
+
+Time: 1 h.  
