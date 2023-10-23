@@ -22,8 +22,8 @@ static inline void assertion_failure(){
 /**
  * sleep
  * 
- * Description: Helper function for tests. Keep the screen unchanged for some time.
- * Inputs:  ticks -- the time of screen being unchanged
+ * Description: Helper function for tests. Pauses the screen for some time.
+ * Inputs:  ticks -- The number of ticks to sleep.
  * Return value: none
  * Side effects: none
  */
@@ -38,7 +38,7 @@ void sleep(uint32_t ticks) {
  * my_test_output
  * 
  * Description: Helper function for tests. Print the results of tests.
- * Inputs: func -- the test function
+ * Inputs: func -- The test function
  * Return value: none
  * Side effects: none
  */
