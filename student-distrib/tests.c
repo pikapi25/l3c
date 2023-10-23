@@ -247,9 +247,9 @@ void Filesys_Test_Read_Data(uint8_t* filename, uint32_t offset, uint32_t length)
 	read_dentry_by_name(filename,&test);
 	//printf(" \n");
 	bytes_read = read_data(test.inode_num,offset,buf,length);
-	printf(" Bytes read:%d\n",bytes_read);
+	//printf(" Bytes read:%d\n",bytes_read);
 	for(i=0; i<bytes_read; i++)
-		putc(buf[i]);
+		userkey_putc(buf[i]);
 	return;
 }
 
@@ -262,23 +262,31 @@ void Filesys_Test_Read_Data(uint8_t* filename, uint32_t offset, uint32_t length)
 *  Files: filesys.c 
 */
 int Filesys_Test_Read_Small(){
-	TEST_HEADER;
+	//TEST_HEADER;
+	printt("[TEST: Filesys_Test_Read_Small] ");
 	dentry_t test;
+	int i=0;
 	char filename[] = "frame0.txt";
-	printf("READ SMALL FILE TEST\n");
 	if(read_dentry_by_name((uint8_t*)filename,&test) == -1){
-		printf("A non-existent file!\n");
+		printt("A non-existent file!\n");
 		return FAIL;
-	}else{
-		printf("Reading file: %s\n",test.filename);
 	}
+
+	/*print file name*/
+	printt("Reading file: ");
+	for(i=0; i<FILENAME_LEN; i++){
+		userkey_putc((uint8_t)test.filename[i]);
+	}
+	printt(" \n");
+	printt(" \n");
 
 	if(strncmp((int8_t*)test.filename,(int8_t*)filename,FILENAME_LEN)!=0){
 		return FAIL;
 	}
 
+	/*print file data*/
 	Filesys_Test_Read_Data((uint8_t*)filename,0,1000);
-	printf(" \n");
+	printt(" \n");
 	
 	return PASS;
 	
@@ -292,26 +300,40 @@ int Filesys_Test_Read_Small(){
 *  Files: filesys.c 
 */
 int Filesys_Test_Read_Exe(){
-	TEST_HEADER;
+	//TEST_HEADER;
+	printt("[TEST: Filesys_Test_Read_Exe] ");
 	dentry_t test;
+	int i;
 	char filename[] = "grep";
-	printf("READ EXECUTABLE FILE TEST\n");
 	if(read_dentry_by_name((uint8_t*)filename,&test) == -1){
-		printf("A non-existent file!\n");
+		printt("A non-existent file!\n");
 		return FAIL;
-	}else{
-		printf("Reading file: %s\n",test.filename);
 	}
+
+	/*print file name*/
+	printt("Reading file: ");
+	for(i=0; i<FILENAME_LEN; i++){
+		userkey_putc((uint8_t)test.filename[i]);
+	}
+	printt(" \n");
+	printt(" \n");
 
 	if(strncmp((int8_t*)test.filename,(int8_t*)filename,FILENAME_LEN)!=0){
 		return FAIL;
 	}
 
-	Filesys_Test_Read_Data((uint8_t*)filename,0,10000);
-	printf(" \n");
+	/*print file data*/
+	printt("Reading the beginning:\n");
+	Filesys_Test_Read_Data((uint8_t*)filename,0,1000);
+	printt("\n\nReading the end:\n");
+	Filesys_Test_Read_Data((uint8_t*)filename,1900,5000);
+	// Filesys_Test_Read_Data((uint8_t*)filename,0,10000);
+
+	printt(" \n");
 	
 	return PASS;
 }
+
 
 /* File System Test -- read large file
 *  
@@ -321,28 +343,35 @@ int Filesys_Test_Read_Exe(){
 *  Files: filesys.c 
 */
 int Filesys_Test_Read_Large(){
-	TEST_HEADER;
+	//TEST_HEADER;
+	printt("[TEST: Filesys_Test_Read_Large] ");
 	dentry_t test;
-	char filename[] = "verylargetextwithverylongname.tx";
-	printf("READ LARGE FILE TEST\n");
+	int i;
+	char filename[] = "verylargetextwithverylongname.txt";
 	if(read_dentry_by_name((uint8_t*)filename,&test) == -1){
-		printf("A non-existent file!\n");
+		printt("A non-existent file!\n");
 		return FAIL;
-	}else{
-		printf("Reading file: %s\n",test.filename);
 	}
+
+	/*print file name*/
+	printt("Reading file: ");
+	for(i=0; i<FILENAME_LEN; i++){
+		userkey_putc((uint8_t)test.filename[i]);
+	}
+	printt(" \n");
 
 	if(strncmp((int8_t*)test.filename,(int8_t*)filename,FILENAME_LEN)!=0){
 		return FAIL;
 	}
 
 	/*read some parts of the file*/
-	Filesys_Test_Read_Data((uint8_t*)filename,0,1500);
+	printt("(Reading some parts of file because the file is too large to be shown on screen)\n\n");
+	Filesys_Test_Read_Data((uint8_t*)filename,0,1250);
 
 	/*read the whole file, but the screen doesn't look good*/
 	// Filesys_Test_Read_Data((uint8_t*)filename,0,15000);
 
-	printf(" \n");
+	printt(" \n");
 	
 	return PASS;
 }
@@ -456,6 +485,14 @@ void sleep(uint32_t ticks) {
 	}
 }
 
+void my_test_output(int func){
+	if(func){
+		printt("\n[TEST] Result = PASS\n");
+	}else{
+		printt("\n[TEST] Result = FAIL\n");
+	}
+}
+
 /* Test suite entry point */
 void launch_tests(){
 	/*CHECKPOINT1 TESTS*/
@@ -475,15 +512,15 @@ void launch_tests(){
 	// TEST_OUTPUT("File_System_Test_close",File_System_Test_close());
 	// clear_redraw();
 	// TEST_OUTPUT("File_System_Test_Dir_Read",File_System_Test_Dir_Read());
-	// clear_redraw();
-	// TEST_OUTPUT("Filesys_Test_Read_Small", Filesys_Test_Read_Small());
-	// sleep(5);
 	clear_redraw();
-	TEST_OUTPUT("Filesys_Test_Read_Large", Filesys_Test_Read_Large());
-	// sleep(5);
-	// clear_redraw();
-	// TEST_OUTPUT("Filesys_Test_Read_Exe", Filesys_Test_Read_Exe());
-	// sleep(5);
+	my_test_output(Filesys_Test_Read_Small());
+	sleep(6);
+	clear_redraw();
+	my_test_output(Filesys_Test_Read_Large());
+	sleep(6);
+	clear_redraw();
+	my_test_output(Filesys_Test_Read_Exe());
+	// sleep(6);
 	// clear_redraw();
 	// ckpt2_test();
 	//rtc_write_test();
