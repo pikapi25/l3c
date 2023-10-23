@@ -263,7 +263,7 @@ void Filesys_Test_Read_Data(uint8_t* filename, uint32_t offset, uint32_t length)
 */
 int Filesys_Test_Read_Small(){
 	//TEST_HEADER;
-	printt("[TEST: Filesys_Test_Read_Small] ");
+	printt("[TEST: Filesys_Test_Read_Small]\n");
 	dentry_t test;
 	int i=0;
 	char filename[] = "frame0.txt";
@@ -273,7 +273,7 @@ int Filesys_Test_Read_Small(){
 	}
 
 	/*print file name*/
-	printt("Reading file: ");
+	printt("[TEST] Reading file: ");
 	for(i=0; i<FILENAME_LEN; i++){
 		userkey_putc((uint8_t)test.filename[i]);
 	}
@@ -301,7 +301,7 @@ int Filesys_Test_Read_Small(){
 */
 int Filesys_Test_Read_Exe(){
 	//TEST_HEADER;
-	printt("[TEST: Filesys_Test_Read_Exe] ");
+	printt("[TEST: Filesys_Test_Read_Exe]\n");
 	dentry_t test;
 	int i;
 	char filename[] = "grep";
@@ -311,7 +311,7 @@ int Filesys_Test_Read_Exe(){
 	}
 
 	/*print file name*/
-	printt("Reading file: ");
+	printt("[TEST] Reading file: ");
 	for(i=0; i<FILENAME_LEN; i++){
 		userkey_putc((uint8_t)test.filename[i]);
 	}
@@ -323,9 +323,9 @@ int Filesys_Test_Read_Exe(){
 	}
 
 	/*print file data*/
-	printt("Reading the beginning:\n");
+	printt("[TEST] Reading the beginning:\n");
 	Filesys_Test_Read_Data((uint8_t*)filename,0,1000);
-	printt("\n\nReading the end:\n");
+	printt("\n\n[TEST] Reading the end:\n");
 	Filesys_Test_Read_Data((uint8_t*)filename,1900,5000);
 	// Filesys_Test_Read_Data((uint8_t*)filename,0,10000);
 
@@ -344,7 +344,7 @@ int Filesys_Test_Read_Exe(){
 */
 int Filesys_Test_Read_Large(){
 	//TEST_HEADER;
-	printt("[TEST: Filesys_Test_Read_Large] ");
+	printt("[TEST: Filesys_Test_Read_Large]\n");
 	dentry_t test;
 	int i;
 	char filename[] = "verylargetextwithverylongname.txt";
@@ -354,7 +354,7 @@ int Filesys_Test_Read_Large(){
 	}
 
 	/*print file name*/
-	printt("Reading file: ");
+	printt("[TEST] Reading file: ");
 	for(i=0; i<FILENAME_LEN; i++){
 		userkey_putc((uint8_t)test.filename[i]);
 	}
