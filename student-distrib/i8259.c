@@ -6,8 +6,8 @@
 #include "lib.h"
 
 /* Interrupt masks to determine which interrupts are enabled and disabled */
-uint8_t master_mask; /* IRQs 0-7  */
-uint8_t slave_mask;  /* IRQs 8-15 */
+uint8_t master_mask = 0xff; /* IRQs 0-7  */
+uint8_t slave_mask = 0xff;  /* IRQs 8-15 */
 
 /*
  * i8259_init
@@ -18,11 +18,11 @@ uint8_t slave_mask;  /* IRQs 8-15 */
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
     /* first mask all interrupts */
-    master_mask = 0xff;
-    slave_mask = 0xff;
-    outb(master_mask, MASTER_8259_DATA);
-    outb(slave_mask, SLAVE_8259_DATA);
+    cli();
 
+
+    outb(0xff, MASTER_8259_DATA);
+    outb(0xff, SLAVE_8259_DATA);
     /* send control words to master */
     outb(ICW1, MASTER_8259_PORT); // start init, edge-triggered inputs, cascade mode, 4 ICWs
     outb(ICW2_MASTER, MASTER_8259_DATA); // 8259A-1, IR0-7 mapped to 0x20-0x21
@@ -35,6 +35,9 @@ void i8259_init(void) {
     outb(ICW3_SLAVE, SLAVE_8259_DATA);
     outb(ICW4, SLAVE_8259_DATA);
 
+    outb(master_mask, MASTER_8259_DATA);
+    outb(slave_mask, SLAVE_8259_DATA);
+    sti();
     /* enable slave (port 2 on master) */
     enable_irq(ICW3_SLAVE);
 }

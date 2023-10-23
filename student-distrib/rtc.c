@@ -60,8 +60,9 @@ void rtc_handler(void){
     outb(RTC_REG_C, RTC_REG_PORT); // select register C
     inb(RTC_CMOS_RW_PORT); // just throw away contents
     //test_interrupts(); // for testing
-    send_eoi(RTC_IRQ_NUM); // send end-of-interrupt to pic
     sti();
+    send_eoi(RTC_IRQ_NUM); // send end-of-interrupt to pic
+
 }
 
 /* rtc_open
@@ -103,7 +104,8 @@ int32_t rtc_read(int32_t fd, const void* buf, int32_t nbytes){
 */
 int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
     /* read the required frequency from buf */
-    uint32_t rtc_set_freq = 0;
+    uint32_t rtc_set_freq;
+    rtc_set_freq = 0;
     if (buf != NULL){
         rtc_set_freq = *(uint32_t*)buf;
     }else{

@@ -242,22 +242,17 @@ int rtc_write_test(){
  * Files: terminal.c/h, keyboard.c/h
 */
 int terminal_test(){
-	TEST_HEADER;
-
 	int32_t t_read, t_write;
 	int32_t read_nbytes, write_nbytes;
 	uint8_t buf[128];
-	char str[128];
+	memset(buf, 0, 128);
 	read_nbytes = 128;
 	write_nbytes = 128;
+	printt("type here!\n");
 	t_read = terminal_read(0, buf, read_nbytes);
 	t_write = terminal_write(0, buf, write_nbytes);
-	printt("please enter b to go back\n");
-	readt(str);
-	while (strncmp(str, "b", 1)!=0){
-		printt("command not found, try again!\n");
-		readt(str);
-	}
+	printf("terminal read returns: %d\n", t_read);
+	printf("terminal write returns: %d\n", t_write);
 	return PASS;
 }
 
@@ -538,7 +533,7 @@ void ckpt2_print_message(){
 	clear_redraw();
 	printt("CHECKPOINT 2 TEST!!!\n");
 	printt("please select one test:\n");
-	printt("0: RTC Write Test\n");
+	printt("0: Terminal Test\n");
 	printt("1: Filesys Test Read Small\n");
 	printt("2: Filesys Test Read Large\n");
 	printt("3: Filesys Test Read Exe\n");
@@ -561,8 +556,7 @@ void ckpt2_test(){
 		if (strncmp(str, "0", 1)==0){
 			printt("\n");
 			clear_redraw();
-			test_result = rtc_write_test();
-			//my_test_output(test_result);
+			test_result = terminal_test();
 			wait_for_b();
 			//test_result = terminal_test();
 		}else if(strncmp(str, "1", 1)==0){
@@ -625,16 +619,19 @@ void launch_tests(){
 	// TEST_OUTPUT("File_System_Test_close",File_System_Test_close());
 	// clear_redraw();
 	// TEST_OUTPUT("File_System_Test_Dir_Read",File_System_Test_Dir_Read());
-	clear_redraw();
-	my_test_output(Filesys_Test_Read_Small());
-	sleep(6);
-	clear_redraw();
-	my_test_output(Filesys_Test_Read_Large());
-	sleep(6);
-	clear_redraw();
-	my_test_output(Filesys_Test_Read_Exe());
+	// clear_redraw();
+	// my_test_output(Filesys_Test_Read_Small());
 	// sleep(6);
 	// clear_redraw();
-	// ckpt2_test();
-	// printt("Checkpoint 2 Test Finished! Well Done! \n");
+	// my_test_output(Filesys_Test_Read_Large());
+	// sleep(6);
+	// clear_redraw();
+	// my_test_output(Filesys_Test_Read_Exe());
+	// sleep(6);
+	// clear_redraw();
+	clear_redraw();
+	rtc_write_test();
+	ckpt2_test();
+	printt("Checkpoint 2 Test Finished! Well Done! \n");
+
 }
