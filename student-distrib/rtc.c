@@ -60,7 +60,6 @@ void rtc_handler(void){
     outb(RTC_REG_C, RTC_REG_PORT); // select register C
     inb(RTC_CMOS_RW_PORT); // just throw away contents
     //test_interrupts(); // for testing
-
     send_eoi(RTC_IRQ_NUM); // send end-of-interrupt to pic
     sti();
 }
@@ -124,3 +123,4 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
     }
     return 0;
 }
+

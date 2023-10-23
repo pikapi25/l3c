@@ -40,6 +40,10 @@ void enable_cursor(uint8_t cursor_start, uint8_t cursor_end);
 // void disable_cursor();
 void update_cursor(int x, int y);
 
+/* Optimized printing method in terminal */
+void printt(const char *str);
+
+void readt(char* str);
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit
  * unsigned int */

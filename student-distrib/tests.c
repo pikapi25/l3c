@@ -169,6 +169,15 @@ int paging_test4(){
 
 
 /* ------------------------ Checkpoint 2 tests --------------------------------*/
+void wait_for_b(){
+	char str[128];
+	printt("please enter b to go back\n");
+	readt(str);
+	while (strncmp(str, "b", 1)!=0){
+		printt("command not found, try again!\n");
+		readt(str);
+	}
+}
 
 /* RTC Test
  * 
@@ -179,18 +188,16 @@ int paging_test4(){
  * Files: rtc.c/.h
 */
 int rtc_write_test(){
-	TEST_HEADER;
 	int freq, rate, count;
+	//printt("rtc test start!\n");
 	for (freq = 2, rate = 0; freq <= 1024; freq <<= 1, rate++) {
-		printf("%d ", freq);
 		rtc_write(0, &freq, 4);
 		for (count = 0; count < freq; count++) {
 			rtc_read(0, NULL, 0);
-			printf("*");
+			printt("*");
 		}
-		printf("\n");
+		printt("\n");
 	}
-
 	return PASS;
 }
 
@@ -208,10 +215,17 @@ int terminal_test(){
 	int32_t t_read, t_write;
 	int32_t read_nbytes, write_nbytes;
 	uint8_t buf[128];
+	char str[128];
 	read_nbytes = 128;
 	write_nbytes = 128;
 	t_read = terminal_read(0, buf, read_nbytes);
 	t_write = terminal_write(0, buf, write_nbytes);
+	printt("please enter b to go back\n");
+	readt(str);
+	while (strncmp(str, "b", 1)!=0){
+		printt("command not found, try again!\n");
+		readt(str);
+	}
 	return PASS;
 }
 
@@ -386,7 +400,36 @@ int File_System_Test_Dir_Read(){
 	return PASS;
 }
 
+void ckpt2_print_message(){
+	clear_redraw();
+	printt("CHECKPOINT 2 TEST!!!\n");
+	printt("please select one test:\n");
+	printt("0: rtc_driver_test\n");
+	printt("q: quit\n");
+}
 
+void ckpt2_test(){
+	char str[128];
+	int test_result;
+	// printt("Press enter to start testing.");
+	// readt(str);	
+	ckpt2_print_message();
+	readt(str);	
+	while (strncmp(str, "q", 1)!=0){
+		if (strncmp(str, "0", 1)==0){
+			printt("\n");
+			clear_redraw();
+			test_result = rtc_write_test();
+			wait_for_b();
+			//test_result = terminal_test();
+		}else{
+			printt("no such command!\n");
+		}
+		ckpt2_print_message();
+		readt(str);	
+	}
+	
+}
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -421,7 +464,9 @@ void launch_tests(){
 	// clear_redraw();
 	// TEST_OUTPUT("File_System_Test_Read_Exe", File_System_Test_Read_Exe());
 	// sleep(5);
-	clear_redraw();
-	TEST_OUTPUT("File_System_Test_Read_Data", File_System_Test_Read_Data((uint8_t*)"frame0.txt"));
+	// clear_redraw();
+	// TEST_OUTPUT("File_System_Test_Read_Data", File_System_Test_Read_Data((uint8_t*)"frame0.txt"));
+	ckpt2_test();
+	//rtc_write_test();
+	printt("Checkpoint 2 Test Finished! Well Done! \n");
 }
-
