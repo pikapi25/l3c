@@ -397,12 +397,31 @@ int Filesys_Test_Read_Large(){
 *  Files: filesys.c 
 */
 int File_System_Test_Open(){
-	TEST_HEADER;
 
-	printf("try to open nonexistent file/directory lalala\n");
-	char file_Nonexistent[] = "lalala";	
-	if (open_file((const uint8_t*)file_Nonexistent) == -1 && open_dir((const uint8_t*)file_Nonexistent) == 0)return PASS;
-	return FAIL;
+	int32_t result1, result2;
+	printt("[TEST: File_System_Test_Open]\n");
+	printt("try to open nonexistent file/directory lalala\n");
+	char file_Nonexistent[] = "lalala";
+	result1 = open_file((const uint8_t*)file_Nonexistent);
+	result2 =  open_dir((const uint8_t*)file_Nonexistent);
+	printt("open_file with file_Nonexistent should return -1\n");
+	if(result1 == -1){
+		printt("actually returns -1.\n");
+	}else{
+		printt("Error!\n");
+		return FAIL;
+	}
+
+	// (as piazza says do nothing and return 0)
+	printt("open_dir with dir_Nonexistent should return 0\n");
+	if(result2 == 0){
+		printt("actually returns 0.\n");
+	}else{
+		printt("Error!\n");
+		return FAIL;
+	}
+	
+	return PASS;
 }
 
 /* File System Test -- close
@@ -413,12 +432,28 @@ int File_System_Test_Open(){
 *  Files: filesys.c 
 */
 int File_System_Test_close(){
-	TEST_HEADER;
 
 	int32_t fd_default = 0;
 	int32_t fd_normal = 3;
-	if (close_file(fd_default) == -1 && close_file(fd_normal) == 0 && close_dir(fd_default) == -1 && close_dir(fd_normal) == 0)return PASS;
-	return FAIL;
+	int32_t result1, result2;
+	printt("[TEST: File_System_Test_Close]\n");
+	result1 = close_file(fd_default);
+	result2 = close_file(fd_normal);
+	printt("close_file function try to close fd = 0 should return -1;\n");
+	if (result1 == -1){
+		printt("actually returns -1\n");
+	}else{
+		printt("Error!\n");
+		return FAIL;
+	}
+	printt("close_file function try to close fd = 3 should return 0;\n");
+	if (result2 == 0){
+		printt("actually returns 0\n");
+	}else{
+		printt("Error!\n");
+		return FAIL;
+	}
+	return PASS;
 }
 
 /* File System Test -- write
@@ -429,12 +464,28 @@ int File_System_Test_close(){
 *  Files: filesys.c 
 */
 int File_System_Test_Write(){
-	TEST_HEADER;
 
 	int32_t buf[20] = {1};
-	// since it's read-only, both write functions shall return -1
-	if (write_file(0,buf,32) == -1 && write_dir(0,buf,32) == -1)return PASS;
-	return FAIL;
+	int32_t result1, result2;
+	printt("[TEST: File_System_Test_Write]\n");
+	result1 = write_file(0,buf,32);
+	result2 = write_dir(0,buf,32);
+	printt("since it's read-only, both write functions shall return -1 \n");
+	if (result1 == -1){
+		printt("write file returns -1\n");
+	}
+	else{
+		printt("write file Error!\n");
+		return FAIL;
+	}
+	if (result2 == -1){
+		printt("write directory returns -1\n");
+	}
+	else{
+		printt("write directory Error!\n");
+		return FAIL;
+	}
+	return PASS;
 }
 
 /* File System Test -- read of directory
@@ -445,13 +496,20 @@ int File_System_Test_Write(){
 *  Files: filesys.c 
 */
 int File_System_Test_Dir_Read(){
-	TEST_HEADER;
 	dentry_t dentry;
-	int i;
+	char buf[32] = {"\0"};
 
+	int x,i;
+	printt("[TEST: File_System_Test_Dir_Read]\n");
 	for (i=0;i<FILES_NUM_MAX;i++){
 		if (read_dentry_by_index(i,&dentry)==-1){break;}
-		printf("filename:%s  \n",dentry.filename);
+		// printf("filename:%s  \n",dentry.filename);
+		memset(buf, 0, 32);
+		strcpy(buf,dentry.filename);
+		for (x=0;x<32;x++){
+			userkey_putc(buf[x]);
+		}
+		printt("\n");
 	}
 	return PASS;
 }
@@ -465,6 +523,10 @@ void ckpt2_print_message(){
 	printt("1: Filesys Test Read Small\n");
 	printt("2: Filesys Test Read Large\n");
 	printt("3: Filesys Test Read Exe\n");
+	printt("4: Filesys Test Open\n");
+	printt("5: Filesys Test Close\n");
+	printt("6: Filesys Test Write\n");
+	printt("7: Filesys Test Read Directory\n");
 	printt("q: quit\n");
 }
 
@@ -495,6 +557,22 @@ void ckpt2_test(){
 		}else if(strncmp(str, "3", 1)==0){
 			clear_redraw();
 			my_test_output(Filesys_Test_Read_Exe());
+			wait_for_b();
+		}else if(strncmp(str, "4", 1)==0){
+			clear_redraw();
+			my_test_output(File_System_Test_Open());
+			wait_for_b();
+		}else if(strncmp(str, "5", 1)==0){
+			clear_redraw();
+			my_test_output(File_System_Test_close());
+			wait_for_b();
+		}else if(strncmp(str, "6", 1)==0){
+			clear_redraw();
+			my_test_output(File_System_Test_Write());
+			wait_for_b();
+		}else if(strncmp(str, "7", 1)==0){
+			clear_redraw();
+			my_test_output(File_System_Test_Dir_Read());
 			wait_for_b();
 		}
 		ckpt2_print_message();
