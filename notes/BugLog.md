@@ -53,6 +53,7 @@ Time: 1 h
 --- problem 3 ---  
 Problem Description:   
 >   - Cursor appears below the characters.  
+
 Solution:   
 >   - The arguments in ``enable_cursor`` are wrong.    
 
