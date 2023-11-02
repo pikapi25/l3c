@@ -9,6 +9,7 @@
 #define MAX_FILES 8
 #define PCB_BLOCK_SIZE 0x2000 // every pcb block is 8KB
 #define PCB_START 0x800000 // every pcb starts at 8MB-i*8KB
+#define PCB_BITMASK 0xFFFFE000 // the mast to get current pcb from esp
 
 /* system call functions */
 int32_t halt (uint8_t status);
@@ -43,19 +44,19 @@ typedef struct file_desc
 }file_desc_t;
 
 /* Process Control Block */
-typedef struct pcb
+typedef struct pcb pcb_t;
+struct pcb_t
 {
     file_desc_t fd_arr[MAX_FILES];
     uint8_t arg_buf[MAX_CHA_BUF];
     uint32_t pid;
-    uint32_t parent_pid;
+    pcb_t* parent_pcb;
     int32_t ebp_val;
     int32_t esp_val;
 
-}pcb_t;
+};
 
 /* ----- Helper Functions ----- */
-uint32_t get_pid();
-pcb_t* get_pcb(uint32_t pid);
+pcb_t* get_cur_pcb();
 
 #endif /* _SYSCALL_H */
