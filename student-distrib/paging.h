@@ -24,7 +24,7 @@
 //                       For PTE, it's physical address of 4kb memory space (memory frame)
 //  PDE and PTE has small difference in PAT (bit 7)
 extern void Page_Initialize();           
-
+extern void mapping_vir_to_phy(uint32_t vir_addr, uint32_t phy_addr);
 #endif
 
 
