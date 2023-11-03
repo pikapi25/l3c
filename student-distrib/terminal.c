@@ -107,7 +107,7 @@ int32_t illegal_open(const uint8_t* filename) {
 }
 
 int32_t illegal_close(int32_t fd) {
-	// printf("WARNING: You cannot close the terminal.\n");
+	printf("WARNING: You cannot close the terminal.\n");
 	/* Otherwise, the message will pop up 
 	 * each time we halt a new shell (excl. #0) */
 	return -1;

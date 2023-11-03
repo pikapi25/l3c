@@ -29,8 +29,8 @@ Page_Initialize(){
     for (i = 0; i < PAGE_TABLE_COUNT; i++ ){
         // i*4 refers to physical address for 4KB memory space
         // 0x0 since these entries are not present 
-        page_table[i] = (i*fourKB) | 0x2;
-        page_dic[i] = 0x2;
+        page_table[i] = (i*fourKB) | 0x3;
+        page_dic[i] = 0x3;
     }
 
     //----------------load video memory (4 KB )------------
@@ -75,11 +75,9 @@ Page_Initialize(){
 */
 void mapping_vir_to_phy(uint32_t vir_addr, uint32_t phy_addr){
     page_dic[vir_addr>>page_dir_start] = phy_addr | user_paging_set;
-    asm volatile(                           \
-        "movl %0, %%eax     \n\t"           \
-        "movl %%eax, %%cr3  \n\t"           \
-        :                                   \
-        : "r" (&page_dic)             \
-        : "%eax"                            \
-    );                                      \
+    asm volatile(                           
+        "movl %%cr3, %%eax;"           
+        "movl %%eax, %%cr3;"           
+        :
+    );                                      
 }
