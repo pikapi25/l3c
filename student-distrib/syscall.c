@@ -90,30 +90,36 @@ int32_t halt (uint8_t status){
  */
 int32_t execute(const uint8_t* command)
 {
-
-    int i, prog_start_addr = EIGHT_MB, curr_pid = -1;
-    char file_name[FILENAME_LEN]={'\0'}; 
-    char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
+    int result;
+    uint32_t i, prog_start_addr, pid = 0;
+    uint8_t eip[4];
+    uint8_t file_name[FILENAME_LEN]; 
+    // char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
     
     /* basic validation check */
-    if(curr_pid >= MAX_PROCESSES) 
-        return FAILURE;
+    // if(curr_pid >= MAX_PROCESSES) 
+    //     return FAILURE;
     if(command == NULL||command == '\0')
         return FAILURE;
 
     /* Parse cmd */
-    uint16_t cmd_len = strlen((int8_t*)command);
-    for(i=0;i<cmd_len;i++){
-        if(command[i] == '\0' || command[i] == ' ') break;
+    // uint16_t cmd_len = strlen((int8_t*)command);
+    // for(i=0;i<cmd_len;i++){
+    //     if(command[i] == ' ') break;
+    //     file_name[i] = command[i];
+    // }
+    i=0;
+    while(command[i]!=' ' && command[i]!='\0'){
         file_name[i] = command[i];
-    }
-    /* Parse args */
-    int arg_idx = i;
-    for(i=0;arg_idx<cmd_len;arg_idx++){
-        if(command[arg_idx] == '\0') break;
-        args[i] = command[arg_idx];
         i++;
     }
+    // /* Parse args */
+    // int arg_idx = i;
+    // for(i=0;arg_idx<cmd_len;arg_idx++){
+    //     if(command[arg_idx] == '\0') break;
+    //     args[i] = command[arg_idx];
+    //     i++;
+    // }
     
     dentry_t dentry;
     uint8_t mag_buf[4];
@@ -128,26 +134,25 @@ int32_t execute(const uint8_t* command)
     if((mag_buf[0] != MAGIC_NUM_0) || (mag_buf[1] != MAGIC_NUM_1) ||(mag_buf[2] != MAGIC_NUM_2) ||(mag_buf[3] != MAGIC_NUM_3))
         return FAILURE;
     
-    /* get program start address */
-    // read_data(dentry.inode_num, 24, (uint8_t* )prog_start_addr, 4);   //NOT SURE whether the starting addr will change
+    /* get eip */
+    result = read_data(dentry.inode_num, 24, eip, 4);
+    if(result != 4) return FAILURE;   
+    prog_start_addr = (eip[0]<<24)+(eip[1]<<16)+(eip[2]<<8)+eip[3];
     
     /* get a new PID for the new process */
-    for(i = 0;i <= MAX_PROCESSES;i++){
-        if(pid_arr[i] == Free){
-            pid_arr[i] = 1;
-            curr_pid = i;
-            pid_arr[i] = Busy;
-            break;
-        }
+    pid = 0;
+    while(pid_arr[pid]!=0 && pid<MAX_PROCESSES){
+        pid++;
     }
     /* If no PIDs are free, return FAILURE. */
-    if(i > MAX_PROCESSES) return FAILURE;
+    if(pid == MAX_PROCESSES) return FAILURE;
     /* get pcb structture */
-    pcb_t* pcb = (pcb_t*)(EIGHT_MB - (curr_pid+1) * EIGHT_KB);
-    pcb->pid = curr_pid;
+    pcb_t* pcb = (pcb_t*)(EIGHT_MB - (pid+1) * EIGHT_KB);
+    pid_arr[pid] = 1;
+    pcb->pid = pid;
 
     /* set parent pid */
-    if(curr_pid == 0||curr_pid ==1 ||curr_pid == 2){
+    if(pid == 0||pid ==1 ||pid == 2){
         pcb->parent_pcb = NULL;  
     }
     else{   
@@ -163,28 +168,23 @@ int32_t execute(const uint8_t* command)
     pcb->fd_arr[1].file_position = 0;
 
 
-    /* Write arguments in pcb */
-    memcpy(pcb->arg_buf, args, MAX_CHA_BUF + 1);
-
-    /* Terminal open calls are omitted.
-     * According to the document, they should be illegal after all */
-
     /* Set up paging */
-    mapping_vir_to_phy(prog_start_addr, PCB_BOTTOM+(pcb->pid)*PHYS_PROGRAM_SIZE);
+    mapping_vir_to_phy(VIRTUAL_PAGE_START, PCB_BOTTOM+(pcb->pid)*PHYS_PROGRAM_SIZE);
 
     /* Load program */
     read_data(dentry.inode_num, 0, (uint8_t*)USER_CODE, USER_STACK - USER_CODE);
 
     /* Save old stack */
-    register uint32_t saved_ebp asm("ebp");
-    register uint32_t saved_esp asm("esp");
-    // TSS represents our destination
-    tss.ss0 = KERNEL_DS;
-    tss.esp0 = (uint32_t)(pcb_t*)(EIGHT_MB - (curr_pid) * EIGHT_KB) - 4;    // the child pid about to be created
+    uint32_t saved_ebp, saved_esp;
+    asm("movl %%esp, %0" : "=r"(saved_esp));
+    asm("movl %%esp, %0" : "=r"(saved_esp));
     // PCB represents our source
     pcb->ebp_val = saved_ebp;                 // so that we can return to the parent
     pcb->esp_val = saved_esp;
-   
+    // TSS represents our destination
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = EIGHT_MB - pid * EIGHT_KB - 4;    // the child pid about to be created
+
     /* Enter user mode */
     // Push order: SS, ESP, EFLAGS, CS, EIP
     // ESP points to the base of user stack (132MB - 4B)
