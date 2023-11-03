@@ -44,9 +44,9 @@ void idt_init()
     }
 
     //initialize idt struct for interrupts
-    idt[KEYBOARD_VEC].reserved3=1;
+    idt[KEYBOARD_VEC].reserved3=0;
     idt[KEYBOARD_VEC].present=1;
-    idt[RTC_VEC].reserved3=1;
+    idt[RTC_VEC].reserved3=0;
     idt[RTC_VEC].present=1;
 
     //initialize idt struct for system call
@@ -81,7 +81,9 @@ void idt_init()
     SET_IDT_ENTRY(idt[RTC_VEC], rtc_handler_linkage);
 
     //set IDT entries for system call
+    idt[SYSTEM_CALL_VEC].reserved3 = 1;
     SET_IDT_ENTRY(idt[SYSTEM_CALL_VEC], syscall_linkage);
+    // idt[SYSTEM_CALL_VEC].reserved3 = 1;
 
     /*load IDT*/
     lidt(idt_desc_ptr);

@@ -18,7 +18,7 @@ pcb_t* get_cur_pcb(){
     return (pcb_t*)(esp_value & PCB_BITMASK);
 }
 
-
+file_op_t terminal_ops = {terminal_read, terminal_write, illegal_open, illegal_close};
 /* halt
  * INPUT: the status value
  * OUTPUT: return a value to the parent execute system call so that we know how the program ended.
@@ -164,19 +164,12 @@ int32_t execute(const uint8_t* command)
     pcb->fd_arr[0].flags = 1;
     pcb->fd_arr[0].inode = 0;
     pcb->fd_arr[0].file_position = 0;
-    pcb->fd_arr[0].file_op_table->close_op = illegal_close;
-    pcb->fd_arr[0].file_op_table->open_op = illegal_open;
-    pcb->fd_arr[0].file_op_table->write_op = illegal_write;
-    pcb->fd_arr[0].file_op_table->read_op = terminal_read;
+    pcb->fd_arr[0].file_op_table = &terminal_ops;
     
     pcb->fd_arr[1].flags = 1;
     pcb->fd_arr[1].inode = 0;
     pcb->fd_arr[1].file_position = 0;
-    pcb->fd_arr[1].file_op_table->close_op = illegal_close;
-    pcb->fd_arr[1].file_op_table->open_op = illegal_open;
-    pcb->fd_arr[1].file_op_table->write_op = terminal_write;
-    pcb->fd_arr[1].file_op_table->read_op = illegal_read;
-
+    pcb->fd_arr[1].file_op_table = &terminal_ops;
 
     /* Set up paging */
     mapping_vir_to_phy(VIRTUAL_PAGE_START, PCB_BOTTOM+(pcb->pid)*PHYS_PROGRAM_SIZE);
@@ -210,7 +203,6 @@ int32_t execute(const uint8_t* command)
                   "r" (USER_CS), \
                   "r" (prog_start_addr)
                 : "memory");
-
     return 0;
 }
 
