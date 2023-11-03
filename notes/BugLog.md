@@ -76,3 +76,32 @@ Solution:
 >   - filesys_init didn't find the correct address for data blocks. Corrected that.
 
 Time: 1 h.  
+
+## CHECKPOINT 2
+
+--- problem 1 ---
+Problem Description:   
+>   - Failed to call read_data function in execute system call. Showing memory at address 0x8fffffc cannot be accessed. 
+
+Solution:   
+>   - It seems that there is lacking steps changing page table used to be set but not used into present (present bit = 1). 
+
+Time: 2h
+
+--- problem 2 ---
+Problem Description:   
+>   - Nothing is showing up after calling execute(shell) and page fault is raised.
+
+Solution:   
+>   - Forget to set stdin and stdout. These two functions are written in terminal.c but not used. 
+
+Time: 2h
+
+--- problem 3 ---
+Problem Description:   
+>   - execute system call is failed with page fault. It seems that "IET" is not correctly functioning.
+
+Solution:   
+>   - Not resolved yet.
+
+Time: 4h
