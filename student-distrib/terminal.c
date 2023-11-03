@@ -48,14 +48,9 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes) {
 
 	reset_kbd_buf();
     terminal.readkey = 1;
-	while (terminal.readkey);					/* Wait on the flag */
+	while (terminal.readkey);					//Wait for the flag 
 	/* Read from the keyboard buffer */
 	/* User can only type up to 127 (MAX_CHA_BUF - 1) characters */
-
-	/* In 3 conditions will the read/write loop be broken:
-	 *     1. If more than 'nbytes' are read/written, or
-	 *     2. if a NUL is encountered, or
-	 *     3. if we already read 128 (MAX_CHA_BUF) bytes. */
 	for (i = 0; i < nbytes && i < MAX_CHA_BUF && terminal.kbd_buf[i] != '\0'; i++) {
 		((char*)buf)[i] = terminal.kbd_buf[i];
 	}
@@ -70,11 +65,6 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes) {
 
 	if (NULL == buf || nbytes == 0) { return -1; }
 
-	// /* Write to the screen */
-	// /* See above for loop-breaking conditions */
-	// for (i = 0; i < nbytes && ((char*)buf)[i] != '\0'; i++) {
-	// 		putc(((char*)buf)[i]);
-	// }
     const uint8_t* write_buf = buf;
     uint8_t c;
     uint32_t num_put = 0;

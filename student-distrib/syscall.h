@@ -15,9 +15,23 @@
 
 #define VIRTUAL_PAGE_START 0x08000000 // All user level programs will be loaded in the page starting at 128MB (virtual mem)
 #define PHYS_PROGRAM_SIZE 0x400000 // every program is 4MB in physical mem
+#define USER_CODE   0x8048000  // starting point of user code
+#define USER_STACK  0x8400000  // 132 MB
 #define Free 0
 #define Busy 1
 /* system call functions */
+         
+#define FAILURE         -1              /* Used to return -1 when a function has failed */
+// #define BUFFER_SIZE     128             /* Buffer max size is 128.                      */
+#define MAX_NUM_ARGS    5               /* NOT SURE ABOUT VALUE but used for parsing    */
+#define MAGIC_NUM_0     0x7F            /* Magic numbers that identify executables      */
+#define MAGIC_NUM_1     0x45            
+#define MAGIC_NUM_2     0x4C
+#define MAGIC_NUM_3     0x46
+#define ADDR_BIT        24
+#define EIGHT_MB        0x00800000      
+#define EIGHT_KB        0x2000         
+
 int32_t halt (uint8_t status);
 int32_t execute (const uint8_t* command);
 int32_t open (const uint8_t* filename);

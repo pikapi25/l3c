@@ -69,6 +69,132 @@ int32_t halt (uint8_t status){
     return 0;
 }
 
+int32_t curr_pid = -1;
+int32_t execute( const uint8_t* command )
+{
+
+    int i, prog_start_addr = VIRTUAL_PAGE_START;
+    char file_name[FILENAME_LEN]={'\0'}; 
+    char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
+    // /* If we just returned from a halt, start a new line*/
+    // if(terminal.cursor_x != 0){
+    //     userkey_putc('\n');
+    //     reset_kbd_buf();
+    // }
+
+    /* basic validation check */
+    if( curr_pid >= MAX_PROCESSES) 
+        return FAILURE;
+    if(command == NULL||command == '\0')
+        return FAILURE;
+
+    /* Parse cmd */
+    uint16_t cmd_len = strlen((int8_t*)command);
+    for(i=0;i<cmd_len;i++){
+        if(command[i] == '\0' || command[i] == ' ') break;
+        file_name[i] = command[i];
+    }
+    if(!get_fname(command))
+        return FAILURE;
+    
+    /* Parse args */
+    int arg_idx = i;
+    for(i=0;arg_idx<cmd_len;arg_idx++){
+        if(command[arg_idx] == '\0') break;
+        args[i] = command[arg_idx];
+        i++;
+    }
+    
+    dentry_t dentry;
+    uint8_t buf[BLOCK_SIZE];
+    /* check if file is valid*/
+    if(read_dentry_by_name((uint8_t*)file_name, &dentry) == FAILURE)
+        return FAILURE;
+
+    /* check if we can read first several bytes from the file */
+    if(4 != read_data( dentry.inode_num, 0, buf, 4)) return FAILURE;
+
+    /* check if it is executeable: ELF's magic number = 0x7f454c46 */ 
+    if((buf[0] != MAGIC_NUM_0) || (buf[1] != MAGIC_NUM_1) ||(buf[2] != MAGIC_NUM_2) ||(buf[3] != MAGIC_NUM_3))
+        return FAILURE;
+    
+    /* get program start address */
+    read_data(dentry.inode_num, ADDR_BIT, (uint8_t* )prog_start_addr, 4);   //NOT SURE whether the starting addr will change
+    
+    /* get a new PID for the new process */
+    for(i = 0;i <= MAX_PROCESSES;i++){
+        if(pid_arr[i] == Free){
+            pid_arr[i] = 1;
+            curr_pid = i;
+            pid_arr[i] = Busy;
+            break;
+        }
+    }
+    /* If no PIDs are free, return FAILURE. */
+    if(i > MAX_PROCESSES) return FAILURE;
+    /* get pcb structture */
+    pcb_t* pcb = (pcb_t*)(EIGHT_MB - (curr_pid+1) * EIGHT_KB);
+    pcb->pid = curr_pid;
+
+    /* set parent pid */
+    if(curr_pid == 0||curr_pid ==1 ||curr_pid == 2){
+        pcb->parent_pcb = NULL;  
+    }
+    else{   
+        pcb->parent_pcb = get_cur_pcb();  //ATTENTION: curr_pid should be convert into pcb: get_cur_pid()
+    }
+
+    pcb->fd_arr[0].flags = 1;
+    pcb->fd_arr[0].inode = 0;
+    pcb->fd_arr[0].file_position = 0;
+
+    pcb->fd_arr[1].flags = 1;
+    pcb->fd_arr[1].inode = 0;
+    pcb->fd_arr[1].file_position = 0;
+
+
+    /* Write arguments in pcb */
+    memcpy(pcb->arg_buf, args, MAX_CHA_BUF + 1);
+
+    /* Terminal open calls are omitted.
+     * According to the document, they should be illegal after all */
+
+    /* Set up paging */
+    mapping_vir_to_phy(prog_start_addr, PCB_BOTTOM+(pcb->pid)*PHYS_PROGRAM_SIZE);
+
+    /* Load program */
+    read_data(dentry.inode_num, 0, (uint8_t*)USER_CODE, USER_STACK - USER_CODE);
+
+    /* Save old stack */
+    register uint32_t saved_ebp asm("ebp");
+    register uint32_t saved_esp asm("esp");
+    // TSS represents our destination
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = (uint32_t)(pcb_t*)(EIGHT_MB - (curr_pid) * EIGHT_KB) - 4;    // the child pid about to be created
+    // PCB represents our source
+    pcb->ebp_val = saved_ebp;                 // so that we can return to the parent
+    pcb->esp_val = saved_esp;
+   
+    /* Enter user mode */
+    // Push order: SS, ESP, EFLAGS, CS, EIP
+    // ESP points to the base of user stack (132MB - 4B)
+    asm volatile("pushl %0 \n\
+                  pushl %1 \n\
+                  pushfl   \n\
+                  pushl %2 \n\
+                  pushl %3 \n\
+                  iret     \n"
+                : /* no output */
+                : "r" (USER_DS), \
+                  "r" (USER_STACK - sizeof(uint32_t)), \
+                  "r" (USER_CS), \
+                  "r" (prog_start_addr)
+                : "memory");
+
+    return 0;
+}
+
+
 /* open
  * INPUT: filename
  * OUTPUT: allocated fd. or -1 on failure
