@@ -69,4 +69,105 @@ int32_t halt (uint8_t status){
     return 0;
 }
 
+/* open
+ * INPUT: filename
+ * OUTPUT: allocated fd. or -1 on failure
+ * Effect: allocate avaliable fd.
+*/
+int32_t open(const uint8_t* filename){
+    /* 1. find file */
+    int i;
+    if (open_file(filename) == -1) return -1;
+
+    /* 2. allocate an unused file descriptor */
+    pcb_t * cur_pcb = get_cur_pcb();
+    for (i = 0; i < MAX_FILES; i++){
+        if (cur_pcb->fd_arr[i].flags == Free){
+            break;
+        }
+    }
+    if (i = MAX_FILES)return -1;
+
+    /* 3. set up descriptor*/
+    dentry_t dentry;
+    read_dentry_by_name(filename, &dentry);
+    cur_pcb->fd_arr[i].file_position = 0;
+    cur_pcb->fd_arr[i].flags = Busy;
+    cur_pcb->fd_arr[i].inode = dentry.inode_num;
+
+    if (dentry.filetype == 0){
+        /* rtc type */
+        cur_pcb->fd_arr[i].file_op_table->close_op = rtc_close;
+        cur_pcb->fd_arr[i].file_op_table->open_op = rtc_open;
+        cur_pcb->fd_arr[i].file_op_table->read_op = rtc_read;
+        cur_pcb->fd_arr[i].file_op_table->write_op = rtc_write;
+    }else if (dentry.filetype == 1){
+        /* directory type */
+        cur_pcb->fd_arr[i].file_op_table->close_op = close_dir;
+        cur_pcb->fd_arr[i].file_op_table->open_op = open_dir;
+        cur_pcb->fd_arr[i].file_op_table->read_op = read_dir;
+        cur_pcb->fd_arr[i].file_op_table->write_op = write_dir;
+    }else if (dentry.filetype == 2){
+        /* data file type */
+        cur_pcb->fd_arr[i].file_op_table->close_op = close_file;
+        cur_pcb->fd_arr[i].file_op_table->open_op = open_file;
+        cur_pcb->fd_arr[i].file_op_table->read_op = read_file;
+        cur_pcb->fd_arr[i].file_op_table->write_op = write_file;
+    }
+    cur_pcb->fd_arr[i].file_op_table->open_op(filename);
+    return i;
+}
+
+/* close
+ * INPUT: fd
+ * OUTPUT: 0 on success; -1 on tyring close invalid fd
+ * Effect: close one fd.
+*/
+int32_t close(int32_t fd){
+    /* close default fd and invalid fd is forbidden */
+    if (fd <= 1 || fd >= MAX_FILES)return -1;
+
+    /* close free fd is forbidden*/
+    pcb_t * cur_pcb = get_cur_pcb();
+    if (cur_pcb->fd_arr[fd].flags == Busy){
+        cur_pcb->fd_arr[fd].file_op_table->close_op(fd);
+        cur_pcb->fd_arr[fd].flags = Free;
+        return 0;
+    }
+    return -1;
+}
+
+/* read
+ * INPUT: fd, buf, nbytes
+ * OUTPUT: bytes read; -1 on failure
+ * Effect: read call is executed.
+*/
+int32_t read(int32_t fd, void* buf, int32_t nbytes){
+    int32_t result;
+    pcb_t * cur_pcb = get_cur_pcb();
+    if (fd < 0 || fd > MAX_FILES)return -1;
+    if (buf == NULL || nbytes < 0)return -1;
+    if (cur_pcb->fd_arr[fd].flags == Free)return -1;
+
+    /* use file operations jump table to call read function*/
+    result = cur_pcb->fd_arr[fd].file_op_table->read_op(fd, buf, nbytes);
+    return result;
+}
+
+/* write
+ * INPUT: fd, buf, nbytes
+ * OUTPUT: bytes written; -1 on failure
+ * Effect: read call is executed.
+*/
+int32_t write(int32_t fd, const void* buf, int32_t nbytes){
+    int32_t result;
+    pcb_t * cur_pcb = get_cur_pcb();
+    if (fd < 0 || fd > MAX_FILES)return -1;
+    if (buf == NULL || nbytes < 0)return -1;
+    if (cur_pcb->fd_arr[fd].flags == Free)return -1;
+
+    /* use file operations jump table to call write function*/
+    result = cur_pcb->fd_arr[fd].file_op_table->write_op(fd, buf, nbytes);
+    return result;
+}
 

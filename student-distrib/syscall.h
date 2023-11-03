@@ -3,6 +3,8 @@
 
 #include "types.h"
 #include "terminal.h"
+#include "filesys.h"
+#include "rtc.h"
 
 /* Magic Numbers*/
 #define MAX_PROCESSES 6
@@ -13,14 +15,15 @@
 
 #define VIRTUAL_PAGE_START 0x08000000 // All user level programs will be loaded in the page starting at 128MB (virtual mem)
 #define PHYS_PROGRAM_SIZE 0x400000 // every program is 4MB in physical mem
-
+#define Free 0
+#define Busy 1
 /* system call functions */
 int32_t halt (uint8_t status);
 int32_t execute (const uint8_t* command);
-int32_t read (int32_t fd, void* buf, int32_t nbytes);
-int32_t write (int32_t fd, const void* buf, int32_t nbytes);
 int32_t open (const uint8_t* filename);
 int32_t close (int32_t fd);
+int32_t read (int32_t fd, void* buf, int32_t nbytes);
+int32_t write (int32_t fd, const void* buf, int32_t nbytes);
 
 /* file operations */
 typedef int32_t (*read_f)(int32_t fd, void* buf, int32_t nbytes);
