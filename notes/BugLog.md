@@ -79,7 +79,7 @@ Time: 1 h.
 
 ## CHECKPOINT 2
 
---- problem 1 --- 
+--- problem 1 ---   
 Problem Description:   
 >   - Failed to call read_data function in execute system call. Showing memory at address 0x8fffffc cannot be accessed. 
 
@@ -88,7 +88,7 @@ Solution:
 
 Time: 2h
 
---- problem 2 --- 
+--- problem 2 ---   
 Problem Description:   
 >   - Nothing is showing up after calling execute(shell) and page fault is raised.
 
@@ -97,7 +97,7 @@ Solution:
 
 Time: 2h
 
---- problem 3 --- 
+--- problem 3 ---   
 Problem Description:   
 >   - execute system call is failed with page fault. It seems that "IET" is not correctly functioning.
 
