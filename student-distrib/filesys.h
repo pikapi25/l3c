@@ -2,6 +2,7 @@
 #define _FILESYS_H
 
 #include "types.h"
+#include "syscall.h"
 
 #define FILENAME_LEN 32        //name is up to 32 characters
 #define FILES_NUM_MAX 63       //the file system can hold up to 63 files
@@ -36,19 +37,6 @@ typedef struct data_block
 {
     int8_t data[BLOCK_SIZE];
 } data_block_t;
-
-// file descriptor entry
-// contains 
-//          FO_pointer(file operations table pointer 4B)
-//          inode(inode 4B)
-//          file_pos(file position 4B)
-//          flag(flags 4B)
-typedef struct fdt{
-    uint32_t FO_pointer;
-    uint32_t inode;
-    uint32_t file_pos;
-    uint32_t flag;
-}fdt;
 
 extern void filesys_init(uint32_t* fs_addr);
 
