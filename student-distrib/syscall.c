@@ -57,14 +57,7 @@ int32_t halt (uint8_t status){
     /* Restore parent paging (from ls back to shell) */
     /* Physical memory starts at 8MB + (process number * 4MB) */
     /* ATTENTION: Need to implement this function to set paging */
-    mapping_vir_to_phy(VIRTUAL_PAGE_START, PCB_BOTTOM+(parent_pcb->pid)*PHYS_PROGRAM_SIZE);
-    asm volatile("mov %%cr3, %%eax \n\
-        mov %%eax, %%cr3 \n\
-        "
-        :
-        :
-        : "memory"
-        );
+    mapping_vir_to_phy(VIRTUAL_PAGE_START, PCB_BOTTOM+(parent_pcb->pid)*PHYS_PROGRAM_SIZE);                                   \
     /* Write Parent process’ info back to TSS(esp0) */
     /* the esp should point to the bottom of the parent block after halting current pcb */
     tss.ss0 = KERNEL_DS;

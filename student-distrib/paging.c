@@ -62,16 +62,10 @@ Page_Initialize(){
         movl %%cr0, %%eax; \
         orl $0x80000001, %%eax; \
         movl %%eax, %%cr0; "
-        : :"r"(page_dic):"%eax"
+        : :"r"(&page_dic)
+        : "%eax"
     );
 
-      asm volatile("mov %%cr3, %%eax \n\
-                mov %%eax, %%cr3 \n\
-               "
-               :
-               :
-               : "memory"
-               );
 }
 
 /* mapping_vir_to_phy
@@ -81,4 +75,11 @@ Page_Initialize(){
 */
 void mapping_vir_to_phy(uint32_t vir_addr, uint32_t phy_addr){
     page_dic[vir_addr>>page_dir_start] = phy_addr | user_paging_set;
+    asm volatile(                           \
+        "movl %0, %%eax     \n\t"           \
+        "movl %%eax, %%cr3  \n\t"           \
+        :                                   \
+        : "r" (&page_dic)             \
+        : "%eax"                            \
+    );                                      \
 }
