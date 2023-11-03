@@ -8,8 +8,11 @@
 #define MAX_PROCESSES 6
 #define MAX_FILES 8
 #define PCB_BLOCK_SIZE 0x2000 // every pcb block is 8KB
-#define PCB_START 0x800000 // every pcb starts at 8MB-i*8KB
+#define PCB_BOTTOM 0x800000 // every pcb starts at 8MB-i*8KB
 #define PCB_BITMASK 0xFFFFE000 // the mast to get current pcb from esp
+
+#define VIRTUAL_PAGE_START 0x08000000 // All user level programs will be loaded in the page starting at 128MB (virtual mem)
+#define PHYS_PROGRAM_SIZE 0x400000 // every program is 4MB in physical mem
 
 /* system call functions */
 int32_t halt (uint8_t status);
