@@ -18,7 +18,8 @@ pcb_t* get_cur_pcb(){
     return (pcb_t*)(esp_value & PCB_BITMASK);
 }
 
-file_op_t terminal_ops = {illegal_open, illegal_close, terminal_read, terminal_write};
+file_op_t terminal_read_ops = {illegal_open, illegal_close, terminal_read, illegal_write};
+file_op_t terminal_write_ops = {illegal_open, illegal_close, illegal_read, terminal_write};
 file_op_t rtc_ops = {rtc_open, rtc_close, rtc_read, rtc_write};
 file_op_t dir_ops = {open_dir, close_dir, read_dir, write_dir};
 file_op_t file_ops = {open_file, close_file, read_file, write_file};
@@ -95,7 +96,6 @@ int32_t execute(const uint8_t* command)
 {
     int result;
     uint32_t i, prog_start_addr, pid = 0;
-    uint8_t eip[4];
     uint8_t file_name[FILENAME_LEN] = {'\0'}; 
     // char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
     
@@ -167,12 +167,12 @@ int32_t execute(const uint8_t* command)
     pcb->fd_arr[0].flags = 1;
     pcb->fd_arr[0].inode = 0;
     pcb->fd_arr[0].file_position = 0;
-    pcb->fd_arr[0].file_op_table = &terminal_ops;
+    pcb->fd_arr[0].file_op_table = &terminal_read_ops;
     
     pcb->fd_arr[1].flags = 1;
     pcb->fd_arr[1].inode = 0;
     pcb->fd_arr[1].file_position = 0;
-    pcb->fd_arr[1].file_op_table = &terminal_ops;
+    pcb->fd_arr[1].file_op_table = &terminal_write_ops;
 
     /* Set up paging */
     mapping_vir_to_phy(VIRTUAL_PAGE_START, PCB_BOTTOM+(pcb->pid)*PHYS_PROGRAM_SIZE);
