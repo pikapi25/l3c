@@ -80,7 +80,7 @@ void idt_init()
     SET_IDT_ENTRY(idt[RTC_VEC], rtc_handler_linkage);
 
     //set IDT entries for system call
-    SET_IDT_ENTRY(idt[SYSTEM_CALL_VEC], system_call_handler);
+    SET_IDT_ENTRY(idt[SYSTEM_CALL_VEC], syscall_linkage);
 
     /*load IDT*/
     lidt(idt_desc_ptr);
