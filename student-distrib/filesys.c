@@ -6,11 +6,6 @@ boot_block_t* boot_block;
 inode_t* inode_head;
 data_block_t* data_block_head;
 
-// here we record the pointer for available pcb entry -1 using global pointer pcb_pointer
-fdt pcb[8];
-int32_t pcb_pointer = 1;
-int dir_loc = 0;
-
 /*
 *   filesys_init
 *   Description: initialize some variables for the file system
@@ -180,15 +175,14 @@ int32_t close_file(int32_t fd){
 // output: return  on success
 // side effect: update file_pos after read is succeeded
 int32_t read_file(int32_t fd, void* buf, int32_t nbytes){
-    // we use cur_fdt to store current file descriptor entry
-    fdt cur_fdt = pcb[fd];
-    uint32_t inode = cur_fdt.inode;
-    uint32_t offset = cur_fdt.file_pos;
+    pcb_t* cur_pcb = get_cur_pcb();
+    uint32_t inode = cur_pcb.file_desc_t fd_arr[fd].inode;
+    uint32_t offset = cur_pcb.file_desc_t fd_arr[fd].file_position;
     int32_t result = read_data(inode, offset, buf, nbytes);
     // since read_data return the bytes copied on success
     if (result != -1){
         // we update the file_pos if read call is succeeded
-        pcb[fd].file_pos += result; 
+        cur_pcb.file_desc_t fd_arr[fd].file_position += result; 
         return 0;
     }
     return -1;
