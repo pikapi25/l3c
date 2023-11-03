@@ -69,11 +69,20 @@ int32_t halt (uint8_t status){
     return 0;
 }
 
-int32_t curr_pid = -1;
-int32_t execute( const uint8_t* command )
+/* execute
+ * INPUT: cmd: spaced-separated sequences of words
+        [file name of the program to be executed] [arg1, arg2, arg3]
+ * RETURN: 
+ * -1 if the command cannot be exexuted 
+ * (eg: the program doen not exist/the filename is not executable)
+ * 256 if the program dies by an exception
+ * 0-255 if the program executes a halt system call, in which case
+ * the value returned is that given by the program’s call to halt
+ */
+int32_t execute(const uint8_t* command)
 {
 
-    int i, prog_start_addr = VIRTUAL_PAGE_START;
+    int i, prog_start_addr = VIRTUAL_PAGE_START, curr_pid = -1;
     char file_name[FILENAME_LEN]={'\0'}; 
     char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
     // /* If we just returned from a halt, start a new line*/
@@ -83,7 +92,7 @@ int32_t execute( const uint8_t* command )
     // }
 
     /* basic validation check */
-    if( curr_pid >= MAX_PROCESSES) 
+    if(curr_pid >= MAX_PROCESSES) 
         return FAILURE;
     if(command == NULL||command == '\0')
         return FAILURE;
@@ -94,9 +103,7 @@ int32_t execute( const uint8_t* command )
         if(command[i] == '\0' || command[i] == ' ') break;
         file_name[i] = command[i];
     }
-    if(!get_fname(command))
-        return FAILURE;
-    
+
     /* Parse args */
     int arg_idx = i;
     for(i=0;arg_idx<cmd_len;arg_idx++){
