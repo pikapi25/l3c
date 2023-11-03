@@ -20,17 +20,17 @@ int32_t open (const uint8_t* filename);
 int32_t close (int32_t fd);
 
 /* file operations */
-typedef int32_t (*read_file)(int32_t fd, void* buf, int32_t nbytes);
-typedef int32_t (*write_file)(int32_t fd, const void* buf, int32_t nbytes);
-typedef int32_t (*open_file)(const uint8_t* filename);
-typedef int32_t (*close_file)(int32_t fd);
+typedef int32_t (*read_f)(int32_t fd, void* buf, int32_t nbytes);
+typedef int32_t (*write_f)(int32_t fd, const void* buf, int32_t nbytes);
+typedef int32_t (*open_f)(const uint8_t* filename);
+typedef int32_t (*close_f)(int32_t fd);
 
 typedef struct file_op
 {
-    read_file read_op;
-    write_file write_op;
-    open_file open_op;
-    close_file close_op;
+    read_f read_op;
+    write_f write_op;
+    open_f open_op;
+    close_f close_op;
 }file_op_t;
 
 /* file descriptor */
