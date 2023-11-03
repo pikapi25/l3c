@@ -135,9 +135,11 @@ int32_t execute(const uint8_t* command)
         return FAILURE;
     
     /* get eip */
-    result = read_data(dentry.inode_num, 24, eip, 4);
-    if(result != 4) return FAILURE;   
-    prog_start_addr = (eip[0]<<24)+(eip[1]<<16)+(eip[2]<<8)+eip[3];
+    // result = read_data(dentry.inode_num, 24, eip, 4);
+    // if(result != 4) return FAILURE;   
+    // prog_start_addr = (eip[0]<<24)+(eip[1]<<16)+(eip[2]<<8)+eip[3];
+    result = read_data(dentry.inode_num, 24, (uint8_t* )&prog_start_addr, 4);
+    if(result != 4) return FAILURE;
     
     /* get a new PID for the new process */
     pid = 0;
@@ -152,20 +154,28 @@ int32_t execute(const uint8_t* command)
     pcb->pid = pid;
 
     /* set parent pid */
-    if(pid == 0||pid ==1 ||pid == 2){
-        pcb->parent_pcb = NULL;  
+    if(pid == 0){
+        pcb->parent_pcb =(pcb_t*)( EIGHT_MB - EIGHT_KB);  
     }
-    else{   
-        pcb->parent_pcb = get_cur_pcb();  //ATTENTION: curr_pid should be convert into pcb: get_cur_pid()
+    else{
+        pcb->parent_pcb = (pcb_t*)(EIGHT_MB - pid * EIGHT_KB);
     }
 
     pcb->fd_arr[0].flags = 1;
     pcb->fd_arr[0].inode = 0;
     pcb->fd_arr[0].file_position = 0;
-
+    pcb->fd_arr[0].file_op_table->close_op = illegal_close;
+    pcb->fd_arr[0].file_op_table->open_op = illegal_open;
+    pcb->fd_arr[0].file_op_table->write_op = illegal_write;
+    pcb->fd_arr[0].file_op_table->read_op = terminal_read;
+    
     pcb->fd_arr[1].flags = 1;
     pcb->fd_arr[1].inode = 0;
     pcb->fd_arr[1].file_position = 0;
+    pcb->fd_arr[1].file_op_table->close_op = illegal_close;
+    pcb->fd_arr[1].file_op_table->open_op = illegal_open;
+    pcb->fd_arr[1].file_op_table->write_op = terminal_write;
+    pcb->fd_arr[1].file_op_table->read_op = illegal_read;
 
 
     /* Set up paging */
