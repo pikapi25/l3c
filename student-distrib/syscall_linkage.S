@@ -12,16 +12,16 @@ syscall_linkage:
     #check whether call number is valid
     cmpl $1, %eax
     jl invalid_call
-    cmpl $10, %eax
+    cmpl $6, %eax
     jg invalid_call
 
     #call valid system call
     movl %eax, %esi
     addl $-1, %esi      #jumptable starts from index 0
     #push parameters
-    pushl %ebx
-    pushl %ecx
     pushl %edx
+    pushl %ecx
+    pushl %ebx
     call *syscall_jumptable( ,%esi, 4);     #long is 4 bytes
     addl $12, %esp      #pop 3 parameters
     jmp done   
