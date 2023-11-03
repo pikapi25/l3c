@@ -176,13 +176,13 @@ int32_t close_file(int32_t fd){
 // side effect: update file_pos after read is succeeded
 int32_t read_file(int32_t fd, void* buf, int32_t nbytes){
     pcb_t* cur_pcb = get_cur_pcb();
-    uint32_t inode = cur_pcb.file_desc_t fd_arr[fd].inode;
-    uint32_t offset = cur_pcb.file_desc_t fd_arr[fd].file_position;
+    uint32_t inode = cur_pcb->fd_arr[fd].inode;
+    uint32_t offset = cur_pcb->fd_arr[fd].file_position;
     int32_t result = read_data(inode, offset, buf, nbytes);
     // since read_data return the bytes copied on success
     if (result != -1){
         // we update the file_pos if read call is succeeded
-        cur_pcb.file_desc_t fd_arr[fd].file_position += result; 
+        cur_pcb->fd_arr[fd].file_position += result;
         return 0;
     }
     return -1;
