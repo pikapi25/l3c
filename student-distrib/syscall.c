@@ -18,7 +18,10 @@ pcb_t* get_cur_pcb(){
     return (pcb_t*)(esp_value & PCB_BITMASK);
 }
 
-file_op_t terminal_ops = {terminal_read, terminal_write, illegal_open, illegal_close};
+file_op_t terminal_ops = {illegal_open, illegal_close, terminal_read, terminal_write};
+file_op_t rtc_ops = {rtc_open, rtc_close, rtc_read, rtc_write};
+file_op_t dir_ops = {open_dir, close_dir, read_dir, write_dir};
+file_op_t file_ops = {open_file, close_file, read_file, write_file};
 /* halt
  * INPUT: the status value
  * OUTPUT: return a value to the parent execute system call so that we know how the program ended.
@@ -36,7 +39,7 @@ int32_t halt (uint8_t status){
     /* close all files */
     for (i=0; i < MAX_FILES; i++){
         if (cur_pcb->fd_arr[i].flags!=0){
-            cur_pcb->fd_arr[i].file_op_table->close_op(i);
+            //cur_pcb->fd_arr[i].file_op_table->close_op(i);
             cur_pcb->fd_arr[i].flags = 0;
         }
     }
@@ -65,19 +68,19 @@ int32_t halt (uint8_t status){
 
     /* Jump to execute return */
     /* ATTENTION: Neet to implement this function to restore ebp and esp value in asm*/
-    asm volatile("movl %0, %%eax \n\
-                movl %1, %%ebp \n\
-                movl %2, %%esp \n\
-                leave          \n\
-                ret            \n"
-            : /* no output */
-            :   "r" (ret_val), \
-                "r" (cur_pcb->ebp_val), \
-                "r" (cur_pcb->esp_val)
-            :   "eax", "ebp", "esp");
+
+	asm volatile("mov %0, %%esp \n\
+                mov %1, %%ebp \n\
+                mov %2, %%eax \n\
+                leave         \n\
+                ret            \n\
+               "
+               :
+               : "r"(cur_pcb->esp_val), "r" (cur_pcb->ebp_val), "r"(ret_val)
+               : "%eax", "ebp","esp");
     return 0;
 }
-
+//              jmp BACK_TO_EXECUTE \n
 /* execute
  * INPUT: cmd: spaced-separated sequences of words
         [file name of the program to be executed] [arg1, arg2, arg3]
@@ -93,7 +96,7 @@ int32_t execute(const uint8_t* command)
     int result;
     uint32_t i, prog_start_addr, pid = 0;
     uint8_t eip[4];
-    uint8_t file_name[FILENAME_LEN]; 
+    uint8_t file_name[FILENAME_LEN] = {'\0'}; 
     // char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
     
     /* basic validation check */
@@ -179,7 +182,7 @@ int32_t execute(const uint8_t* command)
 
     /* Save old stack */
     uint32_t saved_ebp, saved_esp;
-    asm("movl %%esp, %0" : "=r"(saved_esp));
+    asm("movl %%ebp, %0" : "=r"(saved_ebp));
     asm("movl %%esp, %0" : "=r"(saved_esp));
     // PCB represents our source
     pcb->ebp_val = saved_ebp;                 // so that we can return to the parent
@@ -191,18 +194,29 @@ int32_t execute(const uint8_t* command)
     /* Enter user mode */
     // Push order: SS, ESP, EFLAGS, CS, EIP
     // ESP points to the base of user stack (132MB - 4B)
-    asm volatile("pushl %0 \n\
-                  pushl %1 \n\
-                  pushfl   \n\
-                  pushl %2 \n\
-                  pushl %3 \n\
-                  iret     \n"
-                : /* no output */
-                : "r" (USER_DS), \
-                  "r" (USER_STACK - sizeof(uint32_t)), \
-                  "r" (USER_CS), \
-                  "r" (prog_start_addr)
-                : "memory");
+  asm volatile("mov $0x2B, %%ax;"
+                "mov %%ax, %%ds;"
+                "mov %%ax, %%es;"
+                "mov %%ax, %%fs;"
+                "mov %%ax, %%gs;"
+                "pushl $0x2B;"
+                //132MB - 1 bottom of user page
+                "pushl $0x83FFFFC;"
+                "pushfl;"
+                "popl %%edx;"
+                //OR the IF bit (10th bit) of flags to set to 1 because I cli()ed it
+                "orl $0x200, %%edx;"
+                "pushl %%edx;"
+                //push user code segment
+                "pushl $0x23;"
+                //push entry point
+                "pushl %0;"
+                "iret;"
+                "BACK_TO_EXECUTE: "
+               :
+               : "r"(prog_start_addr)
+               : "edx", "eax"
+               );
     return 0;
 }
 
@@ -235,22 +249,13 @@ int32_t open(const uint8_t* filename){
 
     if (dentry.filetype == 0){
         /* rtc type */
-        cur_pcb->fd_arr[i].file_op_table->close_op = rtc_close;
-        cur_pcb->fd_arr[i].file_op_table->open_op = rtc_open;
-        cur_pcb->fd_arr[i].file_op_table->read_op = rtc_read;
-        cur_pcb->fd_arr[i].file_op_table->write_op = rtc_write;
+        cur_pcb->fd_arr[i].file_op_table = &rtc_ops;
     }else if (dentry.filetype == 1){
         /* directory type */
-        cur_pcb->fd_arr[i].file_op_table->close_op = close_dir;
-        cur_pcb->fd_arr[i].file_op_table->open_op = open_dir;
-        cur_pcb->fd_arr[i].file_op_table->read_op = read_dir;
-        cur_pcb->fd_arr[i].file_op_table->write_op = write_dir;
+        cur_pcb->fd_arr[i].file_op_table = &dir_ops;
     }else if (dentry.filetype == 2){
         /* data file type */
-        cur_pcb->fd_arr[i].file_op_table->close_op = close_file;
-        cur_pcb->fd_arr[i].file_op_table->open_op = open_file;
-        cur_pcb->fd_arr[i].file_op_table->read_op = read_file;
-        cur_pcb->fd_arr[i].file_op_table->write_op = write_file;
+        cur_pcb->fd_arr[i].file_op_table = &file_ops;
     }
     cur_pcb->fd_arr[i].file_op_table->open_op(filename);
     return i;

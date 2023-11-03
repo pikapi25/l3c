@@ -45,10 +45,10 @@ typedef int32_t (*close_f)(int32_t fd);
 
 typedef struct file_op
 {
-    read_f read_op;
-    write_f write_op;
     open_f open_op;
     close_f close_op;
+    read_f read_op;
+    write_f write_op;
 }file_op_t;
 
 /* file descriptor */
