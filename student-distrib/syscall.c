@@ -194,29 +194,19 @@ int32_t execute(const uint8_t* command)
     /* Enter user mode */
     // Push order: SS, ESP, EFLAGS, CS, EIP
     // ESP points to the base of user stack (132MB - 4B)
-  asm volatile("mov $0x2B, %%ax;"
-                "mov %%ax, %%ds;"
-                "mov %%ax, %%es;"
-                "mov %%ax, %%fs;"
-                "mov %%ax, %%gs;"
-                "pushl $0x2B;"
-                //132MB - 1 bottom of user page
-                "pushl $0x83FFFFC;"
-                "pushfl;"
-                "popl %%edx;"
-                //OR the IF bit (10th bit) of flags to set to 1 because I cli()ed it
-                "orl $0x200, %%edx;"
-                "pushl %%edx;"
-                //push user code segment
-                "pushl $0x23;"
-                //push entry point
-                "pushl %0;"
-                "iret;"
-                "BACK_TO_EXECUTE: "
-               :
-               : "r"(prog_start_addr)
-               : "edx", "eax"
-               );
+  asm volatile("pushl %0 \n\
+                pushl %1 \n\
+                pushfl   \n\
+                pushl %2 \n\
+                pushl %3 \n\
+                iret     \n"
+                : /* no output */
+                : "r" (USER_DS), \
+                "r" (USER_STACK - sizeof(uint32_t)), \
+                "r" (USER_CS), \
+                "r" (prog_start_addr)
+                : "memory");
+
     return 0;
 }
 
