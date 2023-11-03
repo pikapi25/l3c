@@ -102,24 +102,22 @@ void clear_redraw() {
 }
 
 int32_t illegal_open(const uint8_t* filename) {
-	printf("WARNING: You cannot open the terminal.\n");
+	printf("FAIL TO OPEN TERMINAL\n");
 	return -1;
 }
 
 int32_t illegal_close(int32_t fd) {
-	printf("WARNING: You cannot close the terminal.\n");
-	/* Otherwise, the message will pop up 
-	 * each time we halt a new shell (excl. #0) */
+	printf("FAIL TO CLOSE TERMINAL\n");
 	return -1;
 }
 
 int32_t illegal_read(int32_t fd, void* buf, int32_t nbyte){
-    printf("WARNING: You cannot read in stdout.\n");
+    printf("FAIL TO READ\n");
     return -1;
 }
 
 int32_t illegal_write(int32_t fd, const void* buf, int32_t nbyte){
-    printf("WARNING: You cannot write in stdin.\n");
+    printf("FAIL TO WRITE\n");
     return -1;
 }
 
