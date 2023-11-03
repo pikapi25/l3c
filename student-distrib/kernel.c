@@ -172,11 +172,11 @@ void entry(unsigned long magic, unsigned long addr) {
 
 #ifdef RUN_TESTS
     /* Run tests */
-    launch_tests(); 
-
-#else
-	/* Execute the first program ("shell") ... */
-	execute((uint8_t*)"shell");
+    // launch_tests(); 
+    execute((uint8_t*)"shell");
+// #else
+// 	/* Execute the first program ("shell") ... */
+// 	execute((uint8_t*)"shell");
 #endif
     /* Execute the first program ("shell") ... */
 

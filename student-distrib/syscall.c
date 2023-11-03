@@ -98,15 +98,10 @@ int32_t halt (uint8_t status){
 int32_t execute(const uint8_t* command)
 {
 
-    int i, prog_start_addr = VIRTUAL_PAGE_START, curr_pid = -1;
+    int i, prog_start_addr = EIGHT_MB, curr_pid = -1;
     char file_name[FILENAME_LEN]={'\0'}; 
     char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
-    // /* If we just returned from a halt, start a new line*/
-    // if(terminal.cursor_x != 0){
-    //     userkey_putc('\n');
-    //     reset_kbd_buf();
-    // }
-
+    
     /* basic validation check */
     if(curr_pid >= MAX_PROCESSES) 
         return FAILURE;
@@ -119,7 +114,6 @@ int32_t execute(const uint8_t* command)
         if(command[i] == '\0' || command[i] == ' ') break;
         file_name[i] = command[i];
     }
-
     /* Parse args */
     int arg_idx = i;
     for(i=0;arg_idx<cmd_len;arg_idx++){
@@ -129,20 +123,20 @@ int32_t execute(const uint8_t* command)
     }
     
     dentry_t dentry;
-    uint8_t buf[BLOCK_SIZE];
+    uint8_t mag_buf[4];
     /* check if file is valid*/
     if(read_dentry_by_name((uint8_t*)file_name, &dentry) == FAILURE)
         return FAILURE;
 
     /* check if we can read first several bytes from the file */
-    if(4 != read_data( dentry.inode_num, 0, buf, 4)) return FAILURE;
+    if(4 != read_data( dentry.inode_num, 0, mag_buf, 4)) return FAILURE;
 
     /* check if it is executeable: ELF's magic number = 0x7f454c46 */ 
-    if((buf[0] != MAGIC_NUM_0) || (buf[1] != MAGIC_NUM_1) ||(buf[2] != MAGIC_NUM_2) ||(buf[3] != MAGIC_NUM_3))
+    if((mag_buf[0] != MAGIC_NUM_0) || (mag_buf[1] != MAGIC_NUM_1) ||(mag_buf[2] != MAGIC_NUM_2) ||(mag_buf[3] != MAGIC_NUM_3))
         return FAILURE;
     
     /* get program start address */
-    read_data(dentry.inode_num, ADDR_BIT, (uint8_t* )prog_start_addr, 4);   //NOT SURE whether the starting addr will change
+    // read_data(dentry.inode_num, 24, (uint8_t* )prog_start_addr, 4);   //NOT SURE whether the starting addr will change
     
     /* get a new PID for the new process */
     for(i = 0;i <= MAX_PROCESSES;i++){
@@ -235,7 +229,7 @@ int32_t open(const uint8_t* filename){
             break;
         }
     }
-    if (i = MAX_FILES)return -1;
+    if (i == MAX_FILES) return FAILURE;
 
     /* 3. set up descriptor*/
     dentry_t dentry;

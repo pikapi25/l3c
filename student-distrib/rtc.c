@@ -90,7 +90,7 @@ int32_t rtc_close(int32_t fd){
  * OUTPUT: 0
  * EFFECT: wait until RTC interrupt occurred, and return 0
 */
-int32_t rtc_read(int32_t fd, const void* buf, int32_t nbytes){
+int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes){
     /* wait until interrupt occured */
     while (!rtc_int_flag);
     rtc_int_flag = 0;

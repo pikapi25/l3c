@@ -22,8 +22,6 @@
 /* system call functions */
          
 #define FAILURE         -1              /* Used to return -1 when a function has failed */
-// #define BUFFER_SIZE     128             /* Buffer max size is 128.                      */
-#define MAX_NUM_ARGS    5               /* NOT SURE ABOUT VALUE but used for parsing    */
 #define MAGIC_NUM_0     0x7F            /* Magic numbers that identify executables      */
 #define MAGIC_NUM_1     0x45            
 #define MAGIC_NUM_2     0x4C
