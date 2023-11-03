@@ -10,7 +10,8 @@
 #define NotPresent 0
 #define video_memory_start 0xb8000
 #define video_memory_end 0xb9fff
-
+#define user_paging_set 0x87 // PS, U/S, R/W, P = 1
+#define page_dir_start 22
 uint32_t page_table[PAGE_TABLE_COUNT] __attribute__((aligned (4 * PAGE_TABLE_COUNT)));        // page_table for 0~4 MB
 uint32_t page_dic[PAGE_DIC_COUNT] __attribute__((aligned (4 * PAGE_DIC_COUNT))); 
 // Page_Initialize
@@ -63,5 +64,21 @@ Page_Initialize(){
         movl %%eax, %%cr0; "
         : :"r"(page_dic):"%eax"
     );
+
+      asm volatile("mov %%cr3, %%eax \n\
+                mov %%eax, %%cr3 \n\
+               "
+               :
+               :
+               : "memory"
+               );
 }
 
+/* mapping_vir_to_phy
+ * Input: virtual address, physical address
+ * Output: None
+ * Effect: set page directory to map from virtual to physical,
+*/
+void mapping_vir_to_phy(uint32_t vir_addr, uint32_t phy_addr){
+    page_dic[vir_addr>>page_dir_start] = phy_addr | user_paging_set;
+}

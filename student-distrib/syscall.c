@@ -1,6 +1,7 @@
 #include "syscall.h"
 #include "x86_desc.h"
 #include "paging.h"
+#include "lib.h"
 
 uint32_t pid_arr[MAX_PROCESSES] = {0};
 
@@ -25,7 +26,7 @@ pcb_t* get_cur_pcb(){
 */
 int32_t halt (uint8_t status){
     int i;
-
+    uint32_t ret_val = (uint32_t)status;
     /* get current pcb */
     pcb_t *cur_pcb = get_cur_pcb();
     if(cur_pcb == NULL){
@@ -57,7 +58,13 @@ int32_t halt (uint8_t status){
     /* Physical memory starts at 8MB + (process number * 4MB) */
     /* ATTENTION: Need to implement this function to set paging */
     mapping_vir_to_phy(VIRTUAL_PAGE_START, PCB_BOTTOM+(parent_pcb->pid)*PHYS_PROGRAM_SIZE);
-
+    asm volatile("mov %%cr3, %%eax \n\
+        mov %%eax, %%cr3 \n\
+        "
+        :
+        :
+        : "memory"
+        );
     /* Write Parent process’ info back to TSS(esp0) */
     /* the esp should point to the bottom of the parent block after halting current pcb */
     tss.ss0 = KERNEL_DS;
@@ -65,7 +72,16 @@ int32_t halt (uint8_t status){
 
     /* Jump to execute return */
     /* ATTENTION: Neet to implement this function to restore ebp and esp value in asm*/
-    halt_jmp_to_exe_ret(cur_pcb->ebp_val, cur_pcb->esp_val, status);
+    asm volatile("movl %0, %%eax \n\
+                movl %1, %%ebp \n\
+                movl %2, %%esp \n\
+                leave          \n\
+                ret            \n"
+            : /* no output */
+            :   "r" (ret_val), \
+                "r" (cur_pcb->ebp_val), \
+                "r" (cur_pcb->esp_val)
+            :   "eax", "ebp", "esp");
     return 0;
 }
 
