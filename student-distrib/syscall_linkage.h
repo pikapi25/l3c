@@ -1,6 +1,10 @@
 #ifndef _SYSCALL_LINKAGE_H
 #define _SYSCALL_LINKAGE_H
+#ifndef ASM
 
-extern void syscall_linkage();
+#include "syscall.h"
 
+extern void syscall_linkage(void);
+
+#endif
 #endif

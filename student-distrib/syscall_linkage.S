@@ -22,7 +22,7 @@ syscall_linkage:
     pushl %ebx
     pushl %ecx
     pushl %edx
-    call *syscall_jumptable( , 4, %esi)     #long is 4 bytes
+    call *syscall_jumptable( ,%esi, 4);     #long is 4 bytes
     addl $12, %esp      #pop 3 parameters
     jmp done   
 
@@ -40,4 +40,5 @@ done:
 
 
 syscall_jumptable:
-    .long   halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn
+    .long   halt, execute, read, write, open, close
+
