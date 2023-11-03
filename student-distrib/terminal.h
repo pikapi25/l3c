@@ -35,6 +35,14 @@ extern int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes);
 /* Clear the screen and redraw the cursor at current position */
 extern void clear_redraw();
 
+int32_t illegal_open(const uint8_t* filename);
+
+int32_t illegal_close(int32_t fd);
+
+int32_t illegal_read(int32_t fd, void* buf, int32_t nbyte);
+
+int32_t illegal_write(int32_t fd, const void* buf, int32_t nbyte);
+
 extern terminal_t terminal; //terminal
 
 #endif /* _TERMINAL_H */
