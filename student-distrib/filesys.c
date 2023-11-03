@@ -217,7 +217,6 @@ int32_t close_dir(int32_t fd){
     return 0;
 }
 
-// --------------please do not use, under construction-----------
 // read_dir
 // provide current filename
 // if the initial location is at or beyond the end of the file then return 0
@@ -227,15 +226,17 @@ int32_t close_dir(int32_t fd){
 // output: number of bytes read
 // side effect
 int32_t read_dir(int32_t fd, void* buf, int32_t nbytes){
-    // dentry_t dentry;
-	// int i;
+    dentry_t dentry;
+    pcb_t* cur_pcb = get_cur_pcb();
+    uint32_t length;
+    int32_t index = cur_pcb->fd_arr[fd].file_position;
 
-	// for (i=0;i<FILES_NUM_MAX;i++){
-	// 	if (read_dentry_by_index(i,&dentry)==-1){return 0;}
-	// 	memcpy(&dentry.filename,buf,FILENAME_LEN);
-	// }
-    // return strlen((const int8_t)buf);
-    return 0;
+    if (read_dentry_by_index(index, &dentry)==-1)return 0;
+    memcpy(buf, &dentry.filename, FILENAME_LEN);
+    cur_pcb->fd_arr[index].file_position = index+1;
+    length = strlen((int8_t*)dentry.filename);
+    if (length > FILENAME_LEN)return FILENAME_LEN;
+    return length;
 }
 
 
