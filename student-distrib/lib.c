@@ -449,6 +449,17 @@ int8_t* strcpy(int8_t* dest, const int8_t* src) {
     return dest;
 }
 
+int8_t* strcpy_filename(int8_t* dest, const int8_t* src) {
+    int32_t i = 0;
+    while (src[i] != '\0') {
+        dest[i] = src[i];
+        i++;
+        if(i==32){break;}
+    }
+    dest[i] = '\0';
+    return dest;
+}
+
 /* int8_t* strcpy(int8_t* dest, const int8_t* src, uint32_t n)
  * Inputs:      int8_t* dest = destination string of copy
  *         const int8_t* src = source string of copy

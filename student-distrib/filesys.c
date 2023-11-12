@@ -41,7 +41,7 @@ int32_t read_dentry_by_index(uint32_t index, dentry_t* dentry)
     dentry_t* from_dentry = &(boot_block->direntries[index]);
 
     /*fill in the dentry block*/
-    strncpy((int8_t*)dentry->filename, (int8_t*)from_dentry->filename, FILENAME_LEN);
+    strcpy((int8_t*)dentry->filename, (int8_t*)from_dentry->filename);
     // strcpy((int8_t*)dentry->filename, (int8_t*)from_dentry->filename);
     dentry->filetype = from_dentry->filetype;
     dentry->inode_num = from_dentry->inode_num;
@@ -242,9 +242,14 @@ int32_t read_dir(int32_t fd, void* buf, int32_t nbytes){
     pcb_t* cur_pcb = get_cur_pcb();
     int32_t position = cur_pcb->fd_arr[fd].file_position;
     if (read_dentry_by_index(position, &dentry) == -1)return 0;
-    strcpy(buf,&dentry.filename);
+    // if(position==11){
+    //     strcpy(buf,"verylargetextwithverylongname.tx\0");
+    //     cur_pcb->fd_arr[fd].file_position = position+1;
+    //     return FILENAME_LEN;
+    // }
+    strcpy_filename(buf,(int8_t*)&dentry.filename);
     cur_pcb->fd_arr[fd].file_position = position+1;
-    length = strlen(&dentry.filename);
+    length = strlen((int8_t*)&dentry.filename);
     if (length > FILENAME_LEN){
         return FILENAME_LEN;
     }

@@ -97,7 +97,7 @@ int32_t execute(const uint8_t* command)
     int result;
     uint32_t i, prog_start_addr, pid = 0;
     uint8_t file_name[FILENAME_LEN] = {'\0'}; 
-    // char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
+    char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
     
     /* basic validation check */
     // if(curr_pid >= MAX_PROCESSES) 
@@ -106,7 +106,7 @@ int32_t execute(const uint8_t* command)
         return FAILURE;
 
     /* Parse cmd */
-    // uint16_t cmd_len = strlen((int8_t*)command);
+    uint16_t cmd_len = strlen((int8_t*)command);
     // for(i=0;i<cmd_len;i++){
     //     if(command[i] == ' ') break;
     //     file_name[i] = command[i];
@@ -116,13 +116,13 @@ int32_t execute(const uint8_t* command)
         file_name[i] = command[i];
         i++;
     }
-    // /* Parse args */
-    // int arg_idx = i;
-    // for(i=0;arg_idx<cmd_len;arg_idx++){
-    //     if(command[arg_idx] == '\0') break;
-    //     args[i] = command[arg_idx];
-    //     i++;
-    // }
+    /* Parse args */
+    int arg_idx = i;
+    for(i=0;arg_idx<cmd_len;arg_idx++){
+        if(command[arg_idx] == '\0') break;
+        args[i] = command[arg_idx];
+        i++;
+    }
     
     dentry_t dentry;
     uint8_t mag_buf[4];
@@ -179,6 +179,9 @@ int32_t execute(const uint8_t* command)
 
     /* Load program */
     read_data(dentry.inode_num, 0, (uint8_t*)USER_CODE, USER_STACK - USER_CODE);
+
+    /* Copy args to PCB */
+    memcpy(pcb->arg_buf, args, MAX_CHA_BUF + 1);
 
     /* Save old stack */
     uint32_t saved_ebp, saved_esp;
@@ -304,6 +307,24 @@ int32_t write(int32_t fd, const void* buf, int32_t nbytes){
     return result;
 }
 
+/* getargs
+ * INPUT: buf, nbytes
+ * RETURN: -1 if there is no arguments or if the arguments of terminal are not valid
+ * Effect: reads the program's command line arguments into a user-level buffer
+*/
+int32_t getargs (uint8_t* buf, int32_t nbytes){
+    pcb_t* pcb = get_cur_pcb();
+    if(buf==NULL || buf<(uint8_t*)VIRTUAL_PAGE_START || nbytes<=0 || pcb==NULL)
+        return -1;
+
+    if(nbytes > MAX_CHA_BUF)
+        memcpy(buf, pcb->arg_buf, MAX_CHA_BUF);
+    else 
+        memcpy(buf, pcb->arg_buf, nbytes);
+        // printf((int8_t*) buf);
+    return 0;
+}
+
 /* vidmap
  * INPUT: screen_start
  * OUTPUT: -1 if the provided pre-set virtual address is invalid and 0 on success
@@ -320,5 +341,11 @@ int32_t vidmap (uint8_t** screen_start){
     return 0;
  }
 
+int32_t set_handler (int32_t signum, void* handler_address){
+    return -1;
+}
 
+int32_t sigreturn (void){
+    return -1;
+}
 

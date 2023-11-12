@@ -25,6 +25,7 @@
 //  PDE and PTE has small difference in PAT (bit 7)
 extern void Page_Initialize();           
 extern void mapping_vir_to_phy(uint32_t vir_addr, uint32_t phy_addr);
+extern void map_vidmap_page(uint32_t vir_addr, uint32_t phy_addr, int32_t index);
 #endif
 
 

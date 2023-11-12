@@ -12,7 +12,7 @@ syscall_linkage:
     #check whether call number is valid
     cmpl $1, %eax
     jl invalid_call
-    cmpl $6, %eax
+    cmpl $10, %eax
     jg invalid_call
 
     #call valid system call
@@ -40,5 +40,5 @@ done:
 
 
 syscall_jumptable:
-    .long   halt, execute, read, write, open, close
+    .long   halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn
 
