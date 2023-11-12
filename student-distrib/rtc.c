@@ -51,16 +51,16 @@ void rtc_handler(void){
      * however, the actual rate is 1024, which means it is 1/1024 seconds per interrupt
      * therefore, 1/r / (1/1024) = 1024 / r actual interrupts is equal to one virtual interrupt
     */
-    cli();
+    //cli();
     rtc_ticks ++;
-    if (rtc_ticks  == rtc_virtual_rate){
+    if (rtc_ticks  >= rtc_virtual_rate){
         rtc_int_flag = 1;
         rtc_ticks = 0;
     }
     outb(RTC_REG_C, RTC_REG_PORT); // select register C
     inb(RTC_CMOS_RW_PORT); // just throw away contents
     //test_interrupts(); // for testing
-    sti();
+    //sti();
     send_eoi(RTC_IRQ_NUM); // send end-of-interrupt to pic
 
 }
@@ -92,6 +92,7 @@ int32_t rtc_close(int32_t fd){
 */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes){
     /* wait until interrupt occured */
+    rtc_int_flag = 0;
     while (!rtc_int_flag);
     rtc_int_flag = 0;
     return 0;
