@@ -11,9 +11,11 @@
 #define video_memory_start 0xb8000
 #define video_memory_end 0xb9fff
 #define user_paging_set 0x87 // PS, U/S, R/W, P = 1
+#define video_page_set 0x7 //U/S,R/W,P=1
 #define page_dir_start 22
 uint32_t page_table[PAGE_TABLE_COUNT] __attribute__((aligned (4 * PAGE_TABLE_COUNT)));        // page_table for 0~4 MB
 uint32_t page_dic[PAGE_DIC_COUNT] __attribute__((aligned (4 * PAGE_DIC_COUNT))); 
+uint32_t video_page_table[PAGE_TABLE_COUNT] __attribute__((aligned (4 * PAGE_TABLE_COUNT)));
 // Page_Initialize
 // We open Paging mode, and fill some entries into PD and PT
 //      There is only two entries needed
@@ -71,7 +73,7 @@ Page_Initialize(){
 /* mapping_vir_to_phy
  * Input: virtual address, physical address
  * Output: None
- * Effect: set page directory to map from virtual to physical,
+ * Effect: set page directory to map from virtual to physical
 */
 void mapping_vir_to_phy(uint32_t vir_addr, uint32_t phy_addr){
     page_dic[vir_addr>>page_dir_start] = phy_addr | user_paging_set;
@@ -80,4 +82,17 @@ void mapping_vir_to_phy(uint32_t vir_addr, uint32_t phy_addr){
         "movl %%eax, %%cr3;"           
         :
     );                                      
+}
+/* map_vidmap_page
+ * input: virtual_address and physical_address and index
+ * output: none
+ */ 
+void map_vidmap_page(uint32_t vir_addr, uint32_t phy_addr, int32_t index){
+    page_dic[(vir_addr)>>page_dir_start] = (unsigned int)(video_page_table)|video_page_set;
+    video_page_table[index] = phy_addr|user_paging_set;
+    asm volatile(                           
+        "movl %%cr3, %%eax;"           
+        "movl %%eax, %%cr3;"           
+        :
+    );      
 }

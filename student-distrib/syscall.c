@@ -304,3 +304,21 @@ int32_t write(int32_t fd, const void* buf, int32_t nbytes){
     return result;
 }
 
+/* vidmap
+ * INPUT: screen_start
+ * OUTPUT: -1 if the provided pre-set virtual address is invalid and 0 on success
+ * Functionality: map the text-mode video memory into user space at a pre-set virtual address
+*/
+int32_t vidmap (uint8_t** screen_start){
+    // first check whether the pre-set virtual address is valid or not
+    // (whether coveded by user-level page, 128 MB ~ 136MB)
+    if (screen_start == NULL || screen_start < (uint8_t**) USER_PROGRAM_IMG_START || screen_start >= (uint8_t**) USER_PROGRAM_END ) return -1;
+    // we map video_memory(starts at 0xb8000) to 4kb page (starts at 136MB)
+    map_vidmap_page(USER_PROGRAM_END, VIDEO_MEM_LOC, 0);
+    *screen_start = (uint8_t*)USER_PROGRAM_END;
+
+    return 0;
+ }
+
+
+
