@@ -97,7 +97,7 @@ int32_t execute(const uint8_t* command)
     int result;
     uint32_t i, prog_start_addr, pid = 0;
     uint8_t file_name[FILENAME_LEN] = {'\0'}; 
-    char args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
+    uint8_t args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
     
     /* basic validation check */
     // if(curr_pid >= MAX_PROCESSES) 
@@ -106,21 +106,17 @@ int32_t execute(const uint8_t* command)
         return FAILURE;
 
     /* Parse cmd */
-    uint16_t cmd_len = strlen((int8_t*)command);
-    // for(i=0;i<cmd_len;i++){
-    //     if(command[i] == ' ') break;
-    //     file_name[i] = command[i];
-    // }
     i=0;
     while(command[i]!=' ' && command[i]!='\0'){
         file_name[i] = command[i];
         i++;
     }
+
     /* Parse args */
-    int arg_idx = i;
-    for(i=0;arg_idx<cmd_len;arg_idx++){
-        if(command[arg_idx] == '\0') break;
+    int arg_idx = i+1;
+    for(i=0;command[arg_idx] != '\0';arg_idx++){
         args[i] = command[arg_idx];
+        // printf((int8_t*) args);
         i++;
     }
     
@@ -136,11 +132,7 @@ int32_t execute(const uint8_t* command)
     /* check if it is executeable: ELF's magic number = 0x7f454c46 */ 
     if((mag_buf[0] != MAGIC_NUM_0) || (mag_buf[1] != MAGIC_NUM_1) ||(mag_buf[2] != MAGIC_NUM_2) ||(mag_buf[3] != MAGIC_NUM_3))
         return FAILURE;
-    
-    /* get eip */
-    // result = read_data(dentry.inode_num, 24, eip, 4);
-    // if(result != 4) return FAILURE;   
-    // prog_start_addr = (eip[0]<<24)+(eip[1]<<16)+(eip[2]<<8)+eip[3];
+
     result = read_data(dentry.inode_num, 24, (uint8_t* )&prog_start_addr, 4);
     if(result != 4) return FAILURE;
     
@@ -174,14 +166,14 @@ int32_t execute(const uint8_t* command)
     pcb->fd_arr[1].file_position = 0;
     pcb->fd_arr[1].file_op_table = &terminal_write_ops;
 
+    /* Copy args to PCB */
+    memcpy(pcb->arg_buf, args, MAX_CHA_BUF + 1);
+
     /* Set up paging */
     mapping_vir_to_phy(VIRTUAL_PAGE_START, PCB_BOTTOM+(pcb->pid)*PHYS_PROGRAM_SIZE);
 
     /* Load program */
     read_data(dentry.inode_num, 0, (uint8_t*)USER_CODE, USER_STACK - USER_CODE);
-
-    /* Copy args to PCB */
-    memcpy(pcb->arg_buf, args, MAX_CHA_BUF + 1);
 
     /* Save old stack */
     uint32_t saved_ebp, saved_esp;

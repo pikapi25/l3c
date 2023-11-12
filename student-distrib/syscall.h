@@ -73,7 +73,7 @@ typedef struct pcb pcb_t;
 struct pcb
 {
     file_desc_t fd_arr[MAX_FILES];
-    uint8_t arg_buf[MAX_CHA_BUF];
+    uint8_t arg_buf[MAX_CHA_BUF+1];
     uint32_t pid;
     pcb_t* parent_pcb;
     int32_t ebp_val;
