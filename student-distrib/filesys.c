@@ -183,9 +183,9 @@ int32_t read_file(int32_t fd, void* buf, int32_t nbytes){
     if (result != -1){
         // we update the file_pos if read call is succeeded
         cur_pcb->fd_arr[fd].file_position += result;
-        return 0;
+        return result;
     }
-    return -1;
+    return 0;
 }
 
 // write file
