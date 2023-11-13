@@ -77,7 +77,7 @@ Solution:
 
 Time: 1 h.  
 
-## CHECKPOINT 2
+## CHECKPOINT 3
 
 --- problem 1 ---   
 Problem Description:   
@@ -104,4 +104,39 @@ Problem Description:
 Solution:   
 >   - Not resolved yet.
 
-Time: 4h
+Time: 4h  
+
+## CHECKPOINT 4
+
+--- problem 1 ---   
+Problem Description:   
+>   - pingpong stucks at second line.  
+>   - After testing I found ``terminal_read`` and ``rtc_read`` can't execute at the same time.  
+>   - After ``terminal_read`` is called, ``rtc_read`` will stuck.
+
+Solution:   
+>   - It seems that it is  ``rtc_handler``'s virtualization has something wrong. changed ``if (rtc_ticks  == rtc_virtual_rate)`` to  
+>   - ``if (rtc_ticks  >= rtc_virtual_rate)`` and it works.
+
+Time: 3h  
+
+--- problem 2 ---   
+Problem Description:   
+>   - fish and cat doesn't work.  
+>   - with gdb I found it is ``file_read``'s return value doesn't match ``cat``
+
+Solution:   
+>   - When ``read_data`` returns negative value, ``file_read`` should return 0  
+>   - Otherwise it should return exactly what ``read_data`` returns.
+
+Time: 30min  
+
+--- problem 2 ---  
+Problem Description:  
+>   - Page fault occurs when memcpy function is called in execute function.  
+
+Solution:   
+>   - The size for ages in pcb should be 128+1 instead of 128.
+
+Time: 30min  
+
