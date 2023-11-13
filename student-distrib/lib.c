@@ -531,7 +531,7 @@ void userkey_putc(uint8_t c) {
 	cli_and_save(flags);
 
 	switch (c) {
-		case '\0': break;   //print nothing
+		// case '\0': break;   //print nothing
 		case '\n': case '\r': handle_newline(); break;     //start a new line if get line break or enter is pressed
 		case '\b': handle_backspace(); break;   //handle backspace
 		default:

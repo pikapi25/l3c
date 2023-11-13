@@ -55,6 +55,7 @@ int32_t halt (uint8_t status){
     /* ATTENTION: Need to set parent_pcb to NULL when initializing*/
     if (parent_pcb == NULL){
         pid_arr[cur_pcb->pid] = 0;
+        printf("You can't exit the base shell!");
         execute((uint8_t*)"shell");
     }
 
@@ -150,7 +151,7 @@ int32_t execute(const uint8_t* command)
 
     /* set parent pid */
     if(pid == 0){
-        pcb->parent_pcb =(pcb_t*)( EIGHT_MB - EIGHT_KB);  
+        pcb->parent_pcb =NULL;  //base shell
     }
     else{
         pcb->parent_pcb = (pcb_t*)(EIGHT_MB - pid * EIGHT_KB);

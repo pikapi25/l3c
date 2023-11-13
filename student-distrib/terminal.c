@@ -72,7 +72,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes) {
     {
         c = write_buf[i];
         /* If character is not valid, then break.   */
-        if( c == '\0' || c == 0 ) break;
+        // if( c == '\0' || c == 0 ) break;
         userkey_putc(c);
         reset_kbd_buf();
         num_put++;
