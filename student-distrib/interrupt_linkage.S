@@ -16,3 +16,6 @@ INTR_LINK(keyboard_handler_linkage, keyboard_handler);
 
 #create the assemply linkage for RTC interrupt
 INTR_LINK(rtc_handler_linkage, rtc_handler);         
+
+#create the assemply linkage for PIT interrupt
+INTR_LINK(pit_handler_linkage, pit_handler);   

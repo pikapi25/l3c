@@ -11,5 +11,8 @@ extern void keyboard_handler_linkage();
 //the assemply linkage for RTC interrupt
 extern void rtc_handler_linkage();
 
+//the assemply linkage for PIT interrupt
+extern void pit_handler_linkage();
+
 #endif
 #endif

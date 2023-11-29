@@ -79,6 +79,7 @@ void idt_init()
     //set IDT entries for interrupts
     SET_IDT_ENTRY(idt[KEYBOARD_VEC], keyboard_handler_linkage);
     SET_IDT_ENTRY(idt[RTC_VEC], rtc_handler_linkage);
+    SET_IDT_ENTRY(idt[PIT_VEC], pit_handler_linkage);
 
     //set IDT entries for system call
     idt[SYSTEM_CALL_VEC].reserved3 = 1;
