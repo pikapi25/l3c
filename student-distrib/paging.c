@@ -12,7 +12,11 @@
 #define video_memory_end 0xb9fff
 #define user_paging_set 0x87 // PS, U/S, R/W, P = 1
 #define video_page_set 0x7 //U/S,R/W,P=1
+#define user_PTE_set 0x3 //present = 1, R/W = 1
+#define video_PTE_set 0x7 //present = 1, R/W = 1, privilege = 1
 #define page_dir_start 22
+#define page_table_start 12
+#define USER_PROGRAM_END     0x8800000
 uint32_t page_table[PAGE_TABLE_COUNT] __attribute__((aligned (4 * PAGE_TABLE_COUNT)));        // page_table for 0~4 MB
 uint32_t page_dic[PAGE_DIC_COUNT] __attribute__((aligned (4 * PAGE_DIC_COUNT))); 
 uint32_t video_page_table[PAGE_TABLE_COUNT] __attribute__((aligned (4 * PAGE_TABLE_COUNT)));
@@ -95,4 +99,14 @@ void map_vidmap_page(uint32_t vir_addr, uint32_t phy_addr, int32_t index){
         "movl %%eax, %%cr3;"           
         :
     );      
+}
+
+void map_video_PTE(uint32_t phy_addr){
+    page_table[(video_memory_start)>>page_table_start] = phy_addr|user_PTE_set;
+    video_page_table[(USER_PROGRAM_END<<10)>>22] = phy_addr|video_PTE_set;
+    asm volatile(                           
+        "movl %%cr3, %%eax;"           
+        "movl %%eax, %%cr3;"           
+        :
+    );   
 }

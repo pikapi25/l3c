@@ -14,6 +14,7 @@
 #define PCB_BITMASK 0xFFFFE000 // the mast to get current pcb from esp
 
 #define VIRTUAL_PAGE_START 0x08000000 // All user level programs will be loaded in the page starting at 128MB (virtual mem)
+#define PHYS_PROGRAM_START 0x800000  
 #define PHYS_PROGRAM_SIZE 0x400000 // every program is 4MB in physical mem
 #define USER_CODE   0x8048000  // starting point of user code
 #define USER_STACK  0x8400000  // 132 MB

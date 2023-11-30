@@ -26,6 +26,7 @@
 extern void Page_Initialize();           
 extern void mapping_vir_to_phy(uint32_t vir_addr, uint32_t phy_addr);
 extern void map_vidmap_page(uint32_t vir_addr, uint32_t phy_addr, int32_t index);
+extern void map_video_PTE(uint32_t phy_addr);
 #endif
 
 

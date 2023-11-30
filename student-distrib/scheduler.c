@@ -1,6 +1,6 @@
 #include "scheduler.h" 
-#include "lib.h"
-
+#include "syscall.h"
+#define video_memory_start 0xb8000
 
 /**
  * PIT_init
@@ -41,4 +41,88 @@ void pit_handler(){
     scheduler();                 
     send_eoi(PIT_IRQ);          //Send EOI to PIC
     sti();                 
+}
+
+/**
+ * scheduler_initialize
+ * 
+ * Description: Initialize scheduler 
+ * 
+ * Inputs: None
+ * Return value: none
+ * Side effects: change scheduler 
+ */
+void scheduler_initialize(){
+    myScheduler.cur_task = 0;
+    myScheduler.num_tasks = 0;
+    myScheduler.tasks[0]=NOT_EXIST;
+    myScheduler.tasks[1]=NOT_EXIST;
+    myScheduler.tasks[2]=NOT_EXIST;
+}
+
+/**
+ * scheduler
+ * 
+ * Description: change to next process
+ * 
+ * Inputs: None
+ * Return value: none
+ * Side effects: change scheduler
+*/
+void scheduler(){
+    int8_t current_pointer = myScheduler.cur_task;        // pointer of current process
+    uint32_t current_pid = myScheduler.tasks[current_pointer];
+    int8_t next_pointer = scheduler_getnext;
+    uint32_t next_pid  = myScheduler.tasks[next_pointer];
+    
+    // remap process 
+    mapping_vir_to_phy(VIRTUAL_PAGE_START, PHYS_PROGRAM_START + next_pid * PHYS_PROGRAM_SIZE);
+    
+    if (next_pid == cur_terminal_id){
+        //if next terminal is activated and displayed
+        //recognizes the active terminal and allows writing to the actual video memory.
+        map_video_PTE(video_memory_start);
+
+    }else{
+        //if next termnial is not activated, write into backup buffer
+        map_video_PTE(video_memory_start+cur_terminal_id);
+    }
+
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = EIGHT_MB - next_pid * EIGHT_KB - 4;  
+    pcb_t* current_pcb = (pcb_t*)(EIGHT_MB - (current_pid+1) * EIGHT_KB);
+    pcb_t* next_pcb = (pcb_t*)(EIGHT_MB - (next_pid+1) * EIGHT_KB);
+    asm volatile(
+        "movl %%esp, %%eax;"
+        "movl %%ep, %%ebx;"
+        :"=a"(current_pcb->esp_val),"=b"(current_pcb->ebp_val)
+        :
+    );
+    asm volatile(
+        "movl %%eax, %%esp;"
+        "movl %%ebx, %%ebp;"
+        :
+        :"a"(next_pcb->esp_val),"b"=(next_pcb->ebp_val)
+    );
+}
+
+/**
+ * scheduler_getnext
+ * 
+ * Description: get next process
+ *              
+ * Input: none
+ * Return value: array index of next process
+ * Side effect: None
+*/
+int8_t scheduler_getnext(){
+    int8_t current_pointer = myScheduler.cur_task;        // pointer of current process
+    int8_t i;
+    int8_t next_pointer = current_pointer;
+
+    for (i=0;i<3;i++){
+        next_pointer = (next_pointer+1)%3;
+        if (myScheduler.tasks[next_pointer] != NOT_EXIST){break;}
+    }
+    return next_pointer;
 }
