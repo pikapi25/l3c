@@ -45,6 +45,7 @@ void terminal_switch(uint8_t new_term){
     /* update video memory paging */
     update_vidmem_paging(new_term);
     curr_term_id = new_term;
+    update_cursor(terminal[curr_term_id].cursor_x, terminal[curr_term_id].cursor_y);
 }
 
 /* reset_kbd_buf
