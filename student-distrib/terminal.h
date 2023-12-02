@@ -30,7 +30,7 @@ extern void terminal_init();
 /*Switch terminal*/
 extern void terminal_switch(uint8_t new_term);
 /*reset the keyboard buffer*/
-void reset_kbd_buf();
+void reset_kbd_buf(int term_id);
 /*return current terminal_t* */
 extern terminal_t* get_terminal();
 /* Read from the terminal */
@@ -48,6 +48,6 @@ int32_t illegal_read(int32_t fd, void* buf, int32_t nbyte);
 
 int32_t illegal_write(int32_t fd, const void* buf, int32_t nbyte);
 
-extern terminal_t terminal[NUM_TERMS]; //terminal
-extern volatile uint8_t curr_term_id; // current(visible) terminal id
+terminal_t terminal[NUM_TERMS]; //terminal
+volatile uint8_t curr_term_id; // current(visible) terminal id
 #endif /* _TERMINAL_H */

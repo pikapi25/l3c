@@ -1,6 +1,8 @@
 #include "scheduler.h" 
 #include "syscall.h"
+#include "i8259.h"
 #define video_memory_start 0xb8000
+
 
 /**
  * PIT_init
@@ -37,7 +39,7 @@ void PIT_init()
  * Side effects: May modify task scheduling and acknowledge interrupt to PIC.
  */
 void pit_handler(){
-    cli();                     
+    cli();               
     scheduler();                 
     send_eoi(PIT_IRQ);          //Send EOI to PIC
     sti();                 
@@ -70,9 +72,9 @@ void scheduler_initialize(){
  * Side effects: change scheduler
 */
 void scheduler(){
-    int8_t current_pointer = myScheduler.cur_task;        // pointer of current process
+    int32_t current_pointer = myScheduler.cur_task;        // pointer of current process
     uint32_t current_pid = myScheduler.tasks[current_pointer];
-    int8_t next_pointer = scheduler_getnext;
+    int32_t next_pointer = scheduler_getnext();
     uint32_t next_pid  = myScheduler.tasks[next_pointer];
     
     // remap process 
@@ -94,7 +96,7 @@ void scheduler(){
     pcb_t* next_pcb = (pcb_t*)(EIGHT_MB - (next_pid+1) * EIGHT_KB);
     asm volatile(
         "movl %%esp, %%eax;"
-        "movl %%ep, %%ebx;"
+        "movl %%ebp, %%ebx;"
         :"=a"(current_pcb->esp_val),"=b"(current_pcb->ebp_val)
         :
     );
@@ -115,10 +117,10 @@ void scheduler(){
  * Return value: array index of next process
  * Side effect: None
 */
-int8_t scheduler_getnext(){
-    int8_t current_pointer = myScheduler.cur_task;        // pointer of current process
+int32_t scheduler_getnext(){
+    int32_t current_pointer = myScheduler.cur_task;        // pointer of current process
     int8_t i;
-    int8_t next_pointer = current_pointer;
+    int32_t next_pointer = current_pointer;
 
     for (i=0;i<3;i++){
         next_pointer = (next_pointer+1)%3;

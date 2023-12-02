@@ -52,8 +52,8 @@ int32_t halt (uint8_t status){
     /* remove current pcb */
     pid_arr[cur_pcb->pid] = 0;
 
-    int8_t current_pointer = myScheduler.cur_task;        // pointer of current process
-    uint32_t scheduler_pid = myScheduler.tasks[current_pointer];
+    int32_t current_pointer = myScheduler.cur_task;        // pointer of current process
+    // uint32_t scheduler_pid = myScheduler.tasks[current_pointer];
     /* if it's shell, close the shell and start a new one */
     /* ATTENTION: Need to set parent_pcb to NULL when initializing*/
     if (parent_pcb == NULL){
@@ -158,7 +158,7 @@ int32_t execute(const uint8_t* command)
     pcb->pid = pid;
 
     /* set parent pid */
-    int8_t current_pointer = myScheduler.cur_task;        // pointer of current process
+    int32_t current_pointer = myScheduler.cur_task;        // pointer of current process
     uint32_t scheduler_pid = myScheduler.tasks[current_pointer];
     if(myScheduler.tasks[current_pointer]==NOT_EXIST){   //scheduler
         pcb->parent_pcb =NULL;  //base shell

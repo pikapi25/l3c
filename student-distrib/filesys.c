@@ -67,7 +67,7 @@ int32_t read_dentry_by_name(const uint8_t* fname, dentry_t* dentry)
         return -1;
     }
 
-    if(strlen(fname)>FILENAME_LEN){
+    if(strlen((int8_t*)fname)>FILENAME_LEN){
         return -1;
     }
     

@@ -61,7 +61,7 @@ void rtc_handler(void){
     
     for (i = 0; i < NUM_SCHES; i++){
         rtc_ticks[i] ++;
-        if (rtc_ticks >= rtc_virtual_rate[i]){
+        if (rtc_ticks[i] >= rtc_virtual_rate[i]){
             rtc_int_flag[i] = 1;
             rtc_ticks[i] = 0;
         }

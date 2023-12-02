@@ -14,7 +14,7 @@
 void terminal_init() {
     int i;
     for (i=0; i<NUM_TERMS; i++){
-        terminal[i].background_buffer = (int32_t)(VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*(i+2));
+        terminal[i].background_buffer = (uint8_t*)(VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*(i+2));
         terminal[i].readkey = 0;
         terminal[i].kbd_buf_count = 0;
         memset(terminal[i].kbd_buf, 0, MAX_CHA_BUF);   //not sure
@@ -32,7 +32,7 @@ void terminal_init() {
  * Output: return none, display new terminal on screen through videomap
 */
 void terminal_switch(uint8_t new_term){
-    if (new_term < 0 || new_term > 2){return;}
+    if (new_term > 2){return;}
     /* update video memory paging */
     update_vidmem_paging(curr_term_id);
 
@@ -69,7 +69,7 @@ terminal_t* get_terminal(){
  */
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes) {
 	int32_t i = 0;
-    int8_t curr_sch_id = myScheduler.cur_task;
+    int32_t curr_sch_id = myScheduler.cur_task;
 	if (NULL == buf || nbytes <= 0) { return 0; }
 
 	reset_kbd_buf(curr_sch_id);
@@ -111,7 +111,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes) {
  * Side effect: Clear the screen
  */
 void clear_redraw() {
-    clean();
+    clear();
 }
 
 int32_t illegal_open(const uint8_t* filename) {

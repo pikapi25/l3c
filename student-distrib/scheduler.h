@@ -20,7 +20,7 @@
 typedef struct{
     int32_t tasks[NUM_SCHES];
     int8_t num_tasks;                   // current tasks number
-    int8_t cur_task;                    // current active task id 
+    int32_t cur_task;                    // current active task id 
 }Scheduler;
 
 Scheduler myScheduler;
@@ -31,5 +31,5 @@ extern void scheduler_initialize();
 
 //helper function
 void scheduler();
-int8_t scheduler_getnext();
+int32_t scheduler_getnext();
 #endif

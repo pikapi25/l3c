@@ -276,7 +276,7 @@ void Filesys_Test_Read_Data(uint8_t* filename, uint32_t offset, uint32_t length)
 	bytes_read = read_data(test.inode_num,offset,buf,length);
 	//printf(" Bytes read:%d\n",bytes_read);
 	for(i=0; i<bytes_read; i++)
-		userkey_putc(buf[i]);
+		user_terminal_putc(buf[i],1);
 	return;
 }
 
@@ -302,7 +302,7 @@ int Filesys_Test_Read_Small(){
 	/*print and test file name*/
 	printt("[TEST] Reading file: ");
 	for(i=0; i<FILENAME_LEN; i++){
-		userkey_putc((uint8_t)test.filename[i]);
+		user_terminal_putc((uint8_t)test.filename[i],1);
 	}
 	printt(" \n");
 	printt(" \n");
@@ -340,7 +340,7 @@ int Filesys_Test_Read_Exe(){
 	/*print and test file name*/
 	printt("[TEST] Reading file: ");
 	for(i=0; i<FILENAME_LEN; i++){
-		userkey_putc((uint8_t)test.filename[i]);
+		user_terminal_putc((uint8_t)test.filename[i],1);
 	}
 	printt(" \n");
 	printt(" \n");
@@ -383,7 +383,7 @@ int Filesys_Test_Read_Large(){
 	/*print and test file name*/
 	printt("[TEST] Reading file: ");
 	for(i=0; i<FILENAME_LEN; i++){
-		userkey_putc((uint8_t)test.filename[i]);
+		user_terminal_putc((uint8_t)test.filename[i], 1);
 	}
 	printt(" \n");
 
@@ -521,7 +521,7 @@ int File_System_Test_Dir_Read(){
 		memset(buf, 0, 32);
 		strcpy(buf,dentry.filename);
 		for (x=0;x<32;x++){
-			userkey_putc(buf[x]);
+			user_terminal_putc(buf[x], 1);
 		}
 		printt("\n");
 	}

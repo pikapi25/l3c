@@ -178,7 +178,7 @@ void keyboard_handler(void) {
 					terminal->kbd_buf_count++;
 					terminal->readkey = 0;							/* Set the "endline" flag */
 				}else{
-					reset_kbd_buf();
+					reset_kbd_buf(curr_term_id);
 				}
 				
 			} 
