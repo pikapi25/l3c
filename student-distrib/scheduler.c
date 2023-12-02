@@ -138,10 +138,11 @@ int32_t scheduler_getnext(){
     int8_t i;
     int32_t next_pointer = current_pointer;
 
-    for (i=0;i<3;i++){
-        next_pointer = (next_pointer+1)%3;
-        if (myScheduler.tasks[next_pointer] != NOT_EXIST){break;}
-    }
+    // for (i=0;i<3;i++){
+    //     next_pointer = (next_pointer+1)%3;
+    //     if (myScheduler.tasks[next_pointer] != NOT_EXIST){break;}
+    // }
+    next_pointer = (next_pointer+1)%3;
     myScheduler.cur_task = next_pointer;
     return next_pointer;
 }

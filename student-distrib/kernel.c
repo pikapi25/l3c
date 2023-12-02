@@ -154,8 +154,7 @@ void entry(unsigned long magic, unsigned long addr) {
     //enable_irq(2);
     //disable_irq(0);
 
-    //init the pit
-    pit_init();
+    
 
     scheduler_initialize();
 
@@ -170,6 +169,9 @@ void entry(unsigned long magic, unsigned long addr) {
 
     //init the keyboard
     keyboard_init();
+
+    //init the pit
+    pit_init();
 
 
     
