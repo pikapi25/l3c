@@ -9,7 +9,6 @@
 /* Magic Numbers*/
 #define MAX_PROCESSES 6
 #define MAX_FILES 8
-#define NUM_SCHE  3
 #define PCB_BLOCK_SIZE 0x2000 // every pcb block is 8KB
 #define PCB_BOTTOM 0x800000 // every pcb starts at 8MB-i*8KB
 #define PCB_BITMASK 0xFFFFE000 // the mast to get current pcb from esp

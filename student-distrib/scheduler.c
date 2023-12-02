@@ -73,10 +73,10 @@ void scheduler_initialize(){
  * Side effects: change scheduler
 */
 void scheduler(){
-    int32_t current_pointer = myScheduler.cur_task;        // pointer of current process
-    uint32_t current_pid = myScheduler.tasks[current_pointer];
+    // int32_t current_pointer = myScheduler.cur_task;        // pointer of current process
+    // uint32_t current_pid = myScheduler.tasks[current_pointer];
     int32_t next_pointer = scheduler_getnext();
-    uint32_t next_pid  = myScheduler.tasks[next_pointer];
+    int32_t next_pid  = myScheduler.tasks[next_pointer];
     
     pcb_t* current_pcb = get_cur_pcb();
     register uint32_t saved_ebp asm("ebp");
@@ -134,7 +134,7 @@ void scheduler(){
  * Side effect: None
 */
 int32_t scheduler_getnext(){
-    int32_t current_pointer = myScheduler.cur_task;        // pointer of current process
+    int32_t current_pointer = myScheduler.cur_task % NUM_SCHES;        // pointer of current process
     int8_t i;
     int32_t next_pointer = current_pointer;
 

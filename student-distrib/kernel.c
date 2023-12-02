@@ -154,6 +154,8 @@ void entry(unsigned long magic, unsigned long addr) {
     //enable_irq(2);
     //disable_irq(0);
     pit_init();
+
+    scheduler_initialize();
     // Init the paging
     Page_Initialize();
 

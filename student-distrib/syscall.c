@@ -53,7 +53,7 @@ int32_t halt (uint8_t status){
     /* remove current pcb */
     pid_arr[cur_pcb->pid] = 0;
 
-    int32_t current_pointer = myScheduler.cur_task;        // pointer of current process
+    int32_t current_pointer = myScheduler.cur_task % NUM_SCHES;        // pointer of current process
     // uint32_t scheduler_pid = myScheduler.tasks[current_pointer];
     /* if it's shell, close the shell and start a new one */
     /* ATTENTION: Need to set parent_pcb to NULL when initializing*/
@@ -71,7 +71,7 @@ int32_t halt (uint8_t status){
     /* Restore parent paging (from ls back to shell) */
     /* Physical memory starts at 8MB + (process number * 4MB) */
     /* ATTENTION: Need to implement this function to set paging */
-    mapping_vir_to_phy(VIRTUAL_PAGE_START, PCB_BOTTOM+(parent_pcb->pid)*PHYS_PROGRAM_SIZE);                                   \
+    mapping_vir_to_phy(VIRTUAL_PAGE_START, PCB_BOTTOM+(parent_pcb->pid)*PHYS_PROGRAM_SIZE);                                   
     /* Write Parent process’ info back to TSS(esp0) */
     /* the esp should point to the bottom of the parent block after halting current pcb */
     tss.ss0 = KERNEL_DS;
@@ -161,15 +161,15 @@ int32_t execute(const uint8_t* command)
     pcb->pid = pid;
 
     /* set parent pid */
-    int32_t current_pointer = myScheduler.cur_task;        // pointer of current process
-    uint32_t scheduler_pid = myScheduler.tasks[current_pointer];
-    if(myScheduler.tasks[current_pointer]==NOT_EXIST){   //scheduler
+    int32_t current_pointer = myScheduler.cur_task % NUM_SCHES;        // pointer of current process
+    int32_t scheduler_pid = myScheduler.tasks[current_pointer];
+    if(scheduler_pid==NOT_EXIST){   
         pcb->parent_pcb =NULL;  //base shell
     }
     else{
-        
         pcb->parent_pcb = (pcb_t*)(EIGHT_MB - (scheduler_pid+1) * EIGHT_KB);
     }
+    myScheduler.tasks[current_pointer]=pid;
 
     pcb->fd_arr[0].flags = 1;
     pcb->fd_arr[0].inode = 0;

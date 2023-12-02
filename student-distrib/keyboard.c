@@ -79,7 +79,7 @@ void keyboard_init(void) {
 *   side effect: print the value of the pressed key on screen
 */
 void keyboard_handler(void) {
-	//cli();
+	cli();
 	uint8_t scan_code, ascii;
 	int i;
 	terminal_t* terminal = get_terminal();
@@ -167,8 +167,8 @@ void keyboard_handler(void) {
 				clear_redraw();						
 				break;
 			} 
-			else if (ctrl && (ascii == 'c' || ascii == 'C')) {
-				return;						
+			//ctrl+c/C: terminate current program
+			else if (ctrl && (ascii == 'c' || ascii == 'C')) {			
 				break;
 			} 
 			else if (ascii == '\n') {
@@ -211,6 +211,6 @@ void keyboard_handler(void) {
     //end of interrupt
 	send_eoi(KEY_IRQ_NUM);
 	//end of critical section
-	//sti();
+	sti();
 }
 
