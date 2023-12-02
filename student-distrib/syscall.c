@@ -30,6 +30,7 @@ file_op_t file_ops = {open_file, close_file, read_file, write_file};
  * Effect: none
 */
 int32_t halt (uint8_t status){
+    cli();
     int i;
     uint32_t ret_val = (uint32_t)status;
     /* get current pcb */
@@ -75,7 +76,7 @@ int32_t halt (uint8_t status){
     /* the esp should point to the bottom of the parent block after halting current pcb */
     tss.ss0 = KERNEL_DS;
     tss.esp0 = PCB_BOTTOM - (parent_pcb->pid)*PCB_BLOCK_SIZE - sizeof(int32_t);
-
+    sti();
     /* Jump to execute return */
     /* ATTENTION: Neet to implement this function to restore ebp and esp value in asm*/
 
@@ -103,19 +104,19 @@ int32_t halt (uint8_t status){
  */
 int32_t execute(const uint8_t* command)
 {
+    cli();
     int result;
-    uint32_t i, prog_start_addr, pid = 0;
+    uint32_t i=0, prog_start_addr, pid = 0;
     uint8_t file_name[FILENAME_LEN] = {'\0'}; 
     uint8_t args[MAX_CHA_BUF + 1] = {'\0'};    //contains " "
     
     /* basic validation check */
     // if(curr_pid >= MAX_PROCESSES) 
     //     return FAILURE;
-    if(command == NULL||command == '\0')
+    if(command == NULL||command[i] == '\0')
         return FAILURE;
 
     /* Parse cmd */
-    i=0;
     while(command[i]!=' ' && command[i]!='\0'){
         file_name[i] = command[i];
         i++;
@@ -200,7 +201,7 @@ int32_t execute(const uint8_t* command)
     // TSS represents our destination
     tss.ss0 = KERNEL_DS;
     tss.esp0 = EIGHT_MB - pid * EIGHT_KB - 4;    // the child pid about to be created
-
+    sti();
     /* Enter user mode */
     // Push order: SS, ESP, EFLAGS, CS, EIP
     // ESP points to the base of user stack (132MB - 4B)

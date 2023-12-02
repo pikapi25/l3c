@@ -44,6 +44,9 @@ Page_Initialize(){
     // P = 1, RW = 1, US = 0, PWT = 0, PCD = 0, A = 0, D = 0, PS = 0
     // 00000011
     page_table[184] = 0xB8000|0x3;
+    page_table[(VIDEO_MEM_LOC>>page_table_start)+2] = (VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*2)|0x3;
+    page_table[(VIDEO_MEM_LOC>>page_table_start)+3] = (VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*3)|0x3;
+    page_table[(VIDEO_MEM_LOC>>page_table_start)+4] = (VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*4)|0x3;
     // for 0~4MB
     // P = 1, RW = 1, US = 0, PWT = 0, PCD = 0, A = 0, D = 0, PS = 0
     // 00000010

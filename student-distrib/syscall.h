@@ -80,7 +80,7 @@ struct pcb
     pcb_t* parent_pcb;
     int32_t ebp_val;
     int32_t esp_val;
-
+    int32_t sch_ebp;
 };
 
 /* ----- Helper Functions ----- */

@@ -77,35 +77,50 @@ void scheduler(){
     int32_t next_pointer = scheduler_getnext();
     uint32_t next_pid  = myScheduler.tasks[next_pointer];
     
+    pcb_t* current_pcb = get_cur_pcb();
+    register uint32_t saved_ebp asm("ebp");
+    current_pcb->sch_ebp = saved_ebp;
+
+    if (next_pid < 0){
+        map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
+        execute((uint8_t*)"shell");
+    }
     // remap process 
     mapping_vir_to_phy(VIRTUAL_PAGE_START, PHYS_PROGRAM_START + next_pid * PHYS_PROGRAM_SIZE);
     
-    if (next_pid == curr_term_id){
+    if (next_pointer == curr_term_id){
         //if next terminal is activated and displayed
         //recognizes the active terminal and allows writing to the actual video memory.
         map_video_PTE(video_memory_start);
 
     }else{
         //if next termnial is not activated, write into backup buffer
-        map_video_PTE(video_memory_start+curr_term_id);
+        map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
     }
 
     tss.ss0 = KERNEL_DS;
     tss.esp0 = EIGHT_MB - next_pid * EIGHT_KB - 4;  
-    pcb_t* current_pcb = (pcb_t*)(EIGHT_MB - (current_pid+1) * EIGHT_KB);
+    // pcb_t* current_pcb = (pcb_t*)(EIGHT_MB - (current_pid+1) * EIGHT_KB);
     pcb_t* next_pcb = (pcb_t*)(EIGHT_MB - (next_pid+1) * EIGHT_KB);
+    // asm volatile(
+    //     "movl %%esp, %%eax;"
+    //     "movl %%ebp, %%ebx;"
+    //     :"=a"(current_pcb->esp_val),"=b"(current_pcb->ebp_val)
+    //     :
+    // );
+    // asm volatile(
+    //     "movl %%eax, %%esp;"
+    //     "movl %%ebx, %%ebp;"
+    //     :
+    //     :"a"(next_pcb->esp_val),"b"(next_pcb->ebp_val)
+    // );
     asm volatile(
-        "movl %%esp, %%eax;"
-        "movl %%ebp, %%ebx;"
-        :"=a"(current_pcb->esp_val),"=b"(current_pcb->ebp_val)
-        :
-    );
-    asm volatile(
-        "movl %%eax, %%esp;"
-        "movl %%ebx, %%ebp;"
-        :
-        :"a"(next_pcb->esp_val),"b"(next_pcb->ebp_val)
-    );
+        "movl %0, %%ebp \n\
+                leave          \n\
+                ret            \n"
+            :  /* no output */
+            :  "r" (next_pcb->sch_ebp) \
+            :  "ebp");
 }
 
 /**

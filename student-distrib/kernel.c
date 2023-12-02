@@ -152,6 +152,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init the PIC */
     i8259_init();
 
+    pit_init();
     // Init the paging
     Page_Initialize();
 
@@ -162,7 +163,7 @@ void entry(unsigned long magic, unsigned long addr) {
     keyboard_init();
 
     //init the pit
-    pit_init();
+    
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
