@@ -14,7 +14,7 @@
  * Return value: None
  * Side effects: None.
  */
-void PIT_init()
+void pit_init()
 {
     //set the value of PIT mode/command register
     outb(PIT_REG, PIT_IO_PORT);

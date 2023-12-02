@@ -25,8 +25,8 @@ typedef struct{
 
 Scheduler myScheduler;
 
-extern void pit_handler( void );
-extern void PIT_init( void );
+extern void pit_init();
+extern void pit_handler();
 extern void scheduler_initialize();
 
 //helper function
