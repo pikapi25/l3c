@@ -151,7 +151,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init the PIC */
     i8259_init();
-
+    //enable_irq(2);
+    //disable_irq(0);
     pit_init();
     // Init the paging
     Page_Initialize();

@@ -21,7 +21,7 @@ void pit_init()
 
     //set frequency to channel 0 data port
     outb(PIT_FREQ & LOWER_MASK, CHANNEL_0);
-    outb(PIT_FREQ >> 8, CHANNEL_0);     //right shift 8 to get the high byte
+    outb((PIT_FREQ&0xFF00) >> 8, CHANNEL_0);     //right shift 8 to get the high byte
 
     //enable interrupts
     enable_irq(PIT_IRQ);
@@ -39,10 +39,11 @@ void pit_init()
  * Side effects: May modify task scheduling and acknowledge interrupt to PIC.
  */
 void pit_handler(){
-    cli();               
+    //cli();   
+    send_eoi(PIT_IRQ);           
     scheduler();                 
-    send_eoi(PIT_IRQ);          //Send EOI to PIC
-    sti();                 
+             //Send EOI to PIC
+    //sti();                 
 }
 
 /**
@@ -141,5 +142,6 @@ int32_t scheduler_getnext(){
         next_pointer = (next_pointer+1)%3;
         if (myScheduler.tasks[next_pointer] != NOT_EXIST){break;}
     }
+    myScheduler.cur_task = next_pointer;
     return next_pointer;
 }

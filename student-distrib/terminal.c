@@ -69,18 +69,18 @@ terminal_t* get_terminal(){
  */
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes) {
 	int32_t i = 0;
-    int32_t curr_sch_id = myScheduler.cur_task;
+    //int32_t curr_sch_id = myScheduler.cur_task;
 	if (NULL == buf || nbytes <= 0) { return 0; }
 
-	reset_kbd_buf(curr_sch_id);
-    terminal[curr_sch_id].readkey = 1;
-	while (terminal[curr_sch_id].readkey);					//Wait for the flag 
+	reset_kbd_buf(myScheduler.cur_task);
+    terminal[myScheduler.cur_task].readkey = 1;
+	while (terminal[myScheduler.cur_task].readkey);					//Wait for the flag 
 	/* Read from the keyboard buffer */
 	/* User can only type up to 127 (MAX_CHA_BUF - 1) characters */
-	for (i = 0; i < nbytes && i < MAX_CHA_BUF && terminal[curr_sch_id].kbd_buf[i] != '\0'; i++) {
-		((char*)buf)[i] = terminal[curr_sch_id].kbd_buf[i];
+	for (i = 0; i < nbytes && i < MAX_CHA_BUF && terminal[myScheduler.cur_task].kbd_buf[i] != '\0'; i++) {
+		((char*)buf)[i] = terminal[myScheduler.cur_task].kbd_buf[i];
 	}
-    reset_kbd_buf(curr_sch_id);
+    reset_kbd_buf(myScheduler.cur_task);
 	return i;
 }
 

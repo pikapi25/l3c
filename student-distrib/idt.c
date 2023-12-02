@@ -48,6 +48,8 @@ void idt_init()
     idt[KEYBOARD_VEC].present=1;
     idt[RTC_VEC].reserved3=0;
     idt[RTC_VEC].present=1;
+    idt[PIT_VEC].reserved3=0;
+    idt[PIT_VEC].present=1;
 
     //initialize idt struct for system call
     idt[SYSTEM_CALL_VEC].dpl=3;     //dpl for system call is 3

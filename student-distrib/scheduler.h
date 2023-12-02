@@ -5,7 +5,7 @@
 #include "terminal.h"
 #include "x86_desc.h"
 
-#define PIT_IO_PORT         0x34
+#define PIT_IO_PORT         0x43
 
 //0x36 = 00110110 = channel 0(00)|access mode 3(11)|operating mode 3(011)|16-bit(0)
 #define PIT_REG             0x36
@@ -22,7 +22,7 @@
 typedef struct{
     int32_t tasks[NUM_SCHES];
     int8_t num_tasks;                   // current tasks number
-    int32_t cur_task;                    // current active task id 
+    volatile int32_t cur_task;                    // current active task id 
 }Scheduler;
 
 Scheduler myScheduler;
