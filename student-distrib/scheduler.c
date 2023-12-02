@@ -21,7 +21,7 @@ void pit_init()
 
     //set frequency to channel 0 data port
     outb(PIT_FREQ & LOWER_MASK, CHANNEL_0);
-    outb(PIT_FREQ >> 8, CHANNEL_0);
+    outb(PIT_FREQ >> 8, CHANNEL_0);     //right shift 8 to get the high byte
 
     //enable interrupts
     enable_irq(PIT_IRQ);
