@@ -109,9 +109,10 @@ void keyboard_handler(void) {
 			break;
 		case LEFT_ALT_PRESSED:
 			alt = 1;
+			break;
 		case LEFT_ALT_RELEASED:
 			alt = 0;
-
+			break;
 		case CAPS_LOCK_PRESSED:		
 			caps = !caps;	
 			break;

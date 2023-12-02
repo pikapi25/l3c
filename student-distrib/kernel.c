@@ -153,19 +153,25 @@ void entry(unsigned long magic, unsigned long addr) {
     i8259_init();
     //enable_irq(2);
     //disable_irq(0);
+
+    //init the pit
     pit_init();
 
     scheduler_initialize();
+
     // Init the paging
     Page_Initialize();
 
     //init the RTC
     rtc_init();
 
+    //init the terminal
+    terminal_init();
+
     //init the keyboard
     keyboard_init();
 
-    //init the pit
+
     
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the
