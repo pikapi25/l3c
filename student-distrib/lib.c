@@ -25,6 +25,7 @@ void clear(void) {
     int i;
     //-------------------checkpoint5---------------
     //remap
+    update_vidmem_paging(curr_term_id);
     //clear video memory by setting all to ' ' and ATTRIB
     for( i = 0; i < NUM_ROWS*NUM_COLS; i++ ){
         *(uint8_t *)(VIDEO_MEM_LOC + (i << 1)) = ' ';
@@ -35,6 +36,7 @@ void clear(void) {
     terminal[curr_term_id].cursor_y = 0;
 
     //redraw the cursor
+    update_vidmem_paging(myScheduler.cur_task);
     update_cursor(terminal[curr_term_id].cursor_x, terminal[curr_term_id].cursor_y);
 }
 
@@ -556,7 +558,9 @@ void user_terminal_putc(uint8_t c, uint8_t userkey) {
     // ---------------checkpoint5--------------
     // remap
     // if(userkey)
-        
+    if(userkey){
+        update_vidmem_paging(curr_term_id);
+    }
 	switch (c) {
 		// case '\0': break;   //print nothing
 		case '\n': case '\r': handle_newline(userkey); break;     //start a new line if get line break or enter is pressed
@@ -574,6 +578,9 @@ void user_terminal_putc(uint8_t c, uint8_t userkey) {
 	}
 
 	update_cursor(terminal[term_id].cursor_x, terminal[term_id].cursor_y);
+    if (userkey){
+        update_vidmem_paging(myScheduler.cur_task);
+    }
 	restore_flags(flags);
 }
 
