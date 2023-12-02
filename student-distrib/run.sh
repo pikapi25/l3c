@@ -1,2 +1,2 @@
-make
+sudo make
 gdb bootimg
