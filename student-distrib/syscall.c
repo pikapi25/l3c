@@ -123,10 +123,12 @@ int32_t execute(const uint8_t* command)
 
     /* Parse args */
     int arg_idx = i+1;
-    for(i=0;command[arg_idx] != '\0';arg_idx++){
-        args[i] = command[arg_idx];
-        // printf((int8_t*) args);
-        i++;
+    if(command[i]!='\0'){
+        for(i=0;command[arg_idx] != '\0';arg_idx++){
+            args[i] = command[arg_idx];
+            // printf((int8_t*) args);
+            i++;
+        }
     }
     
     dentry_t dentry;
@@ -319,7 +321,7 @@ int32_t write(int32_t fd, const void* buf, int32_t nbytes){
 */
 int32_t getargs (uint8_t* buf, int32_t nbytes){
     pcb_t* pcb = get_cur_pcb();
-    if(buf==NULL || buf<(uint8_t*)VIRTUAL_PAGE_START || nbytes<=0 || pcb==NULL)
+    if(buf==NULL || buf<(uint8_t*)VIRTUAL_PAGE_START || nbytes<=0 || pcb==NULL||pcb->arg_buf[0]=='\0')
         return -1;
 
     if(nbytes > MAX_CHA_BUF)
