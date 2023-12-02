@@ -135,7 +135,6 @@ void scheduler(){
 */
 int32_t scheduler_getnext(){
     int32_t current_pointer = myScheduler.cur_task % NUM_SCHES;        // pointer of current process
-    int8_t i;
     int32_t next_pointer = current_pointer;
 
     // for (i=0;i<3;i++){
