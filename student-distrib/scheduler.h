@@ -4,15 +4,17 @@
 #include "paging.h"
 #include "terminal.h"
 #include "x86_desc.h"
-#define PIT_IO_PORT         0x43
+
+#define PIT_IO_PORT         0x34
 
 //0x36 = 00110110 = channel 0(00)|access mode 3(11)|operating mode 3(011)|16-bit(0)
 #define PIT_REG             0x36
 #define CHANNEL_0           0x40
 #define VIRTUAL_VIDEO       0xb8000
-#define PIT_FREQ            11931       //The oscillator used by the PIT chip runs at (roughly) 1.193182 MHz. 
-#define LOWER_MASK          0x00FF      //low byte         
-#define HIGHER_MASK         0xFF00      //high byte
+// The oscillator used by the PIT chip runs at (roughly) 1.193182 MHz. 
+// Frequency = 1193182 / Hz, use 100 Hz
+#define PIT_FREQ            11931    
+#define LOWER_MASK          0xFF      //low byte         
 
 #define PIT_IRQ             0           //PIT has top priority
 #define NOT_EXIST           -1           //denote when the process is not created or has been completed and removed
