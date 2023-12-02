@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "terminal.h"
 #include "keyboard.h"
+#include "scheduler.h"
 
 #define VIDEO       0xB8000
 #define NUM_COLS    80
@@ -21,11 +22,20 @@ static char* video_mem = (char *)VIDEO;
  * Return Value: none
  */
 void clear(void) {
-    int32_t i;
-    for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
-        *(uint8_t *)(video_mem + (i << 1)) = ' ';
-        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+    int i;
+    //-------------------checkpoint5---------------
+    //remap
+    //clear video memory by setting all to ' ' and ATTRIB
+    for( i = 0; i < NUM_ROWS*NUM_COLS; i++ ){
+        *(uint8_t *)(VIDEO_MEM_LOC + (i << 1)) = ' ';
+        *(uint8_t *)(VIDEO_MEM_LOC + (i << 1) + 1) = ATTRIB;
     }
+
+    terminal[curr_term_id].cursor_x = 0;
+    terminal[curr_term_id].cursor_y = 0;
+
+    //redraw the cursor
+    update_cursor(terminal[curr_term_id].cursor_x, terminal[curr_term_id].cursor_y);
 }
 
 /* Standard printf().
@@ -496,8 +506,14 @@ void test_interrupts(void) {
  * of the screen and erasing the top line of the screen.   
  * Side effect: the cursor is moved
  */
-void scroll() {
+void scroll(uint8_t userkey) {
 	int i;
+    // ---------------checkpoint5------------------
+    int term_id;
+    if(userkey)
+        term_id = curr_term_id;
+    else
+        term_id = myScheduler.cur_task;
 
     //Starting on the second line, move the content up one line
 	for (i = 0; i < NUM_ROWS - 1; i++) {
@@ -514,9 +530,11 @@ void scroll() {
 	}
 
 	//update the cursor
-    terminal.cursor_y--;
-	if (terminal.cursor_y == 255) {
-		terminal.cursor_y++;
+    //-------------checkpoint5--------------
+    //which terminal
+    terminal[term_id].cursor_y--;
+	if (terminal[term_id].cursor_y == 255) {
+		terminal[term_id].cursor_y++;
 	}
 }
 
@@ -526,25 +544,36 @@ void scroll() {
  * Outputs: none
  * Side effect: print keys on the screen                                           
  */
-void userkey_putc(uint8_t c) {
+void user_terminal_putc(uint8_t c, uint8_t userkey) {
 	int flags;
-	cli_and_save(flags);
+    int term_id;
+    if(userkey)
+        term_id = curr_term_id;
+    else
+        term_id = myScheduler.cur_task;
 
+	cli_and_save(flags);
+    // ---------------checkpoint5--------------
+    // remap
+    // if(userkey)
+        
 	switch (c) {
 		// case '\0': break;   //print nothing
-		case '\n': case '\r': handle_newline(); break;     //start a new line if get line break or enter is pressed
-		case '\b': handle_backspace(); break;   //handle backspace
+		case '\n': case '\r': handle_newline(userkey); break;     //start a new line if get line break or enter is pressed
+		case '\b': handle_backspace(userkey); break;   //handle backspace
 		default:
             //start a new line if cursor is already at the end of the current line
-			if (terminal.cursor_x >= NUM_COLS) {
-				handle_newline();
+			//------------checkpoint5--------------
+            //which terminal
+            if (terminal[term_id].cursor_x >= NUM_COLS) {
+				handle_newline(userkey);
 			}
-			*(uint8_t *)(video_mem + ((NUM_COLS * terminal.cursor_y + terminal.cursor_x) << 1)) = c;
-			*(uint8_t *)(video_mem + ((NUM_COLS * terminal.cursor_y + terminal.cursor_x) << 1) + 1) = ATTRIB;
-			terminal.cursor_x++;
+			*(uint8_t *)(video_mem + ((NUM_COLS * terminal[term_id].cursor_y + terminal[term_id].cursor_x) << 1)) = c;
+			*(uint8_t *)(video_mem + ((NUM_COLS * terminal[term_id].cursor_y + terminal[term_id].cursor_x) << 1) + 1) = ATTRIB;
+			terminal[term_id].cursor_x++;
 	}
 
-	update_cursor(terminal.cursor_x, terminal.cursor_y);
+	update_cursor(terminal[term_id].cursor_x, terminal[term_id].cursor_y);
 	restore_flags(flags);
 }
 
@@ -552,13 +581,21 @@ void userkey_putc(uint8_t c) {
  * add a new line
  * Side effect: cursor moves to the start of the new line                                          
  */
-void handle_newline() {
-	terminal.cursor_x = 0;
-	terminal.cursor_y++;
+void handle_newline(uint8_t userkey) {
+    //------------checkpoint5--------------
+    //which terminal
+    int term_id;
+    if(userkey)
+        term_id = curr_term_id;
+    else
+        term_id = myScheduler.cur_task;
+
+	terminal[term_id].cursor_x = 0;
+	terminal[term_id].cursor_y++;
     //after adding a newline, we run out of the rows
     //then, do scrolling
-	if (terminal.cursor_y >= NUM_ROWS) {
-		scroll();
+	if (terminal[term_id].cursor_y >= NUM_ROWS) {
+		scroll(userkey);
 	}
 	//update_cursor(terminal.cursor_x, terminal.cursor_y);
 }
@@ -567,20 +604,28 @@ void handle_newline() {
  * realize backspace operation
  * Side effect: the position of the cursor changes and the last character is deleted                                  
  */
-void handle_backspace() {
+void handle_backspace(uint8_t userkey) {
+    //------------checkpoint5--------------
+    //which terminal
+    int term_id;
+    if(userkey)
+        term_id = curr_term_id;
+    else
+        term_id = myScheduler.cur_task;
+
     //if the cursor is at the start of the screen, return
-	if (terminal.cursor_x == 0 && terminal.cursor_y == 0) {
+	if (terminal[term_id].cursor_x == 0 && terminal[term_id].cursor_y == 0) {
 		return;
 	}
-	terminal.cursor_x--;
+	terminal[term_id].cursor_x--;
     //backspace on the new line should go back to the previous line
     //(uint8_t)0-1=255
-	if (terminal.cursor_x == 255) {
-		terminal.cursor_y--;
-		terminal.cursor_x = NUM_COLS - 1;
+	if (terminal[term_id].cursor_x == 255) {
+		terminal[term_id].cursor_y--;
+		terminal[term_id].cursor_x = NUM_COLS - 1;
 	}
     //delete the character
-	*(uint8_t *)(video_mem + ((NUM_COLS * terminal.cursor_y + terminal.cursor_x) << 1)) = ' ';
+	*(uint8_t *)(video_mem + ((NUM_COLS * terminal[term_id].cursor_y + terminal[term_id].cursor_x) << 1)) = ' ';
 }
 
 

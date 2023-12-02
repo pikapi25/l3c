@@ -9,11 +9,11 @@
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
-//print users' key checkpoint2
-void scroll();
-void userkey_putc(uint8_t c);
-void handle_newline();
-void handle_backspace();
+ 
+void scroll(uint8_t userkey);
+void user_terminal_putc(uint8_t c, uint8_t userkey);
+void handle_newline(uint8_t userkey);
+void handle_backspace(uint8_t userkey);
 
 int32_t puts(int8_t *s);
 int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);

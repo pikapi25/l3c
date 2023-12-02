@@ -115,9 +115,23 @@ void keyboard_handler(void) {
 		case CAPS_LOCK_PRESSED:		
 			caps = !caps;	
 			break;
-		// case NUM_LOCK_PRESSED:		
-		// 	numl = !numl;	
-		// 	break;
+		//--------------------checkpoint5-----------------------
+		/* terminal switch*/
+		case F1_KEY:
+			if (alt) {
+				terminal_switch(TERM_ONE);
+			}
+			break;
+		case F2_KEY:
+			if (alt) {
+				terminal_switch(TERM_TWO);
+			}
+			break;
+		case F3_KEY:
+			if (alt) {
+				terminal_switch(TERM_THREE);
+			}
+			break;
 
 		default:
             //get corresponding ascii for letters and numbers
@@ -153,8 +167,12 @@ void keyboard_handler(void) {
 				clear_redraw();						
 				break;
 			} 
+			else if (ctrl && (ascii == 'c' || ascii == 'C')) {
+				return;						
+				break;
+			} 
 			else if (ascii == '\n') {
-				userkey_putc(ascii);
+				user_terminal_putc(ascii,1);
 				if (terminal->readkey){
 					terminal->kbd_buf[terminal->kbd_buf_count] = '\n';
 					terminal->kbd_buf_count++;
@@ -166,7 +184,7 @@ void keyboard_handler(void) {
 			} 
 			else if (ascii == '\b') {
 				if (terminal->kbd_buf_count > 0) {
-					userkey_putc(ascii);
+					user_terminal_putc(ascii,1);
 					terminal->kbd_buf_count--;
 					terminal->kbd_buf[terminal->kbd_buf_count] = '\0';
 				}
@@ -174,7 +192,7 @@ void keyboard_handler(void) {
 			else if (ascii == '\t') {
 				for (i = 0; i < 2; i++) {
 					if (terminal->kbd_buf_count < MAX_CHA_BUF - 1) {
-						userkey_putc(' ');
+						user_terminal_putc(' ',1);
 						terminal->kbd_buf[terminal->kbd_buf_count] = ' ';
 						terminal->kbd_buf_count++;
 					}
@@ -182,7 +200,7 @@ void keyboard_handler(void) {
 			} 
 			else if (ascii != '\0') {
 				if (terminal->kbd_buf_count < MAX_CHA_BUF - 1) {
-					userkey_putc(ascii);
+					user_terminal_putc(ascii,1);
 					terminal->kbd_buf[terminal->kbd_buf_count] = ascii;
 					terminal->kbd_buf_count++;
 				}

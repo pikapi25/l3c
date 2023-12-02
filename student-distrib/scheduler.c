@@ -78,14 +78,14 @@ void scheduler(){
     // remap process 
     mapping_vir_to_phy(VIRTUAL_PAGE_START, PHYS_PROGRAM_START + next_pid * PHYS_PROGRAM_SIZE);
     
-    if (next_pid == cur_terminal_id){
+    if (next_pid == curr_term_id){
         //if next terminal is activated and displayed
         //recognizes the active terminal and allows writing to the actual video memory.
         map_video_PTE(video_memory_start);
 
     }else{
         //if next termnial is not activated, write into backup buffer
-        map_video_PTE(video_memory_start+cur_terminal_id);
+        map_video_PTE(video_memory_start+curr_term_id);
     }
 
     tss.ss0 = KERNEL_DS;
@@ -102,7 +102,7 @@ void scheduler(){
         "movl %%eax, %%esp;"
         "movl %%ebx, %%ebp;"
         :
-        :"a"(next_pcb->esp_val),"b"=(next_pcb->ebp_val)
+        :"a"(next_pcb->esp_val),"b"(next_pcb->ebp_val)
     );
 }
 
