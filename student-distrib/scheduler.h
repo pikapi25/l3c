@@ -15,7 +15,7 @@
 #define HIGHER_MASK         0xFF00      //high byte
 
 #define PIT_IRQ             0           //PIT has top priority
-#define NOT_EXIST           0           //denote when the process is not created or has been completed and removed
+#define NOT_EXIST           -1           //denote when the process is not created or has been completed and removed
 #define NUM_SCHES      3  // number of schedules
 typedef struct{
     int32_t tasks[NUM_SCHES];

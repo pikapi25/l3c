@@ -52,21 +52,21 @@ int32_t halt (uint8_t status){
     /* remove current pcb */
     pid_arr[cur_pcb->pid] = 0;
 
-    //--------------------checkpoint5-----------------------
-    /* scheduling */
     int8_t current_pointer = myScheduler.cur_task;        // pointer of current process
     uint32_t scheduler_pid = myScheduler.tasks[current_pointer];
-    if(scheduler_pid == cur_pcb->pid){
-        myScheduler.tasks[current_pointer]=parent_pcb->pid;
-    }
-
     /* if it's shell, close the shell and start a new one */
     /* ATTENTION: Need to set parent_pcb to NULL when initializing*/
     if (parent_pcb == NULL){
         pid_arr[cur_pcb->pid] = 0;
-        printf("You can't exit the base shell!");
+        printf("Warning: You can't exit the base shell!");
+        myScheduler.tasks[current_pointer]=NOT_EXIST;
         execute((uint8_t*)"shell");
     }
+
+    //--------------------checkpoint5-----------------------
+    /* scheduling */
+    myScheduler.tasks[current_pointer]=parent_pcb->pid;
+
     /* Restore parent paging (from ls back to shell) */
     /* Physical memory starts at 8MB + (process number * 4MB) */
     /* ATTENTION: Need to implement this function to set paging */
@@ -158,11 +158,14 @@ int32_t execute(const uint8_t* command)
     pcb->pid = pid;
 
     /* set parent pid */
-    if(pid == 0||pid == 1||pid == 2){   //scheduler
+    int8_t current_pointer = myScheduler.cur_task;        // pointer of current process
+    uint32_t scheduler_pid = myScheduler.tasks[current_pointer];
+    if(myScheduler.tasks[current_pointer]==NOT_EXIST){   //scheduler
         pcb->parent_pcb =NULL;  //base shell
     }
     else{
-        pcb->parent_pcb = (pcb_t*)(EIGHT_MB - pid * EIGHT_KB);
+        
+        pcb->parent_pcb = (pcb_t*)(EIGHT_MB - (scheduler_pid+1) * EIGHT_KB);
     }
 
     pcb->fd_arr[0].flags = 1;
@@ -183,10 +186,6 @@ int32_t execute(const uint8_t* command)
 
     /* Load program */
     read_data(dentry.inode_num, 0, (uint8_t*)USER_CODE, USER_STACK - USER_CODE);
-
-    //--------------------checkpoint5-----------------------
-    /* scheduling */
-    
     
     /* Save old stack */
     /* context switch*/

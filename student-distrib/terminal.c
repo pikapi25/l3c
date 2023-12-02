@@ -99,7 +99,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes) {
         c = write_buf[i];
         /* If character is not valid, then break.   */
         // if( c == '\0' || c == 0 ) break;
-        userkey_putc(c);
+        user_terminal_putc(c, 0);
         //reset_kbd_buf();
         num_put++;
     }
@@ -111,20 +111,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes) {
  * Side effect: Clear the screen
  */
 void clear_redraw() {
-    int i;
-    //clear video memory by setting all to ' ' and ATTRIB
-    for( i = 0; i < NUM_ROWS*NUM_COLS; i++ ){
-        *(uint8_t *)(VIDEO_MEM_LOC + (i << 1)) = ' ';
-        *(uint8_t *)(VIDEO_MEM_LOC + (i << 1) + 1) = ATTRIB;
-    }
-
-    terminal.cursor_x = 0;
-    terminal.cursor_y = 0;
-
-    //redraw the cursor
-    update_cursor(terminal.cursor_x, terminal.cursor_y);
-
-    return;
+    clean();
 }
 
 int32_t illegal_open(const uint8_t* filename) {
