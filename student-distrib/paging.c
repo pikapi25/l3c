@@ -1,6 +1,6 @@
 #include "paging.h"
 #include "types.h"
-
+#include "terminal.h"
 
 #define PAGE_TABLE_COUNT    1024
 #define PAGE_DIC_COUNT  1024
@@ -109,4 +109,14 @@ void map_video_PTE(uint32_t phy_addr){
         "movl %%eax, %%cr3;"           
         :
     );   
+}
+
+void update_vidmem_paging(uint8_t term_id){
+    /* if it's current terminal, map to main video memory */
+    if (curr_term_id == term_id){
+        map_video_PTE(VIDEO_MEM_LOC);
+    }else{
+        /* otherwise map to background buffer*/
+        map_video_PTE((uint32_t)terminal[term_id].background_buffer);
+    }
 }

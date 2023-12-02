@@ -7,8 +7,10 @@
 
 #include "types.h"
 
+#define NUM_TERMS 3
 #define MAX_CHA_BUF 128
 #define VIDEO_MEM_LOC   0xB8000
+#define VIDEO_MEM_SIZE 0x01000
 #define NUM_COLS        80
 #define NUM_ROWS        25
 #define ATTRIB          0x7
@@ -20,10 +22,13 @@ typedef struct terminal_t {
 	uint8_t  cursor_y;          /* row number of current cursor position    */
 	uint8_t  kbd_buf[MAX_CHA_BUF];     /* keyboard buffer                  */
 	uint16_t  kbd_buf_count;     /* number of characters in keyboard buffer  */
+	uint8_t* background_buffer; /* address of the background buffer */
 } terminal_t;
 
 /*Initialize the terminal*/
 extern void terminal_init();
+/*Switch terminal*/
+extern void terminal_switch(uint8_t new_term);
 /*reset the keyboard buffer*/
 void reset_kbd_buf();
 /*return current terminal_t* */
@@ -43,6 +48,6 @@ int32_t illegal_read(int32_t fd, void* buf, int32_t nbyte);
 
 int32_t illegal_write(int32_t fd, const void* buf, int32_t nbyte);
 
-extern terminal_t terminal; //terminal
-
+extern terminal_t terminal[NUM_TERMS]; //terminal
+extern volatile uint8_t curr_term_id; // current(visible) terminal id
 #endif /* _TERMINAL_H */

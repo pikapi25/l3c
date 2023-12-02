@@ -16,9 +16,9 @@
 
 #define PIT_IRQ             0           //PIT has top priority
 #define NOT_EXIST           0           //denote when the process is not created or has been completed and removed
-
+#define NUM_SCHES      3  // number of schedules
 typedef struct{
-    int32_t tasks[3];
+    int32_t tasks[NUM_SCHES];
     int8_t num_tasks;                   // current tasks number
     int8_t cur_task;                    // current active task id 
 }Scheduler;

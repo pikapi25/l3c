@@ -3,10 +3,11 @@
 #include "i8259.h"
 #include "lib.h"
 #include "rtc.h"
+#include "scheduler.h"
 
-volatile uint8_t rtc_int_flag = 0; // indicate if an interrupt occurred. 0 for not occurred.
-volatile uint32_t rtc_ticks = 0; // the number of ticks. every **actual** interrupt increment one tick.
-uint32_t rtc_virtual_rate = 1024; /* the virtual interrupt rate */
+volatile uint8_t rtc_int_flag[NUM_SCHES] = {0,0,0}; // indicate if an interrupt occurred. 0 for not occurred.
+volatile uint32_t rtc_ticks[NUM_SCHES] = {0,0,0}; // the number of ticks. every **actual** interrupt increment one tick.
+uint32_t rtc_virtual_rate[NUM_SCHES] = {1024,1024,1024}; /* the virtual interrupt rate */
 
 /* rtc_init
  * INPUT: none
@@ -17,6 +18,7 @@ void rtc_init(void){
 
     /* Turning on IRQ 8*/
     cli();
+    int i;
     char prev;
     outb(RTC_REG_B|RTC_DIS_NMI, RTC_REG_PORT); // select register B and disable NMI
     prev = inb(RTC_CMOS_RW_PORT); // read the current value of register B
@@ -30,9 +32,12 @@ void rtc_init(void){
     outb((prev & 0xF0) | RTC_DEFAULT_RATE, RTC_CMOS_RW_PORT); // write only our rate to A. Note, rate is the bottom 4 bits.
 
     /* Initialize the variables */
-    rtc_int_flag = 0; // no interrupt occurred
-    rtc_virtual_rate = 1024;
-    rtc_ticks = 0;
+    for (i=0; i<NUM_SCHES;i++){
+        rtc_int_flag[i] = 0;
+        rtc_virtual_rate[i] = 1024;
+        rtc_ticks[i] = 0;
+    }
+    
     // rtc_ticks = 0; // ticks is set to 0. 
 
     /* enable irq line */
@@ -46,16 +51,20 @@ void rtc_init(void){
  * EFFECT: handle the interrupt handler, and disable irq 8
 */
 void rtc_handler(void){
+    int i;
     /* Virtualize interrupt rate:
      * say, if the virtual rate is r, it means 1/r seconds per interrupt
      * however, the actual rate is 1024, which means it is 1/1024 seconds per interrupt
      * therefore, 1/r / (1/1024) = 1024 / r actual interrupts is equal to one virtual interrupt
     */
     //cli();
-    rtc_ticks ++;
-    if (rtc_ticks  >= rtc_virtual_rate){
-        rtc_int_flag = 1;
-        rtc_ticks = 0;
+    
+    for (i = 0; i < NUM_SCHES; i++){
+        rtc_ticks[i] ++;
+        if (rtc_ticks >= rtc_virtual_rate[i]){
+            rtc_int_flag[i] = 1;
+            rtc_ticks[i] = 0;
+        }
     }
     outb(RTC_REG_C, RTC_REG_PORT); // select register C
     inb(RTC_CMOS_RW_PORT); // just throw away contents
@@ -71,8 +80,8 @@ void rtc_handler(void){
  * EFFECT: set the interrupt rate to 2
 */
 int32_t rtc_open(const uint8_t* filename){
-    rtc_int_flag = 0;
-    rtc_virtual_rate = 1024 / 2;
+    rtc_int_flag[myScheduler.cur_task] = 0;
+    rtc_virtual_rate[myScheduler.cur_task] = 1024 / 2;
     return 0;
 }
 
@@ -92,9 +101,9 @@ int32_t rtc_close(int32_t fd){
 */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes){
     /* wait until interrupt occured */
-    rtc_int_flag = 0;
-    while (!rtc_int_flag);
-    rtc_int_flag = 0;
+    rtc_int_flag[myScheduler.cur_task] = 0;
+    while (!rtc_int_flag[myScheduler.cur_task]);
+    rtc_int_flag[myScheduler.cur_task] = 0;
     return 0;
 }
 
@@ -120,7 +129,7 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
      * If we AND the original number with (num - 1), it should result in 0. */
 
     if (rtc_set_freq > 0 && rtc_set_freq <= 1024 && ((rtc_set_freq & (rtc_set_freq - 1)) == 0 )){
-        rtc_virtual_rate = 1024 / rtc_set_freq;
+        rtc_virtual_rate[myScheduler.cur_task] = 1024 / rtc_set_freq;
     }else{
         return -1;
     }
