@@ -42,7 +42,7 @@ int32_t halt (uint8_t status){
     /* close all files */
     for (i=0; i < MAX_FILES; i++){
         if (cur_pcb->fd_arr[i].flags!=0){
-            //cur_pcb->fd_arr[i].file_op_table->close_op(i);
+            cur_pcb->fd_arr[i].file_op_table->close_op(i);
             cur_pcb->fd_arr[i].flags = 0;
         }
     }

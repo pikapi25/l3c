@@ -577,7 +577,9 @@ void user_terminal_putc(uint8_t c, uint8_t userkey) {
 			terminal[term_id].cursor_x++;
 	}
 
-	update_cursor(terminal[term_id].cursor_x, terminal[term_id].cursor_y);
+    if(curr_term_id==term_id){
+	    update_cursor(terminal[term_id].cursor_x, terminal[term_id].cursor_y);
+    }
     if (userkey){
         update_vidmem_paging(myScheduler.cur_task);
     }
