@@ -131,7 +131,7 @@ Solution:
 
 Time: 30min  
 
---- problem 2 ---  
+--- problem 3 ---  
 Problem Description:  
 >   - Page fault occurs when memcpy function is called in execute function.  
 
@@ -140,3 +140,65 @@ Solution:
 
 Time: 30min  
 
+
+## CHECKPOINT 5
+
+--- problem 1 ---   
+Problem Description:   
+>   - Exception occurs when starting the vm.
+
+Solution:   
+>   - Set dpl for pit in idt.c.
+
+Time: 3h
+
+--- problem 2 ---   
+Problem Description:   
+>   - terminal_init(), scheduler_initialize() wasn't added in kernel.c 
+    which contributes to error in cur_terminal_id and myScheduler.task.
+
+Solution:   
+>   - Add initialization functions in kernel.c.
+
+Time: 1h
+
+--- problem 3 ---   
+Problem Description:   
+>   - What we type occurs in terminals randomly.
+
+Solution:   
+>   - Add video remapping in clear and user_terminal_putc functions.
+
+Time: 1h
+
+--- problem 4 ---   
+Problem Description:   
+>   - When we switch to other terminal, the terminals become empty.
+
+Solution:   
+>   - Let pit be initialized after all initialization finish.
+
+Time: 30min
+
+--- problem 5 ---   
+Problem Description:   
+>   - We can't clear terminal.
+
+Solution:   
+>   - Add clear() in terminal_init().
+
+Time: 15min
+
+--- problem 6 ---   
+Problem Description:   
+>   - Starting sentences can't be printed in the first terminal when we
+    start the system. However, the position of the cursor was correct. T
+    This was because the contents that should be printed were in the backup
+    buffer.
+
+Solution:   
+>   - Add a if condition in scheduler:
+    If current_terminal_id is equal to next_terminal_id, map to video memory.
+    Otherwise, map to background buffer. 
+
+Time: 1h30min
