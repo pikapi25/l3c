@@ -154,7 +154,8 @@ void entry(unsigned long magic, unsigned long addr) {
     //enable_irq(2);
     //disable_irq(0);
 
-    
+    //init the terminal
+    terminal_init();
 
     scheduler_initialize();
 
@@ -164,15 +165,13 @@ void entry(unsigned long magic, unsigned long addr) {
     //init the RTC
     rtc_init();
 
-    //init the terminal
-    terminal_init();
-
     //init the keyboard
     keyboard_init();
 
     //init the pit
     pit_init();
 
+    clear();
     
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the
