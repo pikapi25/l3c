@@ -13,6 +13,8 @@
  */
 void terminal_init() {
     int i;
+    curr_term_id = 0;
+    clear_redraw();
     for (i=0; i<NUM_TERMS; i++){
         terminal[i].background_buffer = (uint8_t*)(VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*(i+2));
         terminal[i].readkey = 0;

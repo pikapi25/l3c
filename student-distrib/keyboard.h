@@ -33,9 +33,9 @@
 #define F1_KEY		0x3B
 #define F2_KEY		0x3C
 #define F3_KEY		0x3D
-#define TERM_ONE    1
-#define TERM_TWO    2
-#define TERM_THREE    3
+#define TERM_ONE    0
+#define TERM_TWO    1
+#define TERM_THREE    2
 
 
 //Initialize keyboard

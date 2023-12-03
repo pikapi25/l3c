@@ -173,7 +173,6 @@ void entry(unsigned long magic, unsigned long addr) {
     //init the pit
     pit_init();
 
-
     
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the
@@ -189,7 +188,7 @@ void entry(unsigned long magic, unsigned long addr) {
 #ifdef RUN_TESTS
     /* Run tests */
     // launch_tests(); 
-    clear_redraw();	
+    	
     execute((uint8_t*)"shell");
 // #else
 // 	/* Execute the first program ("shell") ... */
