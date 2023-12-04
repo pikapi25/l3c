@@ -119,22 +119,22 @@ void clear_redraw() {
 }
 
 int32_t illegal_open(const uint8_t* filename) {
-	printf("FAIL TO OPEN TERMINAL\n");
+	// printf("FAIL TO OPEN TERMINAL\n");
 	return -1;
 }
 
 int32_t illegal_close(int32_t fd) {
-	printf("FAIL TO CLOSE TERMINAL\n");
+	// printf("FAIL TO CLOSE TERMINAL\n");
 	return -1;
 }
 
 int32_t illegal_read(int32_t fd, void* buf, int32_t nbyte){
-    printf("FAIL TO READ\n");
+    // printf("FAIL TO READ\n");
     return -1;
 }
 
 int32_t illegal_write(int32_t fd, const void* buf, int32_t nbyte){
-    printf("FAIL TO WRITE\n");
+    // printf("FAIL TO WRITE\n");
     return -1;
 }
 

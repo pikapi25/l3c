@@ -81,9 +81,13 @@ void scheduler(){
     pcb_t* current_pcb = get_cur_pcb();
     register uint32_t saved_ebp asm("ebp");
     current_pcb->sch_ebp = saved_ebp;
-
+    // map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
     if (next_pid < 0){
-        map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
+        if (curr_term_id == next_pointer){
+            map_video_PTE((uint32_t)VIDEO_MEM_LOC);
+        }else{
+            map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
+        }   
         execute((uint8_t*)"shell");
     }
     // remap process 
@@ -100,21 +104,8 @@ void scheduler(){
     }
 
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = EIGHT_MB - next_pid * EIGHT_KB - 4;  
-    // pcb_t* current_pcb = (pcb_t*)(EIGHT_MB - (current_pid+1) * EIGHT_KB);
+    tss.esp0 = EIGHT_MB - next_pid * EIGHT_KB - 4;
     pcb_t* next_pcb = (pcb_t*)(EIGHT_MB - (next_pid+1) * EIGHT_KB);
-    // asm volatile(
-    //     "movl %%esp, %%eax;"
-    //     "movl %%ebp, %%ebx;"
-    //     :"=a"(current_pcb->esp_val),"=b"(current_pcb->ebp_val)
-    //     :
-    // );
-    // asm volatile(
-    //     "movl %%eax, %%esp;"
-    //     "movl %%ebx, %%ebp;"
-    //     :
-    //     :"a"(next_pcb->esp_val),"b"(next_pcb->ebp_val)
-    // );
     asm volatile(
         "movl %0, %%ebp \n\
                 leave          \n\

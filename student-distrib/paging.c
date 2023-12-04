@@ -20,6 +20,8 @@
 uint32_t page_table[PAGE_TABLE_COUNT] __attribute__((aligned (4 * PAGE_TABLE_COUNT)));        // page_table for 0~4 MB
 uint32_t page_dic[PAGE_DIC_COUNT] __attribute__((aligned (4 * PAGE_DIC_COUNT))); 
 uint32_t video_page_table[PAGE_TABLE_COUNT] __attribute__((aligned (4 * PAGE_TABLE_COUNT)));
+
+
 // Page_Initialize
 // We open Paging mode, and fill some entries into PD and PT
 //      There is only two entries needed
@@ -104,9 +106,16 @@ void map_vidmap_page(uint32_t vir_addr, uint32_t phy_addr, int32_t index){
     );      
 }
 
+// ------------helper function-------------
+// map_video_PTE
+// Input: uint32_t phy_addr
+// Function: remap virtual video address (0xb8000) and (136 MB) to provided physical address 
+// OutPut: none
+// Side effect: modify page_table and video_page_table 
 void map_video_PTE(uint32_t phy_addr){
     page_table[(video_memory_start)>>page_table_start] = phy_addr|user_PTE_set;
-    video_page_table[(USER_PROGRAM_END<<10)>>22] = phy_addr|video_PTE_set;
+    // here we left shift 10 to clear first 10 bits and get page table index by right shift 10 + 12 bits
+    video_page_table[(USER_PROGRAM_END<<10)>>page_dir_start] = phy_addr|video_PTE_set;
     asm volatile(                           
         "movl %%cr3, %%eax;"           
         "movl %%eax, %%cr3;"           
@@ -114,6 +123,13 @@ void map_video_PTE(uint32_t phy_addr){
     );   
 }
 
+
+// update_vidmem_paging
+// Input: term_id      
+// Function: remap video memory page 
+//           if the term_id == curr_term_id, then write directly into Video memory else write into corresponding backup buffer
+// OutPut: None
+// Side effect: Change backup buffer content 
 void update_vidmem_paging(uint8_t term_id){
     /* if it's current terminal, map to main video memory */
     if (curr_term_id == term_id){
