@@ -14,5 +14,8 @@ extern void rtc_handler_linkage();
 //the assemply linkage for PIT interrupt
 extern void pit_handler_linkage();
 
+//the assembly linkage for mouse interrupt
+extern void mouse_handler_linkage();
+
 #endif
 #endif

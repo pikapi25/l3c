@@ -14,6 +14,7 @@
 #include "idt.h"
 #include "filesys.h"
 #include "scheduler.h"
+#include "mouse.h"
 
 #define RUN_TESTS   1
 
@@ -167,6 +168,9 @@ void entry(unsigned long magic, unsigned long addr) {
 
     //init the keyboard
     keyboard_init();
+
+    //init the mouse
+    mouse_init();
 
     //init the pit
     pit_init();

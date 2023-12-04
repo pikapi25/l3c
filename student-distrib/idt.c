@@ -50,6 +50,8 @@ void idt_init()
     idt[RTC_VEC].present=1;
     idt[PIT_VEC].reserved3=0;
     idt[PIT_VEC].present=1;
+    idt[MOUSE_VEC].reserved3=0;
+    idt[MOUSE_VEC].present=1;
 
     //initialize idt struct for system call
     idt[SYSTEM_CALL_VEC].dpl=3;     //dpl for system call is 3
@@ -82,7 +84,8 @@ void idt_init()
     SET_IDT_ENTRY(idt[KEYBOARD_VEC], keyboard_handler_linkage);
     SET_IDT_ENTRY(idt[RTC_VEC], rtc_handler_linkage);
     SET_IDT_ENTRY(idt[PIT_VEC], pit_handler_linkage);
-
+    SET_IDT_ENTRY(idt[MOUSE_VEC], mouse_handler_linkage);
+    
     //set IDT entries for system call
     idt[SYSTEM_CALL_VEC].reserved3 = 1;
     SET_IDT_ENTRY(idt[SYSTEM_CALL_VEC], syscall_linkage);

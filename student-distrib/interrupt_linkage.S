@@ -19,3 +19,6 @@ INTR_LINK(rtc_handler_linkage, rtc_handler);
 
 #create the assemply linkage for PIT interrupt
 INTR_LINK(pit_handler_linkage, pit_handler);  
+
+#create the assembly linkage for mouse interrupt
+INTR_LINK(mouse_handler_linkage, mouse_handler); 
