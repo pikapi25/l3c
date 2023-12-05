@@ -1,18 +1,7 @@
 #include "mouse.h"
 #include "lib.h"
+#include "i8259.h"
 
-
-int16_t mouse_x;
-int16_t mouse_y;
-int16_t prev_mouse_x;
-int16_t prev_mouse_y;
-int32_t prev_draw_x;
-int32_t prev_draw_y;
-int32_t need_play;
-
-uint8_t mouse_cycle = MOUSE_PACKET_1;
-uint8_t mouse_packet[3];
-uint8_t mouse_ack = MOUSE_HANDLING;
 
 /* mouse_wait: wait until mouse can read or write
  * Input: wait_type, tell the function whether we are waiting for read or write
@@ -20,14 +9,15 @@ uint8_t mouse_ack = MOUSE_HANDLING;
  * Side Effect: May cause dead loop!
 */
 void mouse_wait(uint8_t wait_type){
+    int32_t counter = 10000;
     if(wait_type == WAIT_MOUSE_READ){
-        while(1){
+        while(counter--){
             if((inb(MOUSE_CHECK_PORT) & WAIT_MOUSE_READ) == MOUSE_CAN_READ){
                 break;
             }
         }
     }else if(wait_type == WAIT_MOUSE_WRITE){
-        while(1){
+        while(counter--){
             if((inb(MOUSE_CHECK_PORT) & WAIT_MOUSE_WRITE) == MOUSE_CAN_WRITE){
                 break;
             }
@@ -47,7 +37,6 @@ void mouse_wait(uint8_t wait_type){
 void mouse_write(uint8_t command){
     mouse_write_port(MOUSE_GOING_TO_WRITE, MOUSE_CHECK_PORT);
     mouse_write_port(command, MOUSE_DATA_PORT);
-    /* not sure if we need to wait for ack. */
     mouse_read();
 }
 
@@ -77,11 +66,12 @@ uint8_t mouse_read(){
  * Side Effect: None
 */
 void mouse_init(){
+    mouse_write(0xA8);
     uint8_t status;
     // Enable the interrupts
     mouse_write_port(MOUSE_ENABLE_INT, MOUSE_CHECK_PORT);
     status = mouse_read();
-    status = status | 2;
+    status = (status | 2)& 0xDF;
     mouse_write_port(MOUSE_DATA_PORT, MOUSE_CHECK_PORT);
     mouse_write_port(status, MOUSE_DATA_PORT);
 
@@ -90,6 +80,21 @@ void mouse_init(){
 
     // Enable the mouse
     mouse_write(MOUSE_ENABLE);
+
+    // mouse_write_port(MOUSE_GOING_TO_WRITE, MOUSE_CHECK_PORT);
+    // mouse_write_port(0xF3, MOUSE_DATA_PORT);
+    // mouse_write_port(200, MOUSE_DATA_PORT);
+
+    my_mouse.mouse_left_btn = BTN_NOT_PRESSED;
+    my_mouse.mouse_middle_btn = BTN_NOT_PRESSED;
+    my_mouse.mouse_right_btn = BTN_NOT_PRESSED;
+    my_mouse.mouse_x = NUM_COLS / 2;
+    my_mouse.mouse_y = NUM_ROWS / 2;
+    my_mouse.mouse_prev_x = NUM_COLS / 2;
+    my_mouse.mouse_prev_y = NUM_ROWS / 2;
+    my_mouse.prev_c = SPACE_CHAR;
+    set_mouse_cursor(DEFAULT_MOUSE_CHAR);
+    enable_irq(MOUSE_IRQ);
 }
 
 /* mouse_handler: handle mouse interrupt, update mouse values
@@ -98,33 +103,69 @@ void mouse_init(){
  * Side Effect: data in my_mouse will be updated.
 */
 void mouse_handler(){
-    uint8_t input;
-    switch (mouse_cycle)
-    {
-        case MOUSE_PACKET_1:
-            mouse_packet[MOUSE_PACKET_1] = inb(MOUSE_DATA_PORT);
-            mouse_cycle++;
-            break;
-        case MOUSE_PACKET_2:
-            mouse_packet[MOUSE_PACKET_2] = inb(MOUSE_DATA_PORT);
-            mouse_cycle++;
-            break;
-        case MOUSE_PACKET_3:
-            mouse_packet[MOUSE_PACKET_3] = inb(MOUSE_DATA_PORT);
-            mouse_cycle = MOUSE_PACKET_1;
-            mouse_ack = MOUSE_HANDLE_DONE;
-            break;
+
+    send_eoi(MOUSE_IRQ);
+    uint8_t pkt1;
+    uint8_t pkt2;
+    uint8_t pkt3;
+    int32_t x_mov;
+    int32_t y_mov;
+    uint8_t c = DEFAULT_MOUSE_CHAR;
+    if (0 == (inb(MOUSE_CHECK_PORT) & 0x1)){
+        return;
     }
-    if(mouse_ack == MOUSE_HANDLE_DONE){
-        if(mouse_packet[MOUSE_PACKET_1] & MOUSE_LEFT_BTN){
-            printf("left button!\n");
-        }
-        if(mouse_packet[MOUSE_PACKET_1] & MOUSE_RIGHT_BTN){
-            printf("rightbutton!\n");
-        }
-        if(mouse_packet[MOUSE_PACKET_1] & MOUSE_MID_BTN){
-            printf("middle button!\n");
-        }
+    if (0 == (inb(MOUSE_CHECK_PORT) & 0x20)){
+        return;
     }
-    mouse_ack = MOUSE_HANDLING;
+    pkt1 = inb(MOUSE_DATA_PORT);
+    //pkt1 = mouse_read();
+    if(MOUSE_ACK == pkt1){
+        return;
+    }else{
+        if(!(pkt1 & MOUSE_ALWAYS_ONE)) return;
+        if ((pkt1 & MOUSE_X_OVERFLOW) || (pkt1 & MOUSE_Y_OVERFLOW)){
+            //printf("mouse overflow!\n");
+            return;
+        } 
+        pkt2 = mouse_read();
+        pkt3 = mouse_read();
+        if (pkt1 & MOUSE_LEFT_BTN){
+            c = '@';
+            //printf("left button!\n");
+        }else if (pkt1 & MOUSE_RIGHT_BTN){
+            c = '#';
+            //printf("right button!\n");
+        }else if (pkt1 & MOUSE_MID_BTN){
+            c = '*';
+            //printf("middle button!\n");
+        }
+        if (pkt1 & MOUSE_X_NEG){
+            x_mov = (int32_t)(MOUSE_NEG_MASK | pkt2) / 10;
+        }else{
+            x_mov = (int32_t)pkt2 / 10;
+        }
+        if (pkt1 & MOUSE_Y_NEG){
+            y_mov = (int32_t)(MOUSE_NEG_MASK | pkt3) / 10;
+        }else{
+            y_mov = (int32_t)pkt3/10;
+        }
+        if (my_mouse.mouse_x + x_mov < 0){
+            my_mouse.mouse_x = 0;
+        } else if (my_mouse.mouse_x + x_mov > NUM_COLS - 1){
+            my_mouse.mouse_x = NUM_COLS - 1;
+        }else{
+            my_mouse.mouse_x = my_mouse.mouse_x + x_mov;
+        }
+
+        if (my_mouse.mouse_y - y_mov < 0){
+            my_mouse.mouse_y = 0;
+        } else if (my_mouse.mouse_y - y_mov > NUM_ROWS - 1){
+            my_mouse.mouse_y = NUM_ROWS - 1;
+        }else{
+            my_mouse.mouse_y = my_mouse.mouse_y - y_mov;
+        }
+
+    }
+    set_mouse_cursor(c);
+    
 }

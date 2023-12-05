@@ -7,6 +7,11 @@
 
 #include "types.h"
 
+#define VIDEO       0xB8000
+#define NUM_COLS    80
+#define NUM_ROWS    25
+#define ATTRIB      0x7
+
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
  
@@ -41,6 +46,7 @@ void enable_cursor(uint8_t cursor_start, uint8_t cursor_end);
 // void disable_cursor();
 void update_cursor(int x, int y);
 
+void set_mouse_cursor(uint8_t c);
 /* Optimized printing method in terminal */
 void printt(const char *str);
 

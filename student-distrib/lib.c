@@ -5,11 +5,8 @@
 #include "terminal.h"
 #include "keyboard.h"
 #include "scheduler.h"
+#include "mouse.h"
 
-#define VIDEO       0xB8000
-#define NUM_COLS    80
-#define NUM_ROWS    25
-#define ATTRIB      0x7
 
 static int screen_x;
 static int screen_y;
@@ -684,6 +681,29 @@ void update_cursor(int x, int y)
 	outb((uint8_t) ((pos >> 8) & 0xFF), 0x3D5);
 }
 
+/* set_mouse_cursor: set the user mouse cursor to given character
+ * Input: c, the mouse character
+ * Output: None
+ * Side Effect: Change the video memory
+*/
+void set_mouse_cursor(uint8_t c){
+    uint32_t flags;
+    uint8_t prev_temp_c;
+    cli_and_save(flags);
+    update_vidmem_paging(curr_term_id);
+    prev_temp_c = *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_y + my_mouse.mouse_x) << 1));
+    if(my_mouse.mouse_prev_x != my_mouse.mouse_x || my_mouse.mouse_prev_y != my_mouse.mouse_y){
+       *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_prev_y + my_mouse.mouse_prev_x) << 1)) = my_mouse.prev_c;
+       *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_prev_y + my_mouse.mouse_prev_x) << 1) + 1) = ATTRIB;
+       my_mouse.prev_c =prev_temp_c;
+    }
+    *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_y + my_mouse.mouse_x) << 1)) = c;
+	*(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_y + my_mouse.mouse_x) << 1) + 1) = ATTRIB;
+    my_mouse.mouse_prev_x = my_mouse.mouse_x;
+    my_mouse.mouse_prev_y = my_mouse.mouse_y;
+    update_vidmem_paging(myScheduler.cur_task);
+    restore_flags(flags);
+}
 void printt(const char *str){
     uint8_t buf[128];
     strcpy((char*)buf, str);

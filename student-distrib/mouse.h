@@ -2,7 +2,9 @@
 #define _MOUSE_H
 
 #include "types.h"
+#include "terminal.h"
 
+#define MOUSE_IRQ 12
 #define MOUSE_CHECK_PORT 0x64
 #define MOUSE_DATA_PORT 0x60
 
@@ -19,12 +21,9 @@
 #define MOUSE_DEFAULT_SET 0xF6
 #define MOUSE_ENABLE 0xF4
 
-#define MOUSE_PACKET_1 0
-#define MOUSE_PACKET_2 1
-#define MOUSE_PACKET_3 2
 
-#define MOUSE_HANDLING 0
-#define MOUSE_HANDLE_DONE 1
+
+#define MOUSE_STATUS_MASK 0xDF
 
 #define MOUSE_LEFT_BTN 0x01
 #define MOUSE_RIGHT_BTN 0x02
@@ -33,11 +32,26 @@
 #define MOUSE_X_OVERFLOW 0x40
 #define MOUSE_Y_NEG 0x20
 #define MOUSE_X_NEG 0x10
+#define MOUSE_ALWAYS_ONE 0x08
+
+#define DEFAULT_MOUSE_CHAR 0x7C
+#define SPACE_CHAR 0x20
+#define BTN_NOT_PRESSED 0
+#define BTN_PRESSED 1
+
+#define MOUSE_ACK 0xFA
+#define MOUSE_NEG_MASK 0xFFFFFF00
+
 
 typedef struct{
     uint8_t mouse_left_btn;
     uint8_t mouse_right_btn;
     uint8_t mouse_middle_btn;
+    int32_t mouse_x;
+    int32_t mouse_y;
+    int32_t mouse_prev_x;
+    int32_t mouse_prev_y;
+    uint8_t prev_c;
 }mouse_t;
 
 mouse_t my_mouse;

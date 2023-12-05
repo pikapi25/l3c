@@ -154,7 +154,7 @@ void entry(unsigned long magic, unsigned long addr) {
     i8259_init();
     //enable_irq(2);
     //disable_irq(0);
-
+    
     //init the terminal
     terminal_init();
 
@@ -166,11 +166,12 @@ void entry(unsigned long magic, unsigned long addr) {
     //init the RTC
     rtc_init();
 
+    mouse_init();
     //init the keyboard
     keyboard_init();
-
+    
     //init the mouse
-    mouse_init();
+    
 
     //init the pit
     pit_init();
@@ -192,7 +193,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Run tests */
     // launch_tests(); 
 
-    execute((uint8_t*)"shell");
+    //execute((uint8_t*)"shell");
 // #else
 // 	/* Execute the first program ("shell") ... */
 // 	execute((uint8_t*)"shell");

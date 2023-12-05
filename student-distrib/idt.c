@@ -5,6 +5,7 @@
 #include "keyboard.h"
 #include "rtc.h"
 #include "syscall_linkage.h"
+#include "mouse.h"
 
 //table for exception names based on their vector numbers
 static char* exception_names[] = {
