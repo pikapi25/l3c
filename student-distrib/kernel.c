@@ -15,6 +15,8 @@
 #include "filesys.h"
 #include "scheduler.h"
 #include "mouse.h"
+#include "vbe.h"
+#include "gui.h"
 
 #define RUN_TESTS   1
 
@@ -163,20 +165,23 @@ void entry(unsigned long magic, unsigned long addr) {
     // Init the paging
     Page_Initialize();
 
+    
     //init the RTC
     rtc_init();
 
-    mouse_init();
+    draw_uiuc();
+
+    //mouse_init();
     //init the keyboard
-    keyboard_init();
+    //keyboard_init();
     
     //init the mouse
     
 
     //init the pit
-    pit_init();
+    //pit_init();
 
-    clear();
+    //clear();
     
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the

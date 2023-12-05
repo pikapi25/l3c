@@ -1,6 +1,7 @@
 #include "paging.h"
 #include "types.h"
 #include "terminal.h"
+#include "vbe.h"
 
 #define PAGE_TABLE_COUNT    1024
 #define PAGE_DIC_COUNT  1024
@@ -34,6 +35,7 @@ void
 Page_Initialize(){
     // here we initialize all PDE and PTE and make them NOT present
     int i;
+
     for (i = 0; i < PAGE_TABLE_COUNT; i++ ){
         // i*4 refers to physical address for 4KB memory space
         // 0x0 since these entries are not present 
@@ -60,6 +62,13 @@ Page_Initialize(){
     // 10000011 = 0x83
     // and kernel physical address is 0x400000 (4MB) which is stored above
     page_dic[1] = KERNEL_PHYSICAL_ADDRESS|0x83; 
+
+    // ---------------load kernel (4 MB )----------------
+    // since it's a single 4MB page, its PS is 1
+    // P = 1, RW = 1, US = 0, PWT = 0, PCD = 0, A = 0, D = 0, PS = 1
+    // 10000011 = 0x83
+    // and kernel physical address is 0x400000 (4MB) which is stored above
+    page_dic[QEMU_BASE_ADDR >> page_dir_start] = QEMU_BASE_ADDR|0x83; 
 
     // 1. load page_directory into cr3
     // 2. set CR0 PG bit to 1 (enable paging) (or 0x80000001)

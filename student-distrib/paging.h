@@ -2,6 +2,8 @@
 #define _PAGING_H
 #include "types.h"
 
+
+#define VGA_START 0xA0000
 // page table and page dictionary all contain 1024 entries
 // and each entry is 32 bit, so use uint32_t
 // PT and PD are required to be aligned.
