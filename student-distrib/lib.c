@@ -691,16 +691,16 @@ void set_mouse_cursor(uint8_t c){
     uint8_t prev_temp_c;
     cli_and_save(flags);
     update_vidmem_paging(curr_term_id);
-    prev_temp_c = *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_y + my_mouse.mouse_x) << 1));
-    if(my_mouse.mouse_prev_x != my_mouse.mouse_x || my_mouse.mouse_prev_y != my_mouse.mouse_y){
-       *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_prev_y + my_mouse.mouse_prev_x) << 1)) = my_mouse.prev_c;
-       *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_prev_y + my_mouse.mouse_prev_x) << 1) + 1) = ATTRIB;
-       my_mouse.prev_c =prev_temp_c;
+    prev_temp_c = *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_y + my_mouse[curr_term_id].mouse_x) << 1));
+    if(my_mouse[curr_term_id].mouse_prev_x != my_mouse[curr_term_id].mouse_x || my_mouse[curr_term_id].mouse_prev_y != my_mouse[curr_term_id].mouse_y){
+       *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_prev_y + my_mouse[curr_term_id].mouse_prev_x) << 1)) = my_mouse[curr_term_id].prev_c;
+       *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_prev_y + my_mouse[curr_term_id].mouse_prev_x) << 1) + 1) = ATTRIB;
+       my_mouse[curr_term_id].prev_c =prev_temp_c;
     }
-    *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_y + my_mouse.mouse_x) << 1)) = c;
-	*(uint8_t *)(video_mem + ((NUM_COLS * my_mouse.mouse_y + my_mouse.mouse_x) << 1) + 1) = ATTRIB;
-    my_mouse.mouse_prev_x = my_mouse.mouse_x;
-    my_mouse.mouse_prev_y = my_mouse.mouse_y;
+    *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_y + my_mouse[curr_term_id].mouse_x) << 1)) = c;
+	*(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_y + my_mouse[curr_term_id].mouse_x) << 1) + 1) = ATTRIB;
+    my_mouse[curr_term_id].mouse_prev_x = my_mouse[curr_term_id].mouse_x;
+    my_mouse[curr_term_id].mouse_prev_y = my_mouse[curr_term_id].mouse_y;
     update_vidmem_paging(myScheduler.cur_task);
     restore_flags(flags);
 }

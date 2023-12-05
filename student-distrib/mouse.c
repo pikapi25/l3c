@@ -66,7 +66,8 @@ uint8_t mouse_read(){
  * Side Effect: None
 */
 void mouse_init(){
-    mouse_write(0xA8);
+    uint8_t i;
+    mouse_write(MOUSE_AUX);
     uint8_t status;
     // Enable the interrupts
     mouse_write_port(MOUSE_ENABLE_INT, MOUSE_CHECK_PORT);
@@ -84,15 +85,17 @@ void mouse_init(){
     // mouse_write_port(MOUSE_GOING_TO_WRITE, MOUSE_CHECK_PORT);
     // mouse_write_port(0xF3, MOUSE_DATA_PORT);
     // mouse_write_port(200, MOUSE_DATA_PORT);
+    for(i = 0; i < NUM_TERMS; i++){
+        my_mouse[i].mouse_left_btn = BTN_NOT_PRESSED;
+        my_mouse[i].mouse_middle_btn = BTN_NOT_PRESSED;
+        my_mouse[i].mouse_right_btn = BTN_NOT_PRESSED;
+        my_mouse[i].mouse_x = NUM_COLS / 2;
+        my_mouse[i].mouse_y = NUM_ROWS / 2;
+        my_mouse[i].mouse_prev_x = NUM_COLS / 2;
+        my_mouse[i].mouse_prev_y = NUM_ROWS / 2;
+        my_mouse[i].prev_c = SPACE_CHAR;
+    }
 
-    my_mouse.mouse_left_btn = BTN_NOT_PRESSED;
-    my_mouse.mouse_middle_btn = BTN_NOT_PRESSED;
-    my_mouse.mouse_right_btn = BTN_NOT_PRESSED;
-    my_mouse.mouse_x = NUM_COLS / 2;
-    my_mouse.mouse_y = NUM_ROWS / 2;
-    my_mouse.mouse_prev_x = NUM_COLS / 2;
-    my_mouse.mouse_prev_y = NUM_ROWS / 2;
-    my_mouse.prev_c = SPACE_CHAR;
     set_mouse_cursor(DEFAULT_MOUSE_CHAR);
     enable_irq(MOUSE_IRQ);
 }
@@ -149,20 +152,20 @@ void mouse_handler(){
         }else{
             y_mov = (int32_t)pkt3/10;
         }
-        if (my_mouse.mouse_x + x_mov < 0){
-            my_mouse.mouse_x = 0;
-        } else if (my_mouse.mouse_x + x_mov > NUM_COLS - 1){
-            my_mouse.mouse_x = NUM_COLS - 1;
+        if (my_mouse[curr_term_id].mouse_x + x_mov < 0){
+            my_mouse[curr_term_id].mouse_x = 0;
+        } else if (my_mouse[curr_term_id].mouse_x + x_mov > NUM_COLS - 1){
+            my_mouse[curr_term_id].mouse_x = NUM_COLS - 1;
         }else{
-            my_mouse.mouse_x = my_mouse.mouse_x + x_mov;
+            my_mouse[curr_term_id].mouse_x = my_mouse[curr_term_id].mouse_x + x_mov;
         }
 
-        if (my_mouse.mouse_y - y_mov < 0){
-            my_mouse.mouse_y = 0;
-        } else if (my_mouse.mouse_y - y_mov > NUM_ROWS - 1){
-            my_mouse.mouse_y = NUM_ROWS - 1;
+        if (my_mouse[curr_term_id].mouse_y - y_mov < 0){
+            my_mouse[curr_term_id].mouse_y = 0;
+        } else if (my_mouse[curr_term_id].mouse_y - y_mov > NUM_ROWS - 1){
+            my_mouse[curr_term_id].mouse_y = NUM_ROWS - 1;
         }else{
-            my_mouse.mouse_y = my_mouse.mouse_y - y_mov;
+            my_mouse[curr_term_id].mouse_y = my_mouse[curr_term_id].mouse_y - y_mov;
         }
 
     }

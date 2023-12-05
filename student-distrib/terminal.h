@@ -11,9 +11,7 @@
 #define MAX_CHA_BUF 128
 #define VIDEO_MEM_LOC   0xB8000
 #define VIDEO_MEM_SIZE 0x01000
-#define NUM_COLS        80
-#define NUM_ROWS        25
-#define ATTRIB          0x7
+
 
 /* Terminal struct, used to keep all informations related to a terminal */
 typedef struct terminal_t {

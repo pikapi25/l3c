@@ -16,7 +16,7 @@
 #define MOUSE_CAN_WRITE 0
 // we need to tell it we are sending a command before actually sending
 #define MOUSE_GOING_TO_WRITE 0xD4 
-
+#define MOUSE_AUX 0xA8
 #define MOUSE_ENABLE_INT 0x20
 #define MOUSE_DEFAULT_SET 0xF6
 #define MOUSE_ENABLE 0xF4
@@ -54,7 +54,7 @@ typedef struct{
     uint8_t prev_c;
 }mouse_t;
 
-mouse_t my_mouse;
+mouse_t my_mouse[NUM_TERMS];
 
 
 void mouse_init();
