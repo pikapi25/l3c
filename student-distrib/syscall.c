@@ -349,9 +349,20 @@ int32_t vidmap (uint8_t** screen_start){
     return 0;
  }
 
+/* set_handler
+ * INPUT: signum -- which signal's handler to change
+ *        handler_address -- pointer to a user-level function to be run when that signal is received
+ * OUTPUT: 0 if the handler is sucessful set, -1 on failure
+ * Functionality: changes the default action taken when a signal is received
+*/
 int32_t set_handler (int32_t signum, void* handler_address){
-    return -1;
+    if(handler_address==NULL){return -1;}
+    if(signum<0||signum>4){return -1;}
+    pcb_t* curr_pcb = get_cur_pcb();
+    curr_pcb->signal_handler[signum] = handler_address;
+    return 0;
 }
+
 
 int32_t sigreturn (void){
     return -1;
