@@ -3,7 +3,6 @@
 #include "i8259.h"
 #include "terminal.h"
 #include "speaker.h"
-#include "gensound.h"
 
 //flags of modifier keys
 uint8_t caps  = 0;
@@ -56,9 +55,9 @@ char shift_and_caps_table[SCAN_CODE_PRESS] = {
 	'<', '>', '?', '\0', '\0', '\0', ' ', '\0',
 };
 
-// char keypad_table[KEYPAD_NUM]={
-// 	'7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'
-// };
+char keypad_table[KEYPAD_NUM]={
+	'7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'
+};
 
 /*
 *   key_init
@@ -148,7 +147,10 @@ void keyboard_handler(void) {
 				speaker_stop();
 				break;
 			}
-			if (scan_code >= SCAN_CODE_PRESS) break;
+			else if(numl){
+				ascii = keypad_table[scan_code-0x47];
+			}
+			else if (scan_code >= SCAN_CODE_PRESS) break;
 			//if shift and caps are both pressed
 			else if (shift && caps) {
 				ascii = shift_and_caps_table[scan_code];
@@ -231,34 +233,34 @@ void keyboard_handler(void) {
 
 void piano(uint8_t ascii){
 	switch (ascii) {
-		case '1':	case '!':	
+		case '1':
 			speaker_play(C3);	
 			break;
-		case '2':	case '@':	
+		case '2':		
 			speaker_play(D3);	
 			break;
-		case '3':	case '#':	
+		case '3':		
 			speaker_play(E3);	
 			break;
-		case '4':	case '$':	
+		case '4':		
 			speaker_play(F3);	
 			break;
-		case '5':	case '%':	
+		case '5':		
 			speaker_play(G3);	
 			break;
-		case '6':	case '^':	
+		case '6':		
 			speaker_play(A3);	
 			break;
-		case '7':	case '&':	
+		case '7':	
 			speaker_play(B3);	
 			break;
-		case '8':	case '*':	
+		case '8':		
 			speaker_play(C4);	
 			break;
-		case '9':	case '(':	
+		case '9':		
 			speaker_play(D4);	
 			break;
-		case '0':	case ')':	
+		case '0':		
 			speaker_play(E4);	
 			break;
 		default:

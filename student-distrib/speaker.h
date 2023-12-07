@@ -14,5 +14,7 @@
 
 void speaker_play(uint32_t nFrequence);
 void speaker_stop(void);
+void play_note(uint32_t freq);
+void play_simple_music();
 
 #endif
