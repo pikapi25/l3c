@@ -81,7 +81,9 @@ struct pcb
     int32_t ebp_val;
     int32_t esp_val;
     int32_t sch_ebp;
-    void* signal_handler[SIGCOUNT];
+    void* signal_handler[SIG_COUNT];
+    int sig_pending[SIG_COUNT];
+    int sig_masked[SIG_COUNT];
 
 };
 

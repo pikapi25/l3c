@@ -5,15 +5,16 @@
 #include "keyboard.h"
 #include "rtc.h"
 #include "syscall_linkage.h"
+#include "signal.h"
 
 //table for exception names based on their vector numbers
-static char* exception_names[] = {
-    "Division Error", "Debug", "Non-maskable Interrupt", "Breakpoint",
-    "Overflow", "Bound Rnage Exceeded", "Invalid Opcode", "Device Not Available",
-    "Double Fault", "Coprocessor Segment Overrun", "Invalid TSS", "Segment Not Present",
-    "Stack-Segment Fault", "General Protection Fault", "Page Fault", "Reserved",
-    "x87 Floating-Point Exception", "Alignment Check", "Machine Check", "SIMD Floating-Point Exception"
-};
+// static char* exception_names[] = {
+//     "Division Error", "Debug", "Non-maskable Interrupt", "Breakpoint",
+//     "Overflow", "Bound Rnage Exceeded", "Invalid Opcode", "Device Not Available",
+//     "Double Fault", "Coprocessor Segment Overrun", "Invalid TSS", "Segment Not Present",
+//     "Stack-Segment Fault", "General Protection Fault", "Page Fault", "Reserved",
+//     "x87 Floating-Point Exception", "Alignment Check", "Machine Check", "SIMD Floating-Point Exception"
+// };
 
 
  
@@ -57,26 +58,26 @@ void idt_init()
 
     /*set IDT entries*/
     //set IDT entries for exceptions from 0x0 to 0x13
-    SET_IDT_ENTRY(idt[0x0], exception_handler_de);
-    SET_IDT_ENTRY(idt[0x1], exception_handler_db);
-    SET_IDT_ENTRY(idt[0x2], exception_handler_nmi);
-    SET_IDT_ENTRY(idt[0x3], exception_handler_bp);
-    SET_IDT_ENTRY(idt[0x4], exception_handler_of);
-    SET_IDT_ENTRY(idt[0x5], exception_handler_br);
-    SET_IDT_ENTRY(idt[0x6], exception_handler_ud);
-    SET_IDT_ENTRY(idt[0x7], exception_handler_nm);
-    SET_IDT_ENTRY(idt[0x8], exception_handler_df);
-    SET_IDT_ENTRY(idt[0x9], exception_handler_cso);
-    SET_IDT_ENTRY(idt[0xA], exception_handler_ts);
-    SET_IDT_ENTRY(idt[0xB], exception_handler_np);
-    SET_IDT_ENTRY(idt[0xC], exception_handler_ss);
-    SET_IDT_ENTRY(idt[0xD], exception_handler_gp);
-    SET_IDT_ENTRY(idt[0xE], exception_handler_pf);
-    SET_IDT_ENTRY(idt[0xF], exception_handler_reserved);
-    SET_IDT_ENTRY(idt[0x10], exception_handler_mf);
-    SET_IDT_ENTRY(idt[0x11], exception_handler_ac);
-    SET_IDT_ENTRY(idt[0x12], exception_handler_mc);
-    SET_IDT_ENTRY(idt[0x13], exception_handler_xm);
+    SET_IDT_ENTRY(idt[0x0], exception_handler_de_linkage);
+    SET_IDT_ENTRY(idt[0x1], exception_handler_db_linkage);
+    SET_IDT_ENTRY(idt[0x2], exception_handler_nmi_linkage);
+    SET_IDT_ENTRY(idt[0x3], exception_handler_bp_linkage);
+    SET_IDT_ENTRY(idt[0x4], exception_handler_of_linkage);
+    SET_IDT_ENTRY(idt[0x5], exception_handler_br_linkage);
+    SET_IDT_ENTRY(idt[0x6], exception_handler_ud_linkage);
+    SET_IDT_ENTRY(idt[0x7], exception_handler_nm_linkage);
+    SET_IDT_ENTRY(idt[0x8], exception_handler_df_linkage);
+    SET_IDT_ENTRY(idt[0x9], exception_handler_cso_linkage);
+    SET_IDT_ENTRY(idt[0xA], exception_handler_ts_linkage);
+    SET_IDT_ENTRY(idt[0xB], exception_handler_np_linkage);
+    SET_IDT_ENTRY(idt[0xC], exception_handler_ss_linkage);
+    SET_IDT_ENTRY(idt[0xD], exception_handler_gp_linkage);
+    SET_IDT_ENTRY(idt[0xE], exception_handler_pf_linkage);
+    SET_IDT_ENTRY(idt[0xF], exception_handler_reserved_linkage);
+    SET_IDT_ENTRY(idt[0x10], exception_handler_mf_linkage);
+    SET_IDT_ENTRY(idt[0x11], exception_handler_ac_linkage);
+    SET_IDT_ENTRY(idt[0x12], exception_handler_mc_linkage);
+    SET_IDT_ENTRY(idt[0x13], exception_handler_xm_linkage);
 
     //set IDT entries for interrupts
     SET_IDT_ENTRY(idt[KEYBOARD_VEC], keyboard_handler_linkage);
@@ -86,7 +87,6 @@ void idt_init()
     //set IDT entries for system call
     idt[SYSTEM_CALL_VEC].reserved3 = 1;
     SET_IDT_ENTRY(idt[SYSTEM_CALL_VEC], syscall_linkage);
-    // idt[SYSTEM_CALL_VEC].reserved3 = 1;
 
     /*load IDT*/
     lidt(idt_desc_ptr);
@@ -105,161 +105,181 @@ void idt_init()
 void exception_handler_de()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x0: %s\n",exception_names[0x0]);
+    // printf("An exception occurs! IDT vector number 0x0: %s\n",exception_names[0x0]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(DIV_ZERO);
 }
 
 void exception_handler_db()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x1: %s\n",exception_names[0x1]);
+    // printf("An exception occurs! IDT vector number 0x1: %s\n",exception_names[0x1]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_nmi()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x2: %s\n",exception_names[0x2]);
+    // printf("An exception occurs! IDT vector number 0x2: %s\n",exception_names[0x2]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_bp()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x3: %s\n",exception_names[0x3]);
+    // printf("An exception occurs! IDT vector number 0x3: %s\n",exception_names[0x3]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_of()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x4: %s\n",exception_names[0x4]);
+    // printf("An exception occurs! IDT vector number 0x4: %s\n",exception_names[0x4]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_br()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x5: %s\n",exception_names[0x5]);
+    // printf("An exception occurs! IDT vector number 0x5: %s\n",exception_names[0x5]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_ud()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x6: %s\n",exception_names[0x6]);
+    // printf("An exception occurs! IDT vector number 0x6: %s\n",exception_names[0x6]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_nm()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x7: %s\n",exception_names[0x7]);
+    // printf("An exception occurs! IDT vector number 0x7: %s\n",exception_names[0x7]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_df()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x8: %s\n",exception_names[0x8]);
+    // printf("An exception occurs! IDT vector number 0x8: %s\n",exception_names[0x8]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_cso()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x9: %s\n",exception_names[0x9]);
+    // printf("An exception occurs! IDT vector number 0x9: %s\n",exception_names[0x9]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_ts()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0xA: %s\n",exception_names[0xA]);
+    // printf("An exception occurs! IDT vector number 0xA: %s\n",exception_names[0xA]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_np()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0xB: %s\n",exception_names[0xB]);
+    // printf("An exception occurs! IDT vector number 0xB: %s\n",exception_names[0xB]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_ss()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0xC: %s\n",exception_names[0xC]);
+    // printf("An exception occurs! IDT vector number 0xC: %s\n",exception_names[0xC]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_gp()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0xD: %s\n",exception_names[0xD]);
+    // printf("An exception occurs! IDT vector number 0xD: %s\n",exception_names[0xD]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_pf()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0xE: %s\n",exception_names[0xE]);
+    // printf("An exception occurs! IDT vector number 0xE: %s\n",exception_names[0xE]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_reserved()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0xF: %s\n",exception_names[0xF]);
+    // printf("An exception occurs! IDT vector number 0xF: %s\n",exception_names[0xF]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_mf()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x10: %s\n",exception_names[0x10]);
+    // printf("An exception occurs! IDT vector number 0x10: %s\n",exception_names[0x10]);
     //infinite loop to freeze
-    while(1){ }
+    // while(1){ }
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_ac()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x11: %s\n",exception_names[0x11]);
+    // printf("An exception occurs! IDT vector number 0x11: %s\n",exception_names[0x11]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_mc()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x12: %s\n",exception_names[0x12]);
+    // printf("An exception occurs! IDT vector number 0x12: %s\n",exception_names[0x12]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 void exception_handler_xm()
 {
     //print exception message
-    printf("An exception occurs! IDT vector number 0x13: %s\n",exception_names[0x13]);
+    // printf("An exception occurs! IDT vector number 0x13: %s\n",exception_names[0x13]);
     //infinite loop to freeze
-    while(1){}
+    // while(1){}
+    send_signal(SEGFAULT);
 }
 
 /* system_call_handler

@@ -3,6 +3,7 @@
 #include "i8259.h"
 #define video_memory_start 0xb8000
 
+static int cnt = 0;
 
 /**
  * PIT_init
@@ -40,6 +41,12 @@ void pit_init()
  */
 void pit_handler(){
     //cli();   
+    cnt++;
+    // send alarm every 10 sec 
+    if (cnt == 1000){
+        send_signal(ALARM);
+        cnt = 0;
+    }
     send_eoi(PIT_IRQ);           
     scheduler();                 
              //Send EOI to PIC

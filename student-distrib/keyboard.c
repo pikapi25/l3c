@@ -2,6 +2,7 @@
 #include "lib.h"
 #include "i8259.h"
 #include "terminal.h"
+#include "signal.h"
 // #include "speaker.h"
 
 //flags of modifier keys
@@ -166,6 +167,11 @@ void keyboard_handler(void) {
 			//no special keys are pressed
             else {
 				ascii = scan_code_table[scan_code];
+			}
+			//signal
+			if (ctrl && (ascii == 'c' || ascii == 'C')){
+				send_signal(INTERRUPT);
+				break;
 			}
 			//output in cp1
             // putc(ascii);

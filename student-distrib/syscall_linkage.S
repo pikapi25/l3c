@@ -3,11 +3,17 @@
 
 .globl syscall_linkage
 syscall_linkage:
-    #callee-saved regs
-    pushl %ebx
-    pushl %esi
+    addl $-4, %esp      # push dummy
+    pushl %fs
+    pushl %es
+    pushl %ds
+    pushl %eax
+    pushl %ebp
     pushl %edi
-    pushfl
+    pushl %esi
+    pushl %edx
+    pushl %ecx
+    pushl %ebx
 
     #check whether call number is valid
     cmpl $1, %eax
@@ -30,12 +36,17 @@ invalid_call:
     movl $-1, %eax      #return -1
 
 done:
-    #restore regs
-    popfl
-    popl %edi
-    popl %esi
     popl %ebx
-
+    popl %ecx
+    popl %edx
+    popl %esi
+    popl %edi
+    popl %ebp
+    addl $4, %esp
+    popl %ds
+    popl %es
+    popl %fs
+    addl $4, %esp           # pop dummy
     iret
 
 
