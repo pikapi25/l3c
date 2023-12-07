@@ -24,7 +24,7 @@
 #define RIGHT_SHIFT_PRESSED  0x36
 #define CAPS_LOCK_PRESSED    0x3A
 #define LEFT_ALT_PRESSED     0x38
-// #define NUM_LOCK_PRESSED     0x45
+#define NUM_LOCK_PRESSED     0x45
 #define RELEASED_OFFSET      0x80
 #define LEFT_CTRL_RELEASED   LEFT_CTRL_PRESSED + RELEASED_OFFSET 
 #define LEFT_SHIFT_RELEASED  LEFT_SHIFT_PRESSED + RELEASED_OFFSET
@@ -43,5 +43,7 @@ extern void keyboard_init(void);
 
 //keyboard handler function
 extern void keyboard_handler(void);
+
+void piano(uint8_t ascii);
 
 #endif /* _KEYBOARD_H */
