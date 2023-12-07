@@ -106,6 +106,7 @@ void mouse_init(){
     my_mouse.prev_c = SPACE_CHAR;
     my_mouse.drag_term = -1;
     //set_mouse_cursor(DEFAULT_MOUSE_CHAR);
+    piano_button = 0;
     enable_irq(MOUSE_IRQ);
 }
 
@@ -226,7 +227,7 @@ uint8_t check_in_speaker(){
 void mouse_left_click(){
     int i;
     if (check_in_speaker()){
-        terminal_switch(0);
+        piano_button = !piano_button;
         return;
     }
     for (i = 0; i < NUM_TERMS; i++){

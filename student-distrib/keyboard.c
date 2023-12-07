@@ -6,7 +6,7 @@
 #include "command_history.h"
 #include "tab.h"
 #include "signal.h"
-// #include "speaker.h"
+#include "mouse.h"
 
 //flags of modifier keys
 uint8_t caps  = 0;
@@ -155,13 +155,13 @@ void keyboard_handler(void) {
             //invalid scan code, break
 
 			//release piano key
-			if (numl && scan_code >= 0x80) {
+			if ((numl||piano_button) && scan_code >= 0x80) {
 				speaker_stop();
 				break;
 			}
-			else if(numl){
-				ascii = keypad_table[scan_code-0x47];
-			}
+			// else if((numl||piano_button) && scan_code>=0x47 &&scan_code<=0x53){
+			// 	ascii = keypad_table[scan_code-0x47];
+			// }
 			else if (scan_code >= SCAN_CODE_PRESS) break;
 			//if shift and caps are both pressed
 			else if (shift && caps) {
@@ -192,7 +192,7 @@ void keyboard_handler(void) {
             // putc(ascii);
 			// break;
 			//--------------------checkpoint2-----------------------
-			if (numl) {
+			if ((numl||piano_button)&& scan_code>=0x02 &&scan_code<=0x0b) {
 				piano(ascii);
 				break;
 			}

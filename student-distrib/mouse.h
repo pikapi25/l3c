@@ -56,7 +56,7 @@ typedef struct{
 }mouse_t;
 
 mouse_t my_mouse;
-
+uint8_t piano_button;
 
 void mouse_init();
 void mouse_handler();
