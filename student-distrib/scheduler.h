@@ -10,10 +10,10 @@
 //0x36 = 00110110 = channel 0(00)|access mode 3(11)|operating mode 3(011)|16-bit(0)
 #define PIT_REG             0x36
 #define CHANNEL_0           0x40
-#define VIRTUAL_VIDEO       0xb8000
+#define VIRTUAL_VIDEO       VIDEO
 // The oscillator used by the PIT chip runs at (roughly) 1.193182 MHz. 
 // Frequency = 1193182 / Hz, use 100 Hz
-#define PIT_FREQ            11931    
+#define PIT_FREQ            11931 / 2    
 #define LOWER_MASK          0xFF      //low byte         
 
 #define PIT_IRQ             0           //PIT has top priority
@@ -26,7 +26,6 @@ typedef struct{
 }Scheduler;
 
 Scheduler myScheduler;
-
 extern void pit_init();
 extern void pit_handler();
 extern void scheduler_initialize();

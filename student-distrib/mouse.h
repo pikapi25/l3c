@@ -54,7 +54,7 @@ typedef struct{
     uint8_t prev_c;
 }mouse_t;
 
-mouse_t my_mouse[NUM_TERMS];
+mouse_t my_mouse;
 
 
 void mouse_init();
@@ -65,5 +65,6 @@ void mouse_wait(uint8_t wait_type);
 void mouse_write(uint8_t command);
 void mouse_write_port(uint8_t command, uint8_t port);
 uint8_t mouse_read();
-
+uint8_t check_in_term(int term_id);
+void mouse_left_click();
 #endif /* _MOUSE_H */

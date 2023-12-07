@@ -17,7 +17,7 @@
 #include "mouse.h"
 #include "vbe.h"
 #include "gui.h"
-
+#include "vga.h"
 #define RUN_TESTS   1
 
 /* Macros. */
@@ -158,28 +158,27 @@ void entry(unsigned long magic, unsigned long addr) {
     //disable_irq(0);
     
     //init the terminal
-    terminal_init();
-
-    scheduler_initialize();
 
     // Init the paging
     Page_Initialize();
+    terminal_init();
+    scheduler_initialize();
 
-    
     //init the RTC
+    mouse_init();
+    init_gui();
     rtc_init();
 
-    draw_uiuc();
 
     //mouse_init();
     //init the keyboard
-    //keyboard_init();
+    keyboard_init();
     
     //init the mouse
-    
+
 
     //init the pit
-    //pit_init();
+    pit_init();
 
     //clear();
     

@@ -6,7 +6,7 @@
 #include "keyboard.h"
 #include "scheduler.h"
 #include "mouse.h"
-
+#include "vga.h"
 
 static int screen_x;
 static int screen_y;
@@ -573,12 +573,12 @@ void user_terminal_putc(uint8_t c, uint8_t userkey) {
 			*(uint8_t *)(video_mem + ((NUM_COLS * terminal[term_id].cursor_y + terminal[term_id].cursor_x) << 1) + 1) = ATTRIB;
 			terminal[term_id].cursor_x++;
 	}
-
     if(curr_term_id==term_id){
 	    update_cursor(terminal[term_id].cursor_x, terminal[term_id].cursor_y);
     }
     if (userkey){
         update_vidmem_paging(myScheduler.cur_task);
+        need_update = 1;
     }
 	restore_flags(flags);
 }
@@ -686,26 +686,27 @@ void update_cursor(int x, int y)
  * Output: None
  * Side Effect: Change the video memory
 */
-void set_mouse_cursor(uint8_t c){
-    uint32_t flags;
-    uint8_t prev_temp_c;
-    cli_and_save(flags);
-    update_vidmem_paging(curr_term_id);
-    prev_temp_c = *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_y + my_mouse[curr_term_id].mouse_x) << 1));
-    if(my_mouse[curr_term_id].mouse_prev_x != my_mouse[curr_term_id].mouse_x || my_mouse[curr_term_id].mouse_prev_y != my_mouse[curr_term_id].mouse_y){
-       *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_prev_y + my_mouse[curr_term_id].mouse_prev_x) << 1)) = my_mouse[curr_term_id].prev_c;
-       *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_prev_y + my_mouse[curr_term_id].mouse_prev_x) << 1) + 1) = ATTRIB;
-       my_mouse[curr_term_id].prev_c =prev_temp_c;
-    }
-    *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_y + my_mouse[curr_term_id].mouse_x) << 1)) = c;
-	*(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_y + my_mouse[curr_term_id].mouse_x) << 1) + 1) = ATTRIB;
-    my_mouse[curr_term_id].mouse_prev_x = my_mouse[curr_term_id].mouse_x;
-    my_mouse[curr_term_id].mouse_prev_y = my_mouse[curr_term_id].mouse_y;
-    update_vidmem_paging(myScheduler.cur_task);
-    restore_flags(flags);
-}
+// void set_mouse_cursor(uint8_t c){
+//     uint32_t flags;
+//     uint8_t prev_temp_c;
+//     cli_and_save(flags);
+//     update_vidmem_paging(curr_term_id);
+//     prev_temp_c = *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_y + my_mouse[curr_term_id].mouse_x) << 1));
+//     if(my_mouse[curr_term_id].mouse_prev_x != my_mouse[curr_term_id].mouse_x || my_mouse[curr_term_id].mouse_prev_y != my_mouse[curr_term_id].mouse_y){
+//        *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_prev_y + my_mouse[curr_term_id].mouse_prev_x) << 1)) = my_mouse[curr_term_id].prev_c;
+//        *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_prev_y + my_mouse[curr_term_id].mouse_prev_x) << 1) + 1) = ATTRIB;
+//        my_mouse[curr_term_id].prev_c =prev_temp_c;
+//     }
+//     *(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_y + my_mouse[curr_term_id].mouse_x) << 1)) = c;
+// 	*(uint8_t *)(video_mem + ((NUM_COLS * my_mouse[curr_term_id].mouse_y + my_mouse[curr_term_id].mouse_x) << 1) + 1) = ATTRIB;
+//     my_mouse[curr_term_id].mouse_prev_x = my_mouse[curr_term_id].mouse_x;
+//     my_mouse[curr_term_id].mouse_prev_y = my_mouse[curr_term_id].mouse_y;
+//     update_vidmem_paging(myScheduler.cur_task);
+//     restore_flags(flags);
+// }
 void printt(const char *str){
     uint8_t buf[128];
+    memset(buf, 0, 128);
     strcpy((char*)buf, str);
     terminal_write(0, buf, 128);
 }

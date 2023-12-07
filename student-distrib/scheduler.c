@@ -1,7 +1,7 @@
 #include "scheduler.h" 
 #include "syscall.h"
 #include "i8259.h"
-#define video_memory_start 0xb8000
+#define video_memory_start VIDEO
 
 
 /**
@@ -17,6 +17,7 @@
 void pit_init()
 {
     //set the value of PIT mode/command register
+    //scheduler_flag = 1;
     outb(PIT_REG, PIT_IO_PORT);
 
     //set frequency to channel 0 data port
@@ -40,8 +41,11 @@ void pit_init()
  */
 void pit_handler(){
     //cli();   
-    send_eoi(PIT_IRQ);           
-    scheduler();                 
+    send_eoi(PIT_IRQ); 
+    // if(scheduler_flag){
+    //     scheduler();
+    // }      
+    scheduler();                    
              //Send EOI to PIC
     //sti();                 
 }
@@ -61,6 +65,7 @@ void scheduler_initialize(){
     myScheduler.tasks[0]=NOT_EXIST;
     myScheduler.tasks[1]=NOT_EXIST;
     myScheduler.tasks[2]=NOT_EXIST;
+    //scheduler_flag = 1;
 }
 
 /**
@@ -83,26 +88,27 @@ void scheduler(){
     current_pcb->sch_ebp = saved_ebp;
     // map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
     if (next_pid < 0){
-        if (curr_term_id == next_pointer){
-            map_video_PTE((uint32_t)VIDEO_MEM_LOC);
-        }else{
-            map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
-        }   
+        // if (curr_term_id == next_pointer){
+        //     map_video_PTE((uint32_t)SVGA_MEM_LOC);
+        // }else{
+        //     map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
+        // }   
+        update_vidmem_paging(next_pointer);
         execute((uint8_t*)"shell");
     }
     // remap process 
     mapping_vir_to_phy(VIRTUAL_PAGE_START, PHYS_PROGRAM_START + next_pid * PHYS_PROGRAM_SIZE);
     
-    if (next_pointer == curr_term_id){
-        //if next terminal is activated and displayed
-        //recognizes the active terminal and allows writing to the actual video memory.
-        map_video_PTE(video_memory_start);
+    // if (next_pointer == curr_term_id){
+    //     //if next terminal is activated and displayed
+    //     //recognizes the active terminal and allows writing to the actual video memory.
+    //     map_video_PTE(SVGA_MEM_LOC);
 
-    }else{
-        //if next termnial is not activated, write into backup buffer
-        map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
-    }
-
+    // }else{
+    //     //if next termnial is not activated, write into backup buffer
+    //     map_video_PTE((uint32_t)terminal[next_pointer].background_buffer);
+    // }
+    update_vidmem_paging(next_pointer);
     tss.ss0 = KERNEL_DS;
     tss.esp0 = EIGHT_MB - next_pid * EIGHT_KB - 4;
     pcb_t* next_pcb = (pcb_t*)(EIGHT_MB - (next_pid+1) * EIGHT_KB);

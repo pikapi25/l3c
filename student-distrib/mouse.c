@@ -1,7 +1,8 @@
 #include "mouse.h"
 #include "lib.h"
 #include "i8259.h"
-
+#include "vga.h"
+#include "gui.h"
 
 /* mouse_wait: wait until mouse can read or write
  * Input: wait_type, tell the function whether we are waiting for read or write
@@ -66,7 +67,7 @@ uint8_t mouse_read(){
  * Side Effect: None
 */
 void mouse_init(){
-    uint8_t i;
+    //uint8_t i;
     mouse_write(MOUSE_AUX);
     uint8_t status;
     // Enable the interrupts
@@ -85,18 +86,26 @@ void mouse_init(){
     // mouse_write_port(MOUSE_GOING_TO_WRITE, MOUSE_CHECK_PORT);
     // mouse_write_port(0xF3, MOUSE_DATA_PORT);
     // mouse_write_port(200, MOUSE_DATA_PORT);
-    for(i = 0; i < NUM_TERMS; i++){
-        my_mouse[i].mouse_left_btn = BTN_NOT_PRESSED;
-        my_mouse[i].mouse_middle_btn = BTN_NOT_PRESSED;
-        my_mouse[i].mouse_right_btn = BTN_NOT_PRESSED;
-        my_mouse[i].mouse_x = NUM_COLS / 2;
-        my_mouse[i].mouse_y = NUM_ROWS / 2;
-        my_mouse[i].mouse_prev_x = NUM_COLS / 2;
-        my_mouse[i].mouse_prev_y = NUM_ROWS / 2;
-        my_mouse[i].prev_c = SPACE_CHAR;
-    }
+    // for(i = 0; i < NUM_TERMS; i++){
+    //     my_mouse[i].mouse_left_btn = BTN_NOT_PRESSED;
+    //     my_mouse[i].mouse_middle_btn = BTN_NOT_PRESSED;
+    //     my_mouse[i].mouse_right_btn = BTN_NOT_PRESSED;
+    //     my_mouse[i].mouse_x = NUM_COLS / 2;
+    //     my_mouse[i].mouse_y = NUM_ROWS / 2;
+    //     my_mouse[i].mouse_prev_x = NUM_COLS / 2;
+    //     my_mouse[i].mouse_prev_y = NUM_ROWS / 2;
+    //     my_mouse[i].prev_c = SPACE_CHAR;
+    // }
+    my_mouse.mouse_left_btn = BTN_NOT_PRESSED;
+    my_mouse.mouse_middle_btn = BTN_NOT_PRESSED;
+    my_mouse.mouse_right_btn = BTN_NOT_PRESSED;
+    my_mouse.mouse_x = VGA_DIMX / 2;
+    my_mouse.mouse_y = VGA_DIMY / 2;
+    my_mouse.mouse_prev_x = VGA_DIMX / 2;
+    my_mouse.mouse_prev_y = VGA_DIMY / 2;
+    my_mouse.prev_c = SPACE_CHAR;
 
-    set_mouse_cursor(DEFAULT_MOUSE_CHAR);
+    //set_mouse_cursor(DEFAULT_MOUSE_CHAR);
     enable_irq(MOUSE_IRQ);
 }
 
@@ -113,7 +122,7 @@ void mouse_handler(){
     uint8_t pkt3;
     int32_t x_mov;
     int32_t y_mov;
-    uint8_t c = DEFAULT_MOUSE_CHAR;
+    //uint8_t c = DEFAULT_MOUSE_CHAR;
     if (0 == (inb(MOUSE_CHECK_PORT) & 0x1)){
         return;
     }
@@ -133,13 +142,14 @@ void mouse_handler(){
         pkt2 = mouse_read();
         pkt3 = mouse_read();
         if (pkt1 & MOUSE_LEFT_BTN){
-            c = '@';
+            mouse_left_click();
+            //c = '@';
             //printf("left button!\n");
         }else if (pkt1 & MOUSE_RIGHT_BTN){
-            c = '#';
+            //c = '#';
             //printf("right button!\n");
         }else if (pkt1 & MOUSE_MID_BTN){
-            c = '*';
+            //c = '*';
             //printf("middle button!\n");
         }
         if (pkt1 & MOUSE_X_NEG){
@@ -150,25 +160,44 @@ void mouse_handler(){
         if (pkt1 & MOUSE_Y_NEG){
             y_mov = (int32_t)(MOUSE_NEG_MASK | pkt3) / 10;
         }else{
-            y_mov = (int32_t)pkt3/10;
+            y_mov = (int32_t)pkt3 / 10;
         }
-        if (my_mouse[curr_term_id].mouse_x + x_mov < 0){
-            my_mouse[curr_term_id].mouse_x = 0;
-        } else if (my_mouse[curr_term_id].mouse_x + x_mov > NUM_COLS - 1){
-            my_mouse[curr_term_id].mouse_x = NUM_COLS - 1;
+        if (my_mouse.mouse_x + x_mov < 0){
+            my_mouse.mouse_x = 0;
+        } else if (my_mouse.mouse_x + x_mov > VGA_DIMX - 17){
+            my_mouse.mouse_x = VGA_DIMX - 17;
         }else{
-            my_mouse[curr_term_id].mouse_x = my_mouse[curr_term_id].mouse_x + x_mov;
+            my_mouse.mouse_x = my_mouse.mouse_x + x_mov;
         }
 
-        if (my_mouse[curr_term_id].mouse_y - y_mov < 0){
-            my_mouse[curr_term_id].mouse_y = 0;
-        } else if (my_mouse[curr_term_id].mouse_y - y_mov > NUM_ROWS - 1){
-            my_mouse[curr_term_id].mouse_y = NUM_ROWS - 1;
+        if (my_mouse.mouse_y - y_mov < 0){
+            my_mouse.mouse_y = 0;
+        } else if (my_mouse.mouse_y - y_mov > VGA_DIMY - 17){
+            my_mouse.mouse_y = VGA_DIMY - 17;
         }else{
-            my_mouse[curr_term_id].mouse_y = my_mouse[curr_term_id].mouse_y - y_mov;
+            my_mouse.mouse_y = my_mouse.mouse_y - y_mov;
         }
 
     }
-    set_mouse_cursor(c);
+    //set_mouse_cursor(c);
     
+}
+
+uint8_t check_in_term(int term_id){
+    if(my_mouse.mouse_x >= term_window[term_id].x_coord && my_mouse.mouse_x < term_window[term_id].x_coord + WINDOW_WIDTH){
+        if(my_mouse.mouse_y >= term_window[term_id].y_coord && my_mouse.mouse_y < term_window[term_id].y_coord + WINDOW_HEIGHT + WINDOW_TITLE_HEIGHT){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void mouse_left_click(){
+    int i;
+    for (i = NUM_TERMS - 1; i >=0; i--){
+        if(check_in_term(term_orders[i])){
+            terminal_switch(term_orders[i]);
+            break;
+        }
+    }
 }

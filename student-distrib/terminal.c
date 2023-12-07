@@ -2,11 +2,11 @@
  * vim:ts=4 noexpandtab
  */
 #include "terminal.h"
-#include "lib.h"
 #include "keyboard.h"
 #include "paging.h"
 #include "scheduler.h"
-
+#include "gui.h"
+#include "vga.h"
 
 /* terminal_init
  * Side effect: initialize the terminal
@@ -16,7 +16,7 @@ void terminal_init() {
     curr_term_id = 0;
     clear_redraw();
     for (i=0; i<NUM_TERMS; i++){
-        terminal[i].background_buffer = (uint8_t*)(VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*(i+2));
+        terminal[i].background_buffer = (uint8_t*)(VIDEO_MEM_LOC + VIDEO_MEM_SIZE*(i+2));
         terminal[i].readkey = 0;
         terminal[i].kbd_buf_count = 0;
         memset(terminal[i].kbd_buf, 0, MAX_CHA_BUF);   //not sure
@@ -36,17 +36,19 @@ void terminal_init() {
 void terminal_switch(uint8_t new_term){
     if (new_term > 2){return;}
     /* update video memory paging */
-    update_vidmem_paging(curr_term_id);
+    //update_vidmem_paging(curr_term_id);
 
     /* copy from video memory to backgroud buffer of current terminal */
-    memcpy(terminal[curr_term_id].background_buffer, (uint8_t*)VIDEO_MEM_LOC, VIDEO_MEM_SIZE);
+    //memcpy(terminal[curr_term_id].background_buffer, (uint8_t*)VIDEO_MEM_LOC, VIDEO_MEM_SIZE);
 
     /* load background buffer of the target into video memory */
-    memcpy((uint8_t*)VIDEO_MEM_LOC, terminal[new_term].background_buffer, VIDEO_MEM_SIZE);
+    //memcpy((uint8_t*)VIDEO_MEM_LOC, terminal[new_term].background_buffer, VIDEO_MEM_SIZE);
 
     /* update video memory paging */
     update_vidmem_paging(new_term);
     curr_term_id = new_term;
+    update_order(new_term);
+    need_update = 1;
     update_cursor(terminal[curr_term_id].cursor_x, terminal[curr_term_id].cursor_y);
 }
 

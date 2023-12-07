@@ -1,26 +1,45 @@
 #ifndef _GUI_H
 #define _GUI_H
-#include "types.h"
+#include "font.h"
+#include "vga.h"
+#include "terminal.h"
 
-#define RED_MASK    0xF800
-#define GREEN_MASK  0x7E0
-#define BLUE_MASK   0x1F
+#define BG_COLOR 0xEBBCDF
 
-#define ASCII_ZERO  48
+#define STATUS_BAR_PADDING 2
+#define STATUS_BAR_HEIGHT 22
+#define STATUS_BAR_COLOR 0xD7F3F5
+#define STATUS_BAR_FONT_COLOR 0x5F6666
+#define STATUS_BAR_Y VGA_DIMY - STATUS_BAR_HEIGHT 
 
-#define WHITE       0x00FFFFFF
-#define BLACK       0x00000000
-#define GRERY       0x00505050
-
-#define TERMINAL_INIT_X 10
-#define TERMINAL_INIT_Y 100
+#define WINDOW_PAD 2
+#define WINDOW_TITLE_HEIGHT FONT_HEIGHT + 2 * WINDOW_PAD
+#define WINDOW_WIDTH    NUM_COLS * FONT_WIDTH + 2 * WINDOW_PAD
+#define WINDOW_HEIGHT   NUM_ROWS * FONT_HEIGHT + 2 * WINDOW_PAD
 
 
+typedef struct{
+    int x_coord;
+    int y_coord;
+    uint32_t title_bg_color;
+    uint32_t title_font_color;
+    uint32_t window_bg_color;
+    uint32_t window_font_color;
+    char title[10];
+}term_window_t;
 
-void draw_string(int x, int y, int8_t* str, uint32_t color, uint32_t back_color);
-extern void draw_mouse();
-extern void draw_uiuc();
-void draw_os_font();
-extern void boot_gui();
-extern void draw_time_bar();
+term_window_t term_window[NUM_TERMS];
+
+int term_orders[NUM_TERMS];
+void init_vga();
+void draw_status_bar();
+void draw_sentence(int x, int y, char* sentence, uint32_t color);
+void draw_char(int x, int y, char ch, uint32_t color);
+void init_term_bg(int term_id, int x, int y, uint32_t title_bg_color, uint32_t title_font_color, uint32_t window_bg_color, uint32_t window_font_color, char* title);
+void draw_terminal_bg(int term_id);
+void draw_terminals();
+void update_order(int term_id);
+void draw_one_terminal(int term_id);
+void update_screen();
+void draw_mouse();
 #endif

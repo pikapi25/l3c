@@ -4,10 +4,13 @@
 #include "lib.h"
 #include "rtc.h"
 #include "scheduler.h"
+#include "gui.h"
+#include "vga.h"
 
-volatile uint8_t rtc_int_flag[NUM_SCHES] = {0,0,0}; // indicate if an interrupt occurred. 0 for not occurred.
-volatile uint32_t rtc_ticks[NUM_SCHES] = {0,0,0}; // the number of ticks. every **actual** interrupt increment one tick.
-uint32_t rtc_virtual_rate[NUM_SCHES] = {1024,1024,1024}; /* the virtual interrupt rate */
+#define NUM_RTC NUM_SCHES + 2
+volatile uint8_t rtc_int_flag[NUM_RTC] = {0,0,0,0,0}; // indicate if an interrupt occurred. 0 for not occurred.
+volatile uint32_t rtc_ticks[NUM_RTC] = {0,0,0,0,0}; // the number of ticks. every **actual** interrupt increment one tick.
+uint32_t rtc_virtual_rate[NUM_RTC] = {1024,1024,1024,1024,20}; /* the virtual interrupt rate */
 
 /* rtc_init
  * INPUT: none
@@ -32,12 +35,12 @@ void rtc_init(void){
     outb((prev & 0xF0) | RTC_DEFAULT_RATE, RTC_CMOS_RW_PORT); // write only our rate to A. Note, rate is the bottom 4 bits.
 
     /* Initialize the variables */
-    for (i=0; i<NUM_SCHES;i++){
+    for (i=0; i<NUM_RTC;i++){
         rtc_int_flag[i] = 0;
         rtc_virtual_rate[i] = 1024;
         rtc_ticks[i] = 0;
     }
-    
+    rtc_virtual_rate[4] = 40;
     // rtc_ticks = 0; // ticks is set to 0. 
 
     /* enable irq line */
@@ -58,20 +61,29 @@ void rtc_handler(void){
      * therefore, 1/r / (1/1024) = 1024 / r actual interrupts is equal to one virtual interrupt
     */
     //cli();
-    
-    for (i = 0; i < NUM_SCHES; i++){
+    cli();
+    for (i = 0; i < NUM_RTC - 1; i++){
         rtc_ticks[i] ++;
         if (rtc_ticks[i] >= rtc_virtual_rate[i]){
             rtc_int_flag[i] = 1;
             rtc_ticks[i] = 0;
         }
     }
+    sti();
     outb(RTC_REG_C, RTC_REG_PORT); // select register C
     inb(RTC_CMOS_RW_PORT); // just throw away contents
     //test_interrupts(); // for testing
     //sti();
+    
+    rtc_ticks[4] ++;
+    if (rtc_ticks[4] >= rtc_virtual_rate[4]){
+        update_screen();
+        rtc_ticks[4] = 0;
+    }
     send_eoi(RTC_IRQ_NUM); // send end-of-interrupt to pic
-
+    // if(need_update){
+    //     update_screen();
+    // }
 }
 
 /* rtc_open

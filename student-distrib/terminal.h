@@ -6,10 +6,11 @@
 #define _TERMINAL_H
 
 #include "types.h"
+#include "lib.h"
 
 #define NUM_TERMS 3
 #define MAX_CHA_BUF 128
-#define VIDEO_MEM_LOC   0xB8000
+#define VIDEO_MEM_LOC   VIDEO
 #define VIDEO_MEM_SIZE 0x01000
 
 

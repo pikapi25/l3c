@@ -3,13 +3,14 @@
 #include "terminal.h"
 #include "vbe.h"
 
+
 #define PAGE_TABLE_COUNT    1024
 #define PAGE_DIC_COUNT  1024
 #define KERNEL_PHYSICAL_ADDRESS 0x400000
 #define KERNEL_PHYSICAL_ADDRESS_END 0x7FFFFF
 #define fourKB 4096
 #define NotPresent 0
-#define video_memory_start 0xb8000
+#define video_memory_start VIDEO
 #define video_memory_end 0xb9fff
 #define user_paging_set 0x87 // PS, U/S, R/W, P = 1
 #define video_page_set 0x7 //U/S,R/W,P=1
@@ -35,7 +36,8 @@ void
 Page_Initialize(){
     // here we initialize all PDE and PTE and make them NOT present
     int i;
-
+    uint32_t vbe_mem = (REG_VBE >> 22);
+    uint32_t vbe_next_mem = vbe_mem + 1;
     for (i = 0; i < PAGE_TABLE_COUNT; i++ ){
         // i*4 refers to physical address for 4KB memory space
         // 0x0 since these entries are not present 
@@ -43,14 +45,15 @@ Page_Initialize(){
         page_dic[i] = 0x2;
     }
 
+    /* ----- SVGA_MEM_CHANGE ----- */
     //----------------load video memory (4 KB )------------
     //from lib.c we know video starts at 0xB8000 = 753664. 753664/1024/4 = 184
     // P = 1, RW = 1, US = 0, PWT = 0, PCD = 0, A = 0, D = 0, PS = 0
     // 00000011
-    page_table[184] = 0xB8000|0x3;
-    page_table[(VIDEO_MEM_LOC>>page_table_start)+2] = (VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*2)|0x3;
-    page_table[(VIDEO_MEM_LOC>>page_table_start)+3] = (VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*3)|0x3;
-    page_table[(VIDEO_MEM_LOC>>page_table_start)+4] = (VIDEO_MEM_LOC+ VIDEO_MEM_SIZE*4)|0x3;
+    page_table[184] = (SVGA_MEM_LOC+ VIDEO_MEM_SIZE*2)|0x3;
+    page_table[(VIDEO_MEM_LOC>>page_table_start)+2] = (SVGA_MEM_LOC+ VIDEO_MEM_SIZE*2)|0x3;
+    page_table[(VIDEO_MEM_LOC>>page_table_start)+3] = (SVGA_MEM_LOC+ VIDEO_MEM_SIZE*3)|0x3;
+    page_table[(VIDEO_MEM_LOC>>page_table_start)+4] = (SVGA_MEM_LOC+ VIDEO_MEM_SIZE*4)|0x3;
     // for 0~4MB
     // P = 1, RW = 1, US = 0, PWT = 0, PCD = 0, A = 0, D = 0, PS = 0
     // 00000010
@@ -61,14 +64,15 @@ Page_Initialize(){
     // P = 1, RW = 1, US = 0, PWT = 0, PCD = 0, A = 0, D = 0, PS = 1
     // 10000011 = 0x83
     // and kernel physical address is 0x400000 (4MB) which is stored above
-    page_dic[1] = KERNEL_PHYSICAL_ADDRESS|0x83; 
+    page_dic[1] = KERNEL_PHYSICAL_ADDRESS|0x183; 
 
     // ---------------load kernel (4 MB )----------------
     // since it's a single 4MB page, its PS is 1
     // P = 1, RW = 1, US = 0, PWT = 0, PCD = 0, A = 0, D = 0, PS = 1
     // 10000011 = 0x83
     // and kernel physical address is 0x400000 (4MB) which is stored above
-    page_dic[QEMU_BASE_ADDR >> page_dir_start] = QEMU_BASE_ADDR|0x83; 
+    page_dic[vbe_mem] = REG_VBE|0x83; 
+    page_dic[vbe_next_mem] = (vbe_next_mem << 22) | 0x183;
 
     // 1. load page_directory into cr3
     // 2. set CR0 PG bit to 1 (enable paging) (or 0x80000001)
@@ -86,6 +90,11 @@ Page_Initialize(){
         : "%eax"
     );
 
+    asm volatile(                           
+        "movl %%cr3, %%eax;"           
+        "movl %%eax, %%cr3;"           
+        :
+    ); 
 }
 
 /* mapping_vir_to_phy
@@ -141,10 +150,12 @@ void map_video_PTE(uint32_t phy_addr){
 // Side effect: Change backup buffer content 
 void update_vidmem_paging(uint8_t term_id){
     /* if it's current terminal, map to main video memory */
-    if (curr_term_id == term_id){
-        map_video_PTE(VIDEO_MEM_LOC);
-    }else{
-        /* otherwise map to background buffer*/
-        map_video_PTE((uint32_t)terminal[term_id].background_buffer);
-    }
+    /* ----- SVGA CHANGES ----- */
+    // if (curr_term_id == term_id){
+    //     map_video_PTE(SVGA_MEM_LOC);
+    // }else{
+    //     /* otherwise map to background buffer*/
+    //     map_video_PTE((uint32_t)terminal[term_id].background_buffer);
+    // }
+    map_video_PTE((SVGA_MEM_LOC+ VIDEO_MEM_SIZE*(term_id+2)));
 }
