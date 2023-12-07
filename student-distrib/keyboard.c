@@ -3,7 +3,8 @@
 #include "i8259.h"
 #include "terminal.h"
 #include "speaker.h"
-
+#include "command_history.h"
+#include "tab.h"
 //flags of modifier keys
 uint8_t caps  = 0;
 uint8_t ctrl  = 0;
@@ -137,7 +138,15 @@ void keyboard_handler(void) {
 				terminal_switch(TERM_THREE);
 			}
 			break;
-
+		case UP_PRESSED:
+			press_up();
+			break;
+		case DOWN_PRESSED:
+			press_down();
+			break;
+		case TAB_PRESSED:
+			press_tab();
+			break;
 		default:
             //get corresponding ascii for letters and numbers
             //invalid scan code, break

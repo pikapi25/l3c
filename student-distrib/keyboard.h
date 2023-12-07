@@ -36,7 +36,9 @@
 #define TERM_ONE    0
 #define TERM_TWO    1
 #define TERM_THREE    2
-
+#define UP_PRESSED           0x48
+#define DOWN_PRESSED         0x50
+#define TAB_PRESSED          0xF
 
 //Initialize keyboard
 extern void keyboard_init(void);
