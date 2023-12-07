@@ -5,6 +5,7 @@
 #include "terminal.h"
 #include "filesys.h"
 #include "rtc.h"
+#include "signal.h"
 
 /* Magic Numbers*/
 #define MAX_PROCESSES 6
@@ -80,6 +81,10 @@ struct pcb
     int32_t ebp_val;
     int32_t esp_val;
     int32_t sch_ebp;
+    void* signal_handler[SIG_COUNT];
+    int sig_pending[SIG_COUNT];
+    int sig_masked[SIG_COUNT];
+
 };
 
 /* ----- Helper Functions ----- */

@@ -3,6 +3,7 @@
 #include "paging.h"
 #include "lib.h"
 #include "scheduler.h"
+#include "signal.h"
 
 uint32_t pid_arr[MAX_PROCESSES] = {0};
 
@@ -61,7 +62,7 @@ int32_t halt (uint8_t status){
         pid_arr[cur_pcb->pid] = 0;
         printf("Warning: You can't exit the base shell!");
         myScheduler.tasks[current_pointer]=NOT_EXIST;
-        execute((uint8_t*)"shell");
+        // execute((uint8_t*)"shell");
     }
 
     //--------------------checkpoint5-----------------------
@@ -181,6 +182,19 @@ int32_t execute(const uint8_t* command)
     pcb->fd_arr[1].file_position = 0;
     pcb->fd_arr[1].file_op_table = &terminal_write_ops;
 
+    //extra
+    //initialize signal
+    int j;
+    for (j = 0; j < SIG_COUNT; j++){
+        pcb->sig_pending[j] = 0;
+        if (j <= 2)
+            pcb->signal_handler[j] = kill_task;
+        else
+            pcb->signal_handler[j] = ignore;
+
+        pcb->sig_masked[j] = 0;
+    }
+
     /* Copy args to PCB */
     memcpy(pcb->arg_buf, args, MAX_CHA_BUF + 1);
 
@@ -201,6 +215,8 @@ int32_t execute(const uint8_t* command)
     // TSS represents our destination
     tss.ss0 = KERNEL_DS;
     tss.esp0 = EIGHT_MB - pid * EIGHT_KB - 4;    // the child pid about to be created
+    // int test;
+    // test=1/0;
     sti();
     /* Enter user mode */
     // Push order: SS, ESP, EFLAGS, CS, EIP
@@ -349,11 +365,35 @@ int32_t vidmap (uint8_t** screen_start){
     return 0;
  }
 
+/* set_handler
+ * INPUT: signum -- which signal's handler to change
+ *        handler_address -- pointer to a user-level function to be run when that signal is received
+ * OUTPUT: 0 if the handler is sucessful set, -1 on failure
+ * Functionality: changes the default action taken when a signal is received
+*/
 int32_t set_handler (int32_t signum, void* handler_address){
-    return -1;
+    if(handler_address==NULL){return -1;}
+    if(signum<0||signum>4){return -1;}
+    pcb_t* curr_pcb = get_cur_pcb();
+    curr_pcb->signal_handler[signum] = handler_address;
+    return 0;
 }
 
+
 int32_t sigreturn (void){
-    return -1;
+    int i;
+    pcb_t* cur_pcb = get_cur_pcb();
+    //unmask other signals
+    for (i = 0; i < SIG_COUNT; i++){
+        cur_pcb->sig_masked[i] = 0;
+    }
+    //copy hdcontext from user stack back to processor
+    register uint32_t ebp asm("ebp");
+    hwcontext_t* kernel_context = (hwcontext_t*)(ebp + 20);
+    uint32_t user_esp = kernel_context->esp;
+    hwcontext_t* user_context = (hwcontext_t*)(user_esp + 4);
+    memcpy(kernel_context, user_context, sizeof(hwcontext_t));
+    return kernel_context->eax;
 }
+
 

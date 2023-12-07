@@ -3,6 +3,7 @@
 #include "i8259.h"
 #define video_memory_start VIDEO
 
+static int cnt = 0;
 
 /**
  * PIT_init
@@ -39,13 +40,15 @@ void pit_init()
  * Return value: None
  * Side effects: May modify task scheduling and acknowledge interrupt to PIC.
  */
-void pit_handler(){
-    //cli();   
-    send_eoi(PIT_IRQ); 
-    // if(scheduler_flag){
-    //     scheduler();
-    // }      
-    scheduler();                    
+void pit_handler(){                  
+    cnt++;
+    // send alarm every 10 sec 
+    if (cnt == 1000){
+        send_signal(ALARM);
+        cnt = 0;
+    }
+    send_eoi(PIT_IRQ);           
+    scheduler();                 
              //Send EOI to PIC
     //sti();                 
 }
