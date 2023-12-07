@@ -6,7 +6,7 @@
 #include "keyboard.h"
 #include "paging.h"
 #include "scheduler.h"
-
+#include "command_history.h"
 
 /* terminal_init
  * Side effect: initialize the terminal
@@ -76,6 +76,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes) {
     //int32_t curr_sch_id = myScheduler.cur_task;
 	if (NULL == buf || nbytes <= 0) { return 0; }
 
+    if (curr_history_index == MAX_HISTORY){update_index();}
 	reset_kbd_buf(myScheduler.cur_task);
     terminal[myScheduler.cur_task].readkey = 1;
 	while (terminal[myScheduler.cur_task].readkey);					//Wait for the flag 
@@ -83,7 +84,11 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes) {
 	/* User can only type up to 127 (MAX_CHA_BUF - 1) characters */
 	for (i = 0; i < nbytes && i < MAX_CHA_BUF && terminal[myScheduler.cur_task].kbd_buf[i] != '\0'; i++) {
 		((char*)buf)[i] = terminal[myScheduler.cur_task].kbd_buf[i];
+        if (i < terminal[myScheduler.cur_task].kbd_buf_count){
+            history_buf[curr_history_index][i] = terminal[myScheduler.cur_task].kbd_buf[i];
+        }
 	}
+    update_index();
     reset_kbd_buf(myScheduler.cur_task);
 	return i;
 }

@@ -2,6 +2,8 @@
 #include "lib.h"
 #include "i8259.h"
 #include "terminal.h"
+#include "command_history.h"
+#include "tab.h"
 // #include "speaker.h"
 
 //flags of modifier keys
@@ -136,6 +138,15 @@ void keyboard_handler(void) {
 			if (alt) {
 				terminal_switch(TERM_THREE);
 			}
+			break;
+		case UP_PRESSED:
+			press_up();
+			break;
+		case DOWN_PRESSED:
+			press_down();
+			break;
+		case TAB_PRESSED:
+			press_tab();
 			break;
 
 		default:

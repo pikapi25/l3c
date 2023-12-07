@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "rtc.h"
 #include "scheduler.h"
+#include "time.h"
 
 volatile uint8_t rtc_int_flag[NUM_SCHES] = {0,0,0}; // indicate if an interrupt occurred. 0 for not occurred.
 volatile uint32_t rtc_ticks[NUM_SCHES] = {0,0,0}; // the number of ticks. every **actual** interrupt increment one tick.

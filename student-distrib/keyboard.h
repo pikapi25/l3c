@@ -24,6 +24,10 @@
 #define RIGHT_SHIFT_PRESSED  0x36
 #define CAPS_LOCK_PRESSED    0x3A
 #define LEFT_ALT_PRESSED     0x38
+#define UP_PRESSED           0x48
+#define DOWN_PRESSED         0x50
+#define TAB_PRESSED          0xF
+
 // #define NUM_LOCK_PRESSED     0x45
 #define RELEASED_OFFSET      0x80
 #define LEFT_CTRL_RELEASED   LEFT_CTRL_PRESSED + RELEASED_OFFSET 
