@@ -3,9 +3,9 @@
 
 #include "types.h"
 
-int32_t second, minute, hour, day, month, year;
-int32_t last_second, last_minute, last_hour, last_day, last_month, last_year;
-
+int second, minute, hour, day, month, year;
+int last_second, last_minute, last_hour, last_day, last_month, last_year;
+char time_buf[18];
 extern void get_time();
 
 #endif

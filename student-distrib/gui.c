@@ -11,11 +11,14 @@
 void init_gui(){
     int i;
     init_vga();
+    memset(time_buf, 0, 18);
+    time_buf[0] = '2';
+    time_buf[1] = '0';
     draw_background(BG_COLOR);
     draw_status_bar();
-    init_term_bg(0, 10, 30, 0xa7f2ec, STATUS_BAR_FONT_COLOR, 0xFAFAFA, 0x2D2E2E, "term 1");
-    init_term_bg(1, 60, 80, 0xa7f2ec, STATUS_BAR_FONT_COLOR, 0xFAFAFA, 0x2D2E2E, "term 2");
-    init_term_bg(2, 110, 130, 0xa7f2ec, STATUS_BAR_FONT_COLOR, 0xFAFAFA, 0x2D2E2E, "term 3");
+    init_term_bg(0, 10, 30, 0xa7f2ec, STATUS_BAR_FONT_COLOR, 0xFAFAFA, 0x2D2E2E, "Terminal 0");
+    init_term_bg(1, 60, 80, 0xcbf5e1, STATUS_BAR_FONT_COLOR, 0xFAFAFA, 0x2D2E2E, "Terminal 1");
+    init_term_bg(2, 110, 130, 0xf5efcb, STATUS_BAR_FONT_COLOR, 0xFAFAFA, 0x2D2E2E, "Terminal 2");
     for(i = 0; i < NUM_TERMS; i++){
         term_orders[i] = i;
     }
@@ -44,9 +47,8 @@ void draw_background(uint32_t color){
 */
 void draw_status_bar(){
     int i;
-    char time_buf[18];
-    memset(time_buf, 0, 18);
-    put_time_to_buf(time_buf);
+    //put_time_to_buf(time_buf);
+    get_time();
     Rdraw(VGA_DIMX, STATUS_BAR_HEIGHT, 0, VGA_DIMY-STATUS_BAR_HEIGHT, STATUS_BAR_COLOR);
     draw_sentence(STATUS_BAR_TERM_START , STATUS_BAR_Y + STATUS_BAR_PADDING, "Terminal 0", STATUS_BAR_FONT_COLOR);
     Rdraw(2, STATUS_BAR_HEIGHT, STATUS_BAR_TERM_START+STATUS_BAR_TERM_W - 2, STATUS_BAR_Y, STATUS_BAR_FONT_COLOR);
@@ -55,7 +57,8 @@ void draw_status_bar(){
     draw_sentence(STATUS_BAR_TERM_START + STATUS_BAR_TERM_W * 2, STATUS_BAR_Y + STATUS_BAR_PADDING, "Terminal 2", STATUS_BAR_FONT_COLOR);
     Rdraw(2, STATUS_BAR_HEIGHT, STATUS_BAR_TERM_START+STATUS_BAR_TERM_W*3 - 2, STATUS_BAR_Y, STATUS_BAR_FONT_COLOR);
     draw_sentence(STATUS_BAR_TIME_START, STATUS_BAR_Y + STATUS_BAR_PADDING, time_buf, STATUS_BAR_FONT_COLOR);
-
+    draw_sentence(STATUS_BAR_CURR_PID_START, STATUS_BAR_Y+STATUS_BAR_PADDING, "Current Pid: ", STATUS_BAR_FONT_COLOR);
+    draw_char(STATUS_BAR_CURR_PID_START+112, STATUS_BAR_Y+STATUS_BAR_PADDING, (char)(myScheduler.cur_task + 0x30), STATUS_BAR_FONT_COLOR);
     //draw_sentence(STATUS_BAR_PADDING, STATUS_BAR_Y + STATUS_BAR_PADDING, "Test!", STATUS_BAR_FONT_COLOR);
     //draw_char(STATUS_BAR_PADDING, STATUS_BAR_Y + STATUS_BAR_PADDING, "0", STATUS_BAR_FONT_COLOR);
 }
@@ -65,22 +68,18 @@ void int_to_char(int num, char* buf, int end_i, int start_i){
     int i = end_i;
     while(num!=0){
         mod = num % 10;
-        buf[i--] = (char)(mod + 0x30);
+        time_buf[i] = (char)(mod + 0x30);
         num /= 10;
+        i--;
     }
     while(i > start_i){
-        buf[i--] = '0';
+        time_buf[i] = '0';
+        i--;
     }
 }
 
 void put_time_to_buf(char* buf){
     get_time();
-    // int_to_char(year, buf, 3, start);
-    // int_to_char(month, buf, 5, 3);
-    // int_to_char(day, buf, 7, 5);
-    // int_to_char(hour, buf, 9, 7);
-    // int_to_char(minute, buf, 11, 9);
-    // int_to_char(second, buf, 13, 11);
     int_to_char(year, buf, 3, 0);
     buf[4] = '/';
     int_to_char(month, buf, 6, 4);
@@ -92,6 +91,17 @@ void put_time_to_buf(char* buf){
     int_to_char(minute, buf, 15, 13);
     buf[16] = ':';
     int_to_char(second, buf, 18, 16);
+    // int_to_char(2023, buf, 3, 0);
+    // buf[4] = '/';
+    // int_to_char(12, buf, 6, 4);
+    // buf[7] = '/';
+    // int_to_char(7, buf, 9, 7);
+    // buf[10] = ' ';
+    // int_to_char(11, buf, 12, 10);
+    // buf[13] = ':';
+    // int_to_char(59, buf, 15, 13);
+    // buf[16] = ':';
+    // int_to_char(32, buf, 18, 16);
 }
 /** draw_char: draw a character of size 8x16 at given position
  * Input: x - the x coord of character; y - the y coord of character;

@@ -4,7 +4,7 @@
 #include "vga.h"
 #include "terminal.h"
 
-#define BG_COLOR 0xEBBCDF
+#define BG_COLOR 0xfcfaf5
 
 #define STATUS_BAR_PADDING 2
 #define STATUS_BAR_HEIGHT 22
@@ -13,8 +13,9 @@
 #define STATUS_BAR_Y VGA_DIMY - STATUS_BAR_HEIGHT 
 #define STATUS_BAR_TERM_W   86
 #define STATUS_BAR_TERM_START 0
-#define STATUS_BAR_TIME_LEN 18*FONT_WIDTH
+#define STATUS_BAR_TIME_LEN 20*FONT_WIDTH
 #define STATUS_BAR_TIME_START   VGA_DIMX - STATUS_BAR_TIME_LEN - STATUS_BAR_PADDING
+#define STATUS_BAR_CURR_PID_START STATUS_BAR_TERM_START + 3*STATUS_BAR_TERM_W + 40
 
 #define SPEAKER_X 800
 #define SPEAKER_Y 500
@@ -39,6 +40,7 @@ typedef struct{
 }term_window_t;
 
 term_window_t term_window[NUM_TERMS];
+
 
 int term_orders[NUM_TERMS];
 void init_vga();
