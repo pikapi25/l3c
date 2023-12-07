@@ -14,5 +14,7 @@ extern void rtc_handler_linkage();
 //the assemply linkage for PIT interrupt
 extern void pit_handler_linkage();
 
+extern void sb16_handler_linkage();
+
 #endif
 #endif
