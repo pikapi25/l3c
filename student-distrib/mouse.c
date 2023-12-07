@@ -183,7 +183,17 @@ void mouse_handler(){
     
 }
 
+uint8_t check_in_area(int w, int h, int x, int y){
+    if (my_mouse.mouse_x >= x && my_mouse.mouse_x < x + w){
+        if (my_mouse.mouse_y >= y && my_mouse.mouse_y < y + h){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 uint8_t check_in_term(int term_id){
+    if (!term_window[term_id].terminal_show) return 0;
     if(my_mouse.mouse_x >= term_window[term_id].x_coord && my_mouse.mouse_x < term_window[term_id].x_coord + WINDOW_WIDTH){
         if(my_mouse.mouse_y >= term_window[term_id].y_coord && my_mouse.mouse_y < term_window[term_id].y_coord + WINDOW_HEIGHT + WINDOW_TITLE_HEIGHT){
             return 1;
@@ -192,8 +202,30 @@ uint8_t check_in_term(int term_id){
     return 0;
 }
 
+uint8_t check_int_bar_term(int term_id){
+    if(my_mouse.mouse_x >= STATUS_BAR_TERM_START + STATUS_BAR_TERM_W*term_id && my_mouse.mouse_x < STATUS_BAR_TERM_START + STATUS_BAR_TERM_W*(term_id+1)){
+        if (my_mouse.mouse_y >= STATUS_BAR_Y){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+uint8_t check_in_speaker(){
+    return check_in_area(SPEAKER_W, SPEAKER_H, SPEAKER_X, SPEAKER_Y);
+}
+
 void mouse_left_click(){
     int i;
+    if (check_in_speaker){
+        terminal_switch(0);
+    }
+    for (i = 0; i < NUM_TERMS; i++){
+        if (check_int_bar_term(i)){
+            term_window[i].terminal_show = 1 - term_window[i].terminal_show;
+            return;
+        }
+    }
     for (i = NUM_TERMS - 1; i >=0; i--){
         if(check_in_term(term_orders[i])){
             terminal_switch(term_orders[i]);

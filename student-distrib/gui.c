@@ -2,7 +2,7 @@
 #include "scheduler.h"
 #include "paging.h"
 #include "mouse.h"
-
+#include "time.h"
 /** init_gui: initialize the GUI
  * Input: None
  * Output: None
@@ -35,6 +35,7 @@ void draw_background(uint32_t color){
             Pdraw(i, j, color);
         }
     }
+    Rdraw(SPEAKER_W, SPEAKER_H, SPEAKER_X, SPEAKER_Y, 0);
 }
 /** draw_status_bar: draw a status bar at the bottom of screen
  * Input: None
@@ -42,11 +43,56 @@ void draw_background(uint32_t color){
  * Side_effect: change the vbe memory
 */
 void draw_status_bar(){
+    int i;
+    char time_buf[18];
+    memset(time_buf, 0, 18);
+    put_time_to_buf(time_buf);
     Rdraw(VGA_DIMX, STATUS_BAR_HEIGHT, 0, VGA_DIMY-STATUS_BAR_HEIGHT, STATUS_BAR_COLOR);
-    draw_sentence(STATUS_BAR_PADDING, STATUS_BAR_Y + STATUS_BAR_PADDING, "Test!", STATUS_BAR_FONT_COLOR);
+    draw_sentence(STATUS_BAR_TERM_START , STATUS_BAR_Y + STATUS_BAR_PADDING, "Terminal 0", STATUS_BAR_FONT_COLOR);
+    Rdraw(2, STATUS_BAR_HEIGHT, STATUS_BAR_TERM_START+STATUS_BAR_TERM_W - 2, STATUS_BAR_Y, STATUS_BAR_FONT_COLOR);
+    draw_sentence(STATUS_BAR_TERM_START + STATUS_BAR_TERM_W, STATUS_BAR_Y + STATUS_BAR_PADDING, "Terminal 1", STATUS_BAR_FONT_COLOR);
+    Rdraw(2, STATUS_BAR_HEIGHT, STATUS_BAR_TERM_START+STATUS_BAR_TERM_W*2 - 2, STATUS_BAR_Y, STATUS_BAR_FONT_COLOR);
+    draw_sentence(STATUS_BAR_TERM_START + STATUS_BAR_TERM_W * 2, STATUS_BAR_Y + STATUS_BAR_PADDING, "Terminal 2", STATUS_BAR_FONT_COLOR);
+    Rdraw(2, STATUS_BAR_HEIGHT, STATUS_BAR_TERM_START+STATUS_BAR_TERM_W*3 - 2, STATUS_BAR_Y, STATUS_BAR_FONT_COLOR);
+    draw_sentence(STATUS_BAR_TIME_START, STATUS_BAR_Y + STATUS_BAR_PADDING, time_buf, STATUS_BAR_FONT_COLOR);
+
+    //draw_sentence(STATUS_BAR_PADDING, STATUS_BAR_Y + STATUS_BAR_PADDING, "Test!", STATUS_BAR_FONT_COLOR);
     //draw_char(STATUS_BAR_PADDING, STATUS_BAR_Y + STATUS_BAR_PADDING, "0", STATUS_BAR_FONT_COLOR);
 }
 
+void int_to_char(int num, char* buf, int end_i, int start_i){
+    int mod;
+    int i = end_i;
+    while(num!=0){
+        mod = num % 10;
+        buf[i--] = (char)(mod + 0x30);
+        num /= 10;
+    }
+    while(i > start_i){
+        buf[i--] = '0';
+    }
+}
+
+void put_time_to_buf(char* buf){
+    get_time();
+    // int_to_char(year, buf, 3, start);
+    // int_to_char(month, buf, 5, 3);
+    // int_to_char(day, buf, 7, 5);
+    // int_to_char(hour, buf, 9, 7);
+    // int_to_char(minute, buf, 11, 9);
+    // int_to_char(second, buf, 13, 11);
+    int_to_char(year, buf, 3, 0);
+    buf[4] = '/';
+    int_to_char(month, buf, 6, 4);
+    buf[7] = '/';
+    int_to_char(day, buf, 9, 7);
+    buf[10] = ' ';
+    int_to_char(hour, buf, 12, 10);
+    buf[13] = ':';
+    int_to_char(minute, buf, 15, 13);
+    buf[16] = ':';
+    int_to_char(second, buf, 18, 16);
+}
 /** draw_char: draw a character of size 8x16 at given position
  * Input: x - the x coord of character; y - the y coord of character;
  *        ch - the character; color - the color of character
@@ -92,6 +138,7 @@ void init_term_bg(int term_id, int x, int y, uint32_t title_bg_color, uint32_t t
     term_window[term_id].title_font_color = title_font_color;
     term_window[term_id].window_bg_color = window_bg_color;
     term_window[term_id].window_font_color = window_font_color;
+    term_window[term_id].terminal_show = 1;
     uint32_t len = strlen(title);
     memset(term_window[term_id].title, 0, 10);
     memcpy(term_window[term_id].title, title, len);
@@ -114,6 +161,7 @@ void draw_terminal_bg(int term_id){
 void update_screen(){
     draw_background(BG_COLOR);
     draw_terminals();
+    draw_status_bar();
     draw_mouse();
     show_screen();
 }
@@ -166,6 +214,7 @@ void draw_one_terminal(int term_id){
     //     //mem_start = VIDEO;
     // }
     //mem_start = VIDEO;
+    if (!term_window[term_id].terminal_show) return;
     mem_start =terminal[term_id].background_buffer;
     draw_terminal_bg(term_id);
     for (i = 0; i < NUM_ROWS; i++){
