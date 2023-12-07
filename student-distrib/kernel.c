@@ -18,6 +18,7 @@
 #include "vbe.h"
 #include "gui.h"
 #include "vga.h"
+#include "speaker.h"
 #define RUN_TESTS   1
 
 /* Macros. */
@@ -176,7 +177,7 @@ void entry(unsigned long magic, unsigned long addr) {
     
     //init the mouse
 
-
+    play_simple_music();
     //init the pit
     pit_init();
 
