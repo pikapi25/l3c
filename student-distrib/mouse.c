@@ -101,10 +101,10 @@ void mouse_init(){
     my_mouse.mouse_right_btn = BTN_NOT_PRESSED;
     my_mouse.mouse_x = VGA_DIMX / 2;
     my_mouse.mouse_y = VGA_DIMY / 2;
-    my_mouse.mouse_prev_x = VGA_DIMX / 2;
-    my_mouse.mouse_prev_y = VGA_DIMY / 2;
+    my_mouse.mouse_drag_x = VGA_DIMX / 2;
+    my_mouse.mouse_drag_y = VGA_DIMY / 2;
     my_mouse.prev_c = SPACE_CHAR;
-
+    my_mouse.drag_term = -1;
     //set_mouse_cursor(DEFAULT_MOUSE_CHAR);
     enable_irq(MOUSE_IRQ);
 }
@@ -139,12 +139,20 @@ void mouse_handler(){
             //printf("mouse overflow!\n");
             return;
         } 
+
+
         pkt2 = mouse_read();
         pkt3 = mouse_read();
         if (pkt1 & MOUSE_LEFT_BTN){
             mouse_left_click();
             //c = '@';
             //printf("left button!\n");
+        }else if (!(pkt1 & MOUSE_LEFT_BTN)){
+            if (my_mouse.drag_term != -1){
+                term_window[my_mouse.drag_term].x_coord += my_mouse.mouse_x - my_mouse.mouse_drag_x;
+                term_window[my_mouse.drag_term].y_coord += my_mouse.mouse_y - my_mouse.mouse_drag_y;
+                my_mouse.drag_term = -1;
+            }
         }else if (pkt1 & MOUSE_RIGHT_BTN){
             //c = '#';
             //printf("right button!\n");
@@ -217,18 +225,28 @@ uint8_t check_in_speaker(){
 
 void mouse_left_click(){
     int i;
-    if (check_in_speaker){
+    if (check_in_speaker()){
         terminal_switch(0);
+        return;
     }
     for (i = 0; i < NUM_TERMS; i++){
         if (check_int_bar_term(i)){
             term_window[i].terminal_show = 1 - term_window[i].terminal_show;
+            if(term_window[i].terminal_show){
+                terminal_switch(i);
+            }
             return;
         }
     }
     for (i = NUM_TERMS - 1; i >=0; i--){
         if(check_in_term(term_orders[i])){
-            terminal_switch(term_orders[i]);
+            if (my_mouse.drag_term == -1){
+                my_mouse.drag_term = term_orders[i];
+                my_mouse.mouse_drag_x = my_mouse.mouse_x;
+                my_mouse.mouse_drag_y = my_mouse.mouse_y;
+                terminal_switch(term_orders[i]);
+            }
+            
             break;
         }
     }

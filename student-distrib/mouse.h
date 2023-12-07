@@ -49,8 +49,9 @@ typedef struct{
     uint8_t mouse_middle_btn;
     int32_t mouse_x;
     int32_t mouse_y;
-    int32_t mouse_prev_x;
-    int32_t mouse_prev_y;
+    int32_t mouse_drag_x;
+    int32_t mouse_drag_y;
+    int drag_term;
     uint8_t prev_c;
 }mouse_t;
 
